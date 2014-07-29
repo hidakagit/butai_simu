@@ -200,7 +200,8 @@
             errorflg = 0
             Exit Sub
         End If
-        Call 合成テーブル作成()
+        Dim tflgcheck As Integer = 合成テーブル作成()
+        If Not tflgcheck = 0 Then Exit Sub 'テーブル作成過程でデータが無い場合は弾く
         Call 合成確率計算()
         Dim dflg As Boolean
         If errorflg = 2 Then
@@ -232,11 +233,24 @@
                     DB_DirectOUT(con2, cmd2, "SELECT * FROM Skill_T WHERE 基本スキル LIKE """ & "%：" & ComboBox(Me, "1" & CStr(i + 1) & "1").Text & """", r)
             End If
             '致命的な空白がある（＝wikiが埋まり切っていない、未解明の部分があるスキルが含まれている）場合はエラー
+            'ちょっと緩和（A,B,Cがそもそも埋まっていない:1, S1が埋まっていない:2, S2が埋まっていない:3, S1,S2とも埋まっていない:6）
             If i = 0 Then '初期スキルの場合は全枠埋まっていないと弾く
                 For j As Integer = 1 To suro2stable(i).Length - 1
                     If suro2stable(i)(j) = "" Then
-                        errorflg = 1
-                        Exit For
+                        If j = 4 Then 'S1が埋まっていない
+                            errorflg = 2
+                            'Exit For
+                        ElseIf j = 5 Then 'S2が埋まっていない
+                            If errorflg = 2 Then 'S1も埋まっていない
+                                errorflg = 6
+                                Exit For
+                            End If
+                            errorflg = 3
+                            Exit For
+                        Else 'A, B, Cが埋まっていない
+                            errorflg = 1
+                            Exit For
+                        End If
                     End If
                 Next
             Else '初期スキルでない場合は、S1が埋まっていないと弾く
@@ -282,7 +296,7 @@
     End Function
 
     '基本テーブルを代入、合成テーブル作成
-    Private Sub 合成テーブル作成()
+    Private Function 合成テーブル作成() As Integer
         '基本となるテーブル
         Select Case suro2sno
             Case 1 '初期スキルのみ
@@ -303,6 +317,11 @@
 
         If s1 = s2 Then '同一合成の場合
             s2flg = True
+            If errorflg = 3 Or errorflg = 6 Then 'S2がデータベースで埋まっていない
+                RichTextBox1.Text = "※S2データがデータベースに登録されていません＾＾；"
+                errorflg = 0
+                Return -3
+            End If
             ReDim Preserve st(4) '4候補目にS2が出てくる（S1が出現する場合を考慮して都合5候補目に登録）
             st(3).name = "-"
             st(4).name = skill_to_SKILL_T(suro2stable(0)(5))
@@ -326,6 +345,11 @@
         Next
 
         If s1flg = True Then 'S1出現の場合
+            If errorflg = 2 Or errorflg = 6 Then 'S1がデータベースで埋まっていない
+                RichTextBox1.Text = "※S1データがデータベースに登録されていません＾＾；"
+                errorflg = 0
+                Return -2
+            End If
             Dim s1name As String = skill_to_SKILL_T(suro2stable(0)(4))
             For i As Integer = 0 To suro1sno - 1
                 If s1name = suro1(i) Then
@@ -355,7 +379,8 @@
             End If
         Next
         ReDim Preserve st(c - 1)
-    End Sub
+        Return 0
+    End Function
 
     Private Function 追加合成シミュ出力(ByVal dataflg As Boolean) As String 'dataflgがFalseの場合、合成成功確率は***で表示
         RichTextBox1.Clear()

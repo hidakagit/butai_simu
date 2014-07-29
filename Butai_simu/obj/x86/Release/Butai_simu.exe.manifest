@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Butai_simu.exe" size="497664">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Butai_simu.exe" size="498176">
       <assemblyIdentity name="Butai_simu" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>RZ8DHhFcmVjt63ozyMayVpgcUVw=</dsig:DigestValue>
+        <dsig:DigestValue>A7rX8bGyZMcJL9Hh4k8FkJnQ3EE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
