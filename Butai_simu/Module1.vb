@@ -1,6 +1,8 @@
 ﻿Imports System.IO
 Imports System.Data.OleDb
 Imports System.Runtime.InteropServices
+Imports Microsoft.VisualBasic.FileIO
+Imports System.Text
 
 Public Structure Busho : Implements System.ICloneable
 
@@ -105,7 +107,7 @@ Public Structure Busho : Implements System.ICloneable
         Public heika As String '兵科
         Public speed As Decimal '速度上昇率
         Public tokusyu As Integer '特殊スキル判定(0:通常, 1:速度のみ, 2:破壊のみ, 5:データ不足, 9:その他)
-        Public sc_dflg As Boolean '総コスト依存フラグ
+        Public t_flg As Boolean '総コストorフラグ存在依存
         Public exp_kouka As Decimal '期待値
         Public exp_kouka_b As Decimal '部隊兵法補正後の期待値
         Public Function Clone() As Object Implements System.ICloneable.Clone
@@ -158,6 +160,7 @@ Public Structure Busho : Implements System.ICloneable
                     For j As Integer = 0 To error_skill.Length - 1
                         If sname = error_skill(j) Then
                             .tokusyu = 9
+                            .t_flg = フラグ付きスキル参照(skill(i))
                             Exit For
                         End If
                     Next
@@ -439,33 +442,46 @@ Public Structure Busho : Implements System.ICloneable
         attack = (ad + hei_sum * heisyu.pwr) * heisyu.ts
     End Sub
 
-    '外から部隊兵法値を取ってくるかどうかがheihou_
-    Sub スキル期待値計算(Optional ByVal heihou_ As Decimal = -1) '部隊兵法値が既知であることが必要
+    '外から部隊兵法値を取ってくるかどうかがheihou_, rank_, cost_
+    Sub スキル期待値計算(Optional ByVal heihou_ As Decimal = -1, Optional ByVal rank_ As Decimal = -1, Optional ByVal cost_ As Decimal = -1) '部隊兵法値、ランク合計値が既知であることが必要
         Dim heihou_sum_ As Decimal
+        Dim rank_sum_ As Decimal
+        Dim cost_sum_ As Decimal
         If heihou_ = -1 Then
             heihou_sum_ = heihou_sum
         Else
             heihou_sum_ = heihou_
         End If
+        If rank_ = -1 Then
+            rank_sum_ = rank_sum
+        Else
+            rank_sum_ = rank_
+        End If
+        If cost_ = -1 Then
+            cost_sum_ = Costsum
+        Else
+            cost_sum_ = cost_
+        End If
         For j As Integer = 0 To skill_no - 1
             With skill(j)
                 If .tokusyu = 0 Then '通常スキルならば
-                    .sc_dflg = False
+                    .t_flg = False
                     If .kouka_p = 1 Then
                         .kouka_p_b = 1
                     Else
-                        .kouka_p_b = .kouka_p + 0.01 * heihou_sum_
+                        .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
                     End If
                     .exp_kouka = .kouka_p * .kouka_f
                     .exp_kouka_b = .kouka_p_b * .kouka_f '期待値
                 Else
                     If .tokusyu = 9 Then '特殊スキルの場合は・・・
-                        .sc_dflg = 部隊コスト依存スキル判定(skill(j), Costsum) '怪しいスキルを疑う
+                        .t_flg = 条件依存スキル・フラグスキル判定(skill(j), cost_sum_) '怪しいスキルを疑う
+                        .t_flg = フラグ付きスキル参照(skill(j))
                         If Not .kouka_f = 0 Then 'ゼロならば単なる特殊スキル
                             If .kouka_p = 1 Then
                                 .kouka_p_b = 1
                             Else
-                                .kouka_p_b = .kouka_p + 0.01 * heihou_sum_
+                                .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
                             End If
                             .exp_kouka = .kouka_p * .kouka_f
                             .exp_kouka_b = .kouka_p_b * .kouka_f '期待値
@@ -524,6 +540,72 @@ Public Structure bskl '部隊スキル関連
     Public qq As Boolean '将攻二乗モードONOFF
 End Structure
 
+Public Structure flgskl : Implements System.ICloneable 'フラグスキル格納
+    Public id As Integer 'id
+    Public name As String 'スキル名
+    Public lv As Integer 'スキルLV.
+    Public koubou As String '攻撃or防御スキル
+    Public kouka_p As Decimal '発動率
+    Public kouka_p_b As Decimal '部隊兵法補正後の発動率
+    Public kouka_f As Decimal '上昇率
+    Public heika As String '兵科
+    Public speed As Decimal '加速率    
+    Public onoff As Boolean 'ONOFF
+    Public Function Clone() As Object Implements System.ICloneable.Clone
+        Return Me.MemberwiseClone()
+    End Function
+End Structure
+
+Public Structure _warabe
+    Public Structure _atk
+        Public yari As Decimal
+        Public yumi As Decimal
+        Public uma As Decimal
+        Public hou As Decimal
+        Public utuwa As Decimal
+    End Structure
+    Public atk As _atk
+    Public Structure _def
+        Public yari As Decimal
+        Public yumi As Decimal
+        Public uma As Decimal
+        Public hou As Decimal
+        Public utuwa As Decimal
+    End Structure
+    Public def As _def
+    Public Structure _speed
+        Public yari As Decimal
+        Public yumi As Decimal
+        Public uma As Decimal
+        Public hou As Decimal
+        Public utuwa As Decimal
+    End Structure
+    Public speed As _speed
+    Public Sub warabe_clean()
+        With atk
+            .yari = 0
+            .yumi = 0
+            .uma = 0
+            .hou = 0
+            .utuwa = 0
+        End With
+        With def
+            .yari = 0
+            .yumi = 0
+            .uma = 0
+            .hou = 0
+            .utuwa = 0
+        End With
+        With speed
+            .yari = 0
+            .yumi = 0
+            .uma = 0
+            .hou = 0
+            .utuwa = 0
+        End With
+    End Sub
+End Structure
+
 Module Module1
     'INIファイル編集のためにWindows-API使用
     <DllImport("KERNEL32.DLL")> _
@@ -571,6 +653,9 @@ Module Module1
     Public heihou_sum As Decimal '兵法補正
     Public Atksum As Decimal '総戦闘力
     Public Costsum As Decimal '総コスト
+    Public Ranksum As Decimal '部隊ランクボーナス適用値
+    Public rank_sum As Decimal '部隊ランクボーナス値
+
     Public atksum_max As Decimal 'MAX値
     Public atksum_maxmax As Decimal '部隊スキルが有効な場合のMAX値
 
@@ -587,6 +672,7 @@ Module Module1
     Public skill_ax As Decimal = 0 '確率変数x → 標準偏差σ(x)
     Public skill_axx As Decimal = 0
     Public can_skill() As Busho.skl '発動して意味のあるスキル一覧 '0:一般, 1:将
+    Public warabe As _warabe '童効果格納
     '*** 部隊スキル関係 ***
     Public bskill As bskl '武将スキル
     '*** DB関連の変数 ***
@@ -594,12 +680,16 @@ Module Module1
     Public cmd, cmd2, cmd3 As New OleDbCommand
     Public dbpath As String = Application.StartupPath & "\Busho.mdb" '実行ファイルのある階層に武将DBは置く
     Public dbpath2 As String = Application.StartupPath & "\Skill.mdb" '同じく、スキルDB
-    public dbpath3 as string = Application.StartupPath & "\npc.mdb"
+    Public dbpath3 As String = Application.StartupPath & "\npc.mdb"
     Public bnpath As String = Application.StartupPath & "\BName2.INI" '同名武将区別ファイル
     Public espath As String = Application.StartupPath & "\ERRORSKILL.txt" '特殊スキルリストの場所
+    Public fdpath As String = Application.StartupPath & "\optionskill.csv" 'フラグ付きスキルリストの場所
     Public error_skill() As String '特殊スキルリスト
+    Public fskill_data() As flgskl 'フラグ付きスキルデータリスト
+    Public simu_execno As Integer 'どこから計算しているのかを格納 0:シミュレータ本体, 1:ランキングモード
     '*** INIファイルの場所 ***
     Public FILENAME_bs As String
+    Public FILENAME_ranking As String
     '*** CSVファイルの場所 ***
     Public FILENAME_csv As String
 
@@ -717,14 +807,14 @@ Module Module1
         For i As Integer = 0 To str.Length - 1
             With richtextbox
                 f = InStr(.Text, str(i))
-                    If f <> 0 Then
+                If f <> 0 Then
                     If Not Mid(.Text, f, str(i).Length) = str(i) Then
                         Continue For
                     End If
-                        .SelectionStart = f - 1
-                        .SelectionLength = str(i).Length
-                        .SelectionFont = New Font(.SelectionFont, FontStyle.Bold)
-                    End If
+                    .SelectionStart = f - 1
+                    .SelectionLength = str(i).Length
+                    .SelectionFont = New Font(.SelectionFont, FontStyle.Bold)
+                End If
             End With
         Next
     End Sub
@@ -835,39 +925,212 @@ Module Module1
         スキル関連推定 = stmp(0)
     End Function
 
-    '部隊コストに依存したスキルの扱い（覇王征軍 and 武神八幡陣）
-    Public Function 部隊コスト依存スキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal) As Boolean
-        '覇王征軍の増分データ
-        Dim hs() As Decimal = {1, 1, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 20, 25}
-        '武神八幡陣の増分データ
-        Dim bh() As Decimal = {1, 1, 1, 2, 3, 3, 4, 5, 6, 7, 9, 10, 12, 14, 16, 19, 22, 25}
-        Dim sdata() As String
-
+    '部隊条件に依存したスキルの扱い（覇王征軍、武神八幡陣、遁世影武者）
+    'データベースから静的に参照するだけではどうしようもないスキルはココでデータ確定
+    Public Function 条件依存スキル・フラグスキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal) As Boolean
+        'Dim sdata() As String
         With sk
-            Select Case .name
+            Select (.name)
                 Case "覇王征軍"
                     '覇王征軍
-                    sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
+                    '覇王征軍の増分データ
+                    Dim hs_f() As Decimal = {10, 11, 12, 13, 15, 17, 19, 21, 23, 25}
+                    Dim hs_d() As Decimal = {1, 1, 1, 2, 3, 4, 5, 7, 9, 11, 13, 16, 20, 25}
+                    'sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
                     If sumcost > 9 Then
-                        .kouka_f = 0.01 * (Val(String_onlyNumber(sdata(2))) + hs(((sumcost - 9) / 0.5) - 1))
+                        .kouka_f = 0.01 * (hs_f(.lv - 1) + hs_d(((sumcost - 9) / 0.5) - 1))
                     Else
-                        .kouka_f = 0.01 * Val(String_onlyNumber(sdata(2)))
+                        .kouka_f = 0.01 * hs_f(.lv - 1)
                     End If
                     .heika = "槍弓馬砲器"
+                    Return True
                 Case "武神八幡陣"
                     '武神八幡陣
-                    sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
+                    '武神八幡陣の増分データ
+                    Dim bh_f() As Decimal = {10, 12, 14, 17, 20, 24, 28, 32, 36, 40}
+                    Dim bh_d() As Decimal = {1, 1, 1, 2, 3, 3, 4, 5, 6, 7, 9, 10, 12, 14, 16, 19, 22, 25}
+                    'sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
                     If sumcost > 7 Then
-                        .kouka_f = 0.01 * (Val(String_onlyNumber(sdata(2))) + bh(((sumcost - 7) / 0.5) - 1))
+                        .kouka_f = 0.01 * (bh_f(.lv - 1) + bh_d(((sumcost - 7) / 0.5) - 1))
                     Else
-                        .kouka_f = 0.01 * Val(String_onlyNumber(sdata(2)))
+                        .kouka_f = 0.01 * bh_f(.lv - 1)
                     End If
                     .heika = "槍弓馬砲器"
-                Case Else
-                    Return False
+                    Return True
+                Case "遁世影武者"
+                    '遁世影武者
+                    '部隊長の初期スキルbs(0).skill(0)もしくはForm10.simu_bs(0).skill(0)と同等に
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    'sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
+                    Dim refskl As Busho.skl = Nothing
+                    If simu_execno = 0 Then
+                        refskl = bs(0).skill(0).Clone
+                    ElseIf simu_execno = 1 Then
+                        refskl = Form10.simu_bs(0).skill(0).Clone
+                    End If
+                    If refskl.name = "遁世影武者" Then '部隊長の初期スキルが自分自身なら無効
+                        Return False
+                    End If
+                    .heika = refskl.heika
+                    .koubou = refskl.koubou
+                    .kouka_f = refskl.kouka_f
+                    Return True
             End Select
+            Return False
         End With
         Return True
+    End Function
+
+    Public Function CsvLoad(ByVal csvname As String, Optional ByVal output_dgridview As DataGridView = Nothing) As String()()
+        Dim parser As TextFieldParser = New TextFieldParser(csvname, Encoding.GetEncoding("Shift_JIS"))
+        Dim returnstr()() As String = Nothing
+        Dim count As Integer = 0
+        parser.TextFieldType = FieldType.Delimited
+        parser.SetDelimiters(",") ' 区切り文字はコンマ
+        While (Not parser.EndOfData)
+            Dim row As String() = parser.ReadFields() ' 1行読み込み
+            ' 読み込んだデータ(1行をDataGridViewに表示する)
+            If Not (output_dgridview Is Nothing) Then
+                output_dgridview.Rows.Add(row)
+            End If
+            ReDim Preserve returnstr(count)
+            returnstr(count) = row.Clone
+            count = count + 1
+        End While
+        Return returnstr
+    End Function
+
+    Public Sub フラグ付きスキル読み込み()
+        Dim sr As New System.IO.StreamReader(fdpath, System.Text.Encoding.GetEncoding(932))
+        Dim srbuff As String = sr.ReadToEnd()
+        sr.Close()
+        Dim tmpbuf() As String = Split(srbuff, vbCrLf)
+        Dim onoffstr()() As String = CsvLoad("defoption.csv")
+        ReDim fskill_data(tmpbuf.Length - 3)
+        For i As Integer = 0 To tmpbuf.Length - 3
+            Dim dmp() As String = Split(tmpbuf(i + 1), ",") 'csvのインデックスを飛ばす+1
+            With fskill_data(i)
+                .id = dmp(0)
+                .name = dmp(1)
+                .koubou = dmp(2)
+                .heika = dmp(3)
+                .lv = dmp(4)
+                For j As Integer = 0 To onoffstr.GetLength(0) - 1
+                    If (onoffstr(j)(1) = .name) Then
+                        If (onoffstr(j)(3) = "ON") Then
+                            .onoff = True
+                        Else
+                            .onoff = False
+                        End If
+                        Exit For
+                    End If
+                Next
+                If .onoff Then
+                    .kouka_p = dmp(5)
+                    .kouka_f = dmp(6)
+                    .speed = dmp(7)
+                Else
+                    .kouka_p = dmp(8)
+                    .kouka_f = dmp(9)
+                    .speed = dmp(10)
+                End If
+            End With
+        Next
+    End Sub
+
+    'フラグ付きスキルのフラグNoとスキル性能の結合
+    Public Function フラグ付きスキル参照(ByRef skl As Busho.skl) As Boolean
+        Dim count As Integer = 0
+        While (count < fskill_data.Length)
+            '今のところコスト依存が無いから楽・・・
+            With skl
+                If (fskill_data(count).name = .name) And (fskill_data(count).lv = .lv) Then
+                    .koubou = fskill_data(count).koubou
+                    .heika = fskill_data(count).heika
+                    If InStr(.heika, "全") Then
+                        .heika = "槍弓馬砲器"
+                    End If
+                    .kouka_p = fskill_data(count).kouka_p
+                    .kouka_f = fskill_data(count).kouka_f
+                    .speed = fskill_data(count).speed
+                    Return True
+                End If
+                count = count + 1
+            End With
+        End While
+        If skl.t_flg Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    'csvからの文字列で童情報を抽出
+    Public Sub 童ボーナス加算()
+        Call warabe.warabe_clean()
+        '今は単調ボーナスだけなのでここに記述したほうが軽いかな・・・
+        For i As Integer = 0 To fskill_data.Length - 1
+            If Not (fskill_data(i).onoff) Then
+                Continue For
+            End If
+            With fskill_data(i)
+                Select Case (.name)
+                    Case "傾奇爛漫"
+                        warabe.def.yari += 3
+                    Case "日輪の子"
+                        warabe.def.yari += 5
+                    Case "華の童子"
+                        warabe.def.yumi += 5
+                    Case "勝軍地蔵"
+                        warabe.speed.yari += 3
+                        warabe.speed.yumi += 3
+                        warabe.speed.uma += 3
+                        warabe.speed.hou += 3
+                        warabe.speed.utuwa += 3
+                    Case Else
+                        Continue For
+                End Select
+            End With
+        Next
+    End Sub
+
+    Public Function 童効果文字列出力()
+        Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
+        Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+        Dim strret As String = ""
+        For i As Integer = 0 To harr.Length - 1
+            If warr(i) > 0 Then
+                strret = strret & ", " & harr(i) & "防+" & warr(i) & "%"
+
+            End If
+        Next
+        If Not strret = "" Then
+            strret = strret.Remove(0, 2)
+        Else
+            strret = "適用無"
+        End If
+        Return strret
+    End Function
+
+    '部隊ランクボーナス
+    Public Function 部隊ランクボーナス計算(ByVal ranksum As Decimal) As Decimal
+        Dim rbutaibonus As Decimal = 0
+        If ranksum < 4 Then
+            rbutaibonus = ranksum * 0.1
+        ElseIf ranksum < 8 Then
+            rbutaibonus = 0.3 + (ranksum - 3) * 0.15
+        ElseIf ranksum < 12 Then
+            rbutaibonus = 0.9 + (ranksum - 7) * 0.2
+        ElseIf ranksum < 16 Then
+            rbutaibonus = 1.7 + (ranksum - 11) * 0.25
+        ElseIf ranksum < 20 Then
+            rbutaibonus = 2.7 + (ranksum - 15) * 0.3
+        ElseIf ranksum < 24 Then
+            rbutaibonus = 3.9 + (ranksum - 19) * 0.4
+        Else 'ranksum = 24
+            rbutaibonus = 6.0
+        End If
+        Return rbutaibonus
     End Function
 
     '兵科1に対する兵科2の相性
@@ -1239,10 +1502,10 @@ Module Module1
                                  strResult, Len(strResult), INIFILE)
         GetINIValue = Left(strResult, InStr(strResult, Chr(0)) - 1)
     End Function
-    'SETの場合はINIFILEにはファイル名のみ指定
+    'SETの場合はINIFILEにはフルパス指定
     Public Function SetINIValue(ByVal Value As String, ByVal KEY As String, ByVal Section As String, ByVal INIFILE As String) As Boolean
         Dim Ret As Long
-        Ret = WritePrivateProfileString(Section, KEY, Value, My.Application.Info.DirectoryPath & "\butai\" & INIFILE)
+        Ret = WritePrivateProfileString(Section, KEY, Value, INIFILE)
         SetINIValue = CBool(Ret)
     End Function
     Public Function DeleteINISection(ByVal Section As String, ByVal INIFILE As String) As Boolean

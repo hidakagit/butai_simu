@@ -148,9 +148,9 @@
         End If
     End Sub
 
-    Private Sub INIファイル書き込み(ByVal path As String, ByVal rogini As String)
-        If IO.File.Exists(path) Then '既に存在すれば削除して作り直し
-            IO.File.Delete(path)
+    Private Sub INIファイル書き込み(ByVal rogini As String)
+        If IO.File.Exists(rogini) Then '既に存在すれば削除して作り直し
+            IO.File.Delete(rogini)
         End If
 
         Try
@@ -227,7 +227,7 @@
         '取り込んだ部隊情報はDRAGDROP_BUTAI.INIに保存
         Dim rogini As String = "DRAGDROP_BUTAI" & ".INI"
         Dim rogini_path As String = My.Application.Info.DirectoryPath & "\butai\" & rogini
-        Call INIファイル書き込み(rogini_path, rogini)
+        Call INIファイル書き込み(rogini_path)
         Call Form1.INIファイルから読み込み(rogini_path)
         Me.Close()
         Cursor.Current = Cursors.Default

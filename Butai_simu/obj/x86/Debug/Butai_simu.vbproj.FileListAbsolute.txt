@@ -50,3 +50,4 @@ C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\Butai_simu.vbproj.GenerateResource.Cache
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\Butai_simu.exe.manifest
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\Butai_simu.application
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\WindowsApplication1.Form12.resources

@@ -247,11 +247,11 @@ Partial Class Form1
         Me.名前を付けて現在の部隊を保存ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripDropDownButton1 = New System.Windows.Forms.ToolStripDropDownButton()
         Me.ToolTipモードToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.速度計測ONToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.追加合成シミュToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.スキル期待値シミュToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.武将シミュToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.武将ランキングToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.条件設定ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
         Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.ToolStrip2 = New System.Windows.Forms.ToolStrip()
@@ -295,6 +295,14 @@ Partial Class Form1
         Me.ToolStripMenuItem_1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem_10 = New System.Windows.Forms.ToolStripMenuItem()
         Me.CupToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStrip3 = New System.Windows.Forms.ToolStrip()
+        Me.ToolStripButton6 = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripLabel5 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripLabel6 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator11 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripSeparator12 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator13 = New System.Windows.Forms.ToolStripSeparator()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -314,6 +322,7 @@ Partial Class Form1
         Me.ToolStrip1.SuspendLayout()
         Me.ToolStrip2.SuspendLayout()
         Me.ContextMenuStrip2.SuspendLayout()
+        Me.ToolStrip3.SuspendLayout()
         Me.SuspendLayout()
         '
         'ComboBox001
@@ -370,7 +379,7 @@ Partial Class Form1
         Me.GroupBox1.Controls.Add(Me.ComboBox003)
         Me.GroupBox1.Controls.Add(Me.Label5)
         Me.GroupBox1.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox1.Location = New System.Drawing.Point(8, 42)
+        Me.GroupBox1.Location = New System.Drawing.Point(8, 66)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox1.TabIndex = 6
@@ -483,7 +492,7 @@ Partial Class Form1
         'ComboBox010
         '
         Me.ComboBox010.FormattingEnabled = True
-        Me.ComboBox010.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox010.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox010.Location = New System.Drawing.Point(35, 79)
         Me.ComboBox010.Name = "ComboBox010"
         Me.ComboBox010.Size = New System.Drawing.Size(36, 20)
@@ -492,7 +501,7 @@ Partial Class Form1
         'ComboBox009
         '
         Me.ComboBox009.FormattingEnabled = True
-        Me.ComboBox009.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox009.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox009.Location = New System.Drawing.Point(35, 57)
         Me.ComboBox009.Name = "ComboBox009"
         Me.ComboBox009.Size = New System.Drawing.Size(36, 20)
@@ -501,7 +510,7 @@ Partial Class Form1
         'Label0005
         '
         Me.Label0005.AutoSize = True
-        Me.Label0005.Location = New System.Drawing.Point(1, 82)
+        Me.Label0005.Location = New System.Drawing.Point(4, 82)
         Me.Label0005.Name = "Label0005"
         Me.Label0005.Size = New System.Drawing.Size(29, 12)
         Me.Label0005.TabIndex = 8
@@ -510,7 +519,7 @@ Partial Class Form1
         'Label0004
         '
         Me.Label0004.AutoSize = True
-        Me.Label0004.Location = New System.Drawing.Point(1, 60)
+        Me.Label0004.Location = New System.Drawing.Point(4, 60)
         Me.Label0004.Name = "Label0004"
         Me.Label0004.Size = New System.Drawing.Size(29, 12)
         Me.Label0004.TabIndex = 8
@@ -528,7 +537,7 @@ Partial Class Form1
         'Label0003
         '
         Me.Label0003.AutoSize = True
-        Me.Label0003.Location = New System.Drawing.Point(1, 38)
+        Me.Label0003.Location = New System.Drawing.Point(3, 38)
         Me.Label0003.Name = "Label0003"
         Me.Label0003.Size = New System.Drawing.Size(58, 12)
         Me.Label0003.TabIndex = 8
@@ -866,7 +875,7 @@ Partial Class Form1
         Me.GroupBox5.Controls.Add(Me.ComboBox103)
         Me.GroupBox5.Controls.Add(Me.Label43)
         Me.GroupBox5.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox5.Location = New System.Drawing.Point(227, 42)
+        Me.GroupBox5.Location = New System.Drawing.Point(227, 66)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox5.TabIndex = 15
@@ -979,7 +988,7 @@ Partial Class Form1
         'ComboBox110
         '
         Me.ComboBox110.FormattingEnabled = True
-        Me.ComboBox110.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox110.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox110.Location = New System.Drawing.Point(35, 79)
         Me.ComboBox110.Name = "ComboBox110"
         Me.ComboBox110.Size = New System.Drawing.Size(36, 20)
@@ -988,7 +997,7 @@ Partial Class Form1
         'ComboBox109
         '
         Me.ComboBox109.FormattingEnabled = True
-        Me.ComboBox109.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox109.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox109.Location = New System.Drawing.Point(35, 57)
         Me.ComboBox109.Name = "ComboBox109"
         Me.ComboBox109.Size = New System.Drawing.Size(36, 20)
@@ -997,7 +1006,7 @@ Partial Class Form1
         'Label1005
         '
         Me.Label1005.AutoSize = True
-        Me.Label1005.Location = New System.Drawing.Point(1, 82)
+        Me.Label1005.Location = New System.Drawing.Point(4, 82)
         Me.Label1005.Name = "Label1005"
         Me.Label1005.Size = New System.Drawing.Size(29, 12)
         Me.Label1005.TabIndex = 8
@@ -1006,7 +1015,7 @@ Partial Class Form1
         'Label1004
         '
         Me.Label1004.AutoSize = True
-        Me.Label1004.Location = New System.Drawing.Point(1, 60)
+        Me.Label1004.Location = New System.Drawing.Point(4, 60)
         Me.Label1004.Name = "Label1004"
         Me.Label1004.Size = New System.Drawing.Size(29, 12)
         Me.Label1004.TabIndex = 8
@@ -1024,7 +1033,7 @@ Partial Class Form1
         'Label1003
         '
         Me.Label1003.AutoSize = True
-        Me.Label1003.Location = New System.Drawing.Point(1, 38)
+        Me.Label1003.Location = New System.Drawing.Point(3, 38)
         Me.Label1003.Name = "Label1003"
         Me.Label1003.Size = New System.Drawing.Size(58, 12)
         Me.Label1003.TabIndex = 8
@@ -1401,7 +1410,7 @@ Partial Class Form1
         Me.GroupBox9.Controls.Add(Me.ComboBox203)
         Me.GroupBox9.Controls.Add(Me.Label64)
         Me.GroupBox9.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox9.Location = New System.Drawing.Point(446, 42)
+        Me.GroupBox9.Location = New System.Drawing.Point(446, 66)
         Me.GroupBox9.Name = "GroupBox9"
         Me.GroupBox9.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox9.TabIndex = 16
@@ -1514,7 +1523,7 @@ Partial Class Form1
         'ComboBox210
         '
         Me.ComboBox210.FormattingEnabled = True
-        Me.ComboBox210.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox210.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox210.Location = New System.Drawing.Point(35, 79)
         Me.ComboBox210.Name = "ComboBox210"
         Me.ComboBox210.Size = New System.Drawing.Size(36, 20)
@@ -1523,7 +1532,7 @@ Partial Class Form1
         'ComboBox209
         '
         Me.ComboBox209.FormattingEnabled = True
-        Me.ComboBox209.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox209.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox209.Location = New System.Drawing.Point(35, 57)
         Me.ComboBox209.Name = "ComboBox209"
         Me.ComboBox209.Size = New System.Drawing.Size(36, 20)
@@ -1532,7 +1541,7 @@ Partial Class Form1
         'Label2005
         '
         Me.Label2005.AutoSize = True
-        Me.Label2005.Location = New System.Drawing.Point(1, 82)
+        Me.Label2005.Location = New System.Drawing.Point(4, 82)
         Me.Label2005.Name = "Label2005"
         Me.Label2005.Size = New System.Drawing.Size(29, 12)
         Me.Label2005.TabIndex = 8
@@ -1541,7 +1550,7 @@ Partial Class Form1
         'Label2004
         '
         Me.Label2004.AutoSize = True
-        Me.Label2004.Location = New System.Drawing.Point(1, 60)
+        Me.Label2004.Location = New System.Drawing.Point(4, 60)
         Me.Label2004.Name = "Label2004"
         Me.Label2004.Size = New System.Drawing.Size(29, 12)
         Me.Label2004.TabIndex = 8
@@ -1559,7 +1568,7 @@ Partial Class Form1
         'Label2003
         '
         Me.Label2003.AutoSize = True
-        Me.Label2003.Location = New System.Drawing.Point(1, 38)
+        Me.Label2003.Location = New System.Drawing.Point(3, 38)
         Me.Label2003.Name = "Label2003"
         Me.Label2003.Size = New System.Drawing.Size(58, 12)
         Me.Label2003.TabIndex = 8
@@ -1936,7 +1945,7 @@ Partial Class Form1
         Me.GroupBox13.Controls.Add(Me.ComboBox303)
         Me.GroupBox13.Controls.Add(Me.Label87)
         Me.GroupBox13.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox13.Location = New System.Drawing.Point(665, 42)
+        Me.GroupBox13.Location = New System.Drawing.Point(665, 66)
         Me.GroupBox13.Name = "GroupBox13"
         Me.GroupBox13.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox13.TabIndex = 17
@@ -2049,7 +2058,7 @@ Partial Class Form1
         'ComboBox310
         '
         Me.ComboBox310.FormattingEnabled = True
-        Me.ComboBox310.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox310.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox310.Location = New System.Drawing.Point(35, 79)
         Me.ComboBox310.Name = "ComboBox310"
         Me.ComboBox310.Size = New System.Drawing.Size(36, 20)
@@ -2058,7 +2067,7 @@ Partial Class Form1
         'ComboBox309
         '
         Me.ComboBox309.FormattingEnabled = True
-        Me.ComboBox309.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox309.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox309.Location = New System.Drawing.Point(35, 57)
         Me.ComboBox309.Name = "ComboBox309"
         Me.ComboBox309.Size = New System.Drawing.Size(36, 20)
@@ -2067,7 +2076,7 @@ Partial Class Form1
         'Label3005
         '
         Me.Label3005.AutoSize = True
-        Me.Label3005.Location = New System.Drawing.Point(1, 82)
+        Me.Label3005.Location = New System.Drawing.Point(4, 82)
         Me.Label3005.Name = "Label3005"
         Me.Label3005.Size = New System.Drawing.Size(29, 12)
         Me.Label3005.TabIndex = 8
@@ -2076,7 +2085,7 @@ Partial Class Form1
         'Label3004
         '
         Me.Label3004.AutoSize = True
-        Me.Label3004.Location = New System.Drawing.Point(1, 60)
+        Me.Label3004.Location = New System.Drawing.Point(4, 60)
         Me.Label3004.Name = "Label3004"
         Me.Label3004.Size = New System.Drawing.Size(29, 12)
         Me.Label3004.TabIndex = 8
@@ -2094,7 +2103,7 @@ Partial Class Form1
         'Label3003
         '
         Me.Label3003.AutoSize = True
-        Me.Label3003.Location = New System.Drawing.Point(1, 38)
+        Me.Label3003.Location = New System.Drawing.Point(3, 38)
         Me.Label3003.Name = "Label3003"
         Me.Label3003.Size = New System.Drawing.Size(58, 12)
         Me.Label3003.TabIndex = 8
@@ -2512,6 +2521,7 @@ Partial Class Form1
         '
         'ToolStripComboBox2
         '
+        Me.ToolStripComboBox2.DropDownWidth = 75
         Me.ToolStripComboBox2.Items.AddRange(New Object() {"1", "2", "3", "4"})
         Me.ToolStripComboBox2.Name = "ToolStripComboBox2"
         Me.ToolStripComboBox2.Size = New System.Drawing.Size(75, 39)
@@ -2576,7 +2586,7 @@ Partial Class Form1
         'ToolStripDropDownButton1
         '
         Me.ToolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-        Me.ToolStripDropDownButton1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolTipモードToolStripMenuItem, Me.速度計測ONToolStripMenuItem, Me.追加合成シミュToolStripMenuItem, Me.スキル期待値シミュToolStripMenuItem, Me.武将シミュToolStripMenuItem, Me.武将ランキングToolStripMenuItem})
+        Me.ToolStripDropDownButton1.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolTipモードToolStripMenuItem, Me.追加合成シミュToolStripMenuItem, Me.スキル期待値シミュToolStripMenuItem, Me.武将シミュToolStripMenuItem, Me.武将ランキングToolStripMenuItem, Me.条件設定ToolStripMenuItem})
         Me.ToolStripDropDownButton1.Image = CType(resources.GetObject("ToolStripDropDownButton1.Image"), System.Drawing.Image)
         Me.ToolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripDropDownButton1.Name = "ToolStripDropDownButton1"
@@ -2589,12 +2599,6 @@ Partial Class Form1
         Me.ToolTipモードToolStripMenuItem.Size = New System.Drawing.Size(184, 22)
         Me.ToolTipモードToolStripMenuItem.Text = "ToolTipモード"
         Me.ToolTipモードToolStripMenuItem.Visible = False
-        '
-        '速度計測ONToolStripMenuItem
-        '
-        Me.速度計測ONToolStripMenuItem.Name = "速度計測ONToolStripMenuItem"
-        Me.速度計測ONToolStripMenuItem.Size = New System.Drawing.Size(184, 22)
-        Me.速度計測ONToolStripMenuItem.Text = "速度計測ON"
         '
         '追加合成シミュToolStripMenuItem
         '
@@ -2620,6 +2624,14 @@ Partial Class Form1
         Me.武将ランキングToolStripMenuItem.Size = New System.Drawing.Size(184, 22)
         Me.武将ランキングToolStripMenuItem.Text = "武将ランキング"
         '
+        '条件設定ToolStripMenuItem
+        '
+        Me.条件設定ToolStripMenuItem.Enabled = False
+        Me.条件設定ToolStripMenuItem.Name = "条件設定ToolStripMenuItem"
+        Me.条件設定ToolStripMenuItem.Size = New System.Drawing.Size(184, 22)
+        Me.条件設定ToolStripMenuItem.Text = "【条件設定】"
+        Me.条件設定ToolStripMenuItem.Visible = False
+        '
         'ToolStripLabel3
         '
         Me.ToolStripLabel3.Name = "ToolStripLabel3"
@@ -2637,7 +2649,7 @@ Partial Class Form1
         Me.ToolStrip2.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.ToolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
         Me.ToolStrip2.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton5, Me.ToolStripSeparator5, Me.ToolStripSplitButton3, Me.ToolStripSeparator6, Me.ToolStripComboBox3, Me.ToolStripSeparator7, Me.ToolStripComboBox4, Me.ToolStripSeparator8, Me.ToolStripLabel8, Me.ToolStripComboBox5, Me.ToolStripSeparator9, Me.ToolStripLabel7, Me.ToolStripComboBox6, Me.ToolStripComboBox7, Me.ToolStripLabel4, Me.ToolStripComboBox8, Me.ToolStripSplitButton2, Me.ToolStripSeparator10, Me.ToolStripLabel9, Me.ToolStripLabel10})
-        Me.ToolStrip2.Location = New System.Drawing.Point(0, 476)
+        Me.ToolStrip2.Location = New System.Drawing.Point(0, 496)
         Me.ToolStrip2.Name = "ToolStrip2"
         Me.ToolStrip2.Size = New System.Drawing.Size(884, 26)
         Me.ToolStrip2.TabIndex = 26
@@ -2809,7 +2821,7 @@ Partial Class Form1
         'ToolStripComboBox6
         '
         Me.ToolStripComboBox6.AutoSize = False
-        Me.ToolStripComboBox6.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ToolStripComboBox6.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ToolStripComboBox6.Name = "ToolStripComboBox6"
         Me.ToolStripComboBox6.Size = New System.Drawing.Size(50, 26)
         '
@@ -2906,12 +2918,69 @@ Partial Class Form1
         Me.CupToolStripMenuItem.Size = New System.Drawing.Size(115, 22)
         Me.CupToolStripMenuItem.Text = "2%cup"
         '
+        'ToolStrip3
+        '
+        Me.ToolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
+        Me.ToolStrip3.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton6, Me.ToolStripLabel5, Me.ToolStripLabel6, Me.ToolStripSeparator11, Me.ToolStripSeparator12, Me.ToolStripButton7, Me.ToolStripSeparator13})
+        Me.ToolStrip3.Location = New System.Drawing.Point(0, 39)
+        Me.ToolStrip3.Name = "ToolStrip3"
+        Me.ToolStrip3.Size = New System.Drawing.Size(884, 25)
+        Me.ToolStrip3.TabIndex = 27
+        Me.ToolStrip3.Text = "ToolStrip3"
+        '
+        'ToolStripButton6
+        '
+        Me.ToolStripButton6.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.ToolStripButton6.Image = CType(resources.GetObject("ToolStripButton6.Image"), System.Drawing.Image)
+        Me.ToolStripButton6.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton6.Name = "ToolStripButton6"
+        Me.ToolStripButton6.Size = New System.Drawing.Size(23, 22)
+        Me.ToolStripButton6.Text = "移動時間計算！"
+        '
+        'ToolStripLabel5
+        '
+        Me.ToolStripLabel5.ForeColor = System.Drawing.Color.Maroon
+        Me.ToolStripLabel5.Name = "ToolStripLabel5"
+        Me.ToolStripLabel5.Size = New System.Drawing.Size(99, 22)
+        Me.ToolStripLabel5.Text = "1マス移動時間："
+        '
+        'ToolStripLabel6
+        '
+        Me.ToolStripLabel6.Name = "ToolStripLabel6"
+        Me.ToolStripLabel6.Size = New System.Drawing.Size(53, 22)
+        Me.ToolStripLabel6.Text = "---------"
+        '
+        'ToolStripSeparator11
+        '
+        Me.ToolStripSeparator11.Name = "ToolStripSeparator11"
+        Me.ToolStripSeparator11.Size = New System.Drawing.Size(6, 25)
+        '
+        'ToolStripSeparator12
+        '
+        Me.ToolStripSeparator12.Name = "ToolStripSeparator12"
+        Me.ToolStripSeparator12.Size = New System.Drawing.Size(6, 25)
+        '
+        'ToolStripButton7
+        '
+        Me.ToolStripButton7.Image = CType(resources.GetObject("ToolStripButton7.Image"), System.Drawing.Image)
+        Me.ToolStripButton7.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton7.Name = "ToolStripButton7"
+        Me.ToolStripButton7.Size = New System.Drawing.Size(112, 22)
+        Me.ToolStripButton7.Text = "特殊オプション"
+        Me.ToolStripButton7.ToolTipText = "防衛オプションの選択へ"
+        '
+        'ToolStripSeparator13
+        '
+        Me.ToolStripSeparator13.Name = "ToolStripSeparator13"
+        Me.ToolStripSeparator13.Size = New System.Drawing.Size(6, 25)
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoSize = True
-        Me.ClientSize = New System.Drawing.Size(884, 502)
+        Me.ClientSize = New System.Drawing.Size(884, 522)
+        Me.Controls.Add(Me.ToolStrip3)
         Me.Controls.Add(Me.ToolStrip2)
         Me.Controls.Add(Me.ToolStrip1)
         Me.Controls.Add(Me.GroupBox1)
@@ -2919,7 +2988,7 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer2.75"
+        Me.Text = "部隊シミュレータVer2.82"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
@@ -2957,6 +3026,8 @@ Partial Class Form1
         Me.ToolStrip2.ResumeLayout(False)
         Me.ToolStrip2.PerformLayout()
         Me.ContextMenuStrip2.ResumeLayout(False)
+        Me.ToolStrip3.ResumeLayout(False)
+        Me.ToolStrip3.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -3159,7 +3230,6 @@ Partial Class Form1
     Friend WithEvents ToolStripSeparator2 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripButton3 As System.Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripSeparator3 As System.Windows.Forms.ToolStripSeparator
-    Friend WithEvents 速度計測ONToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents ToolStripButton4 As System.Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripSeparator4 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripSplitButton1 As System.Windows.Forms.ToolStripSplitButton
@@ -3232,4 +3302,13 @@ Partial Class Form1
     Friend WithEvents CheckBox11 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox21 As System.Windows.Forms.CheckBox
     Friend WithEvents CheckBox31 As System.Windows.Forms.CheckBox
+    Friend WithEvents 条件設定ToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents ToolStrip3 As System.Windows.Forms.ToolStrip
+    Friend WithEvents ToolStripLabel5 As System.Windows.Forms.ToolStripLabel
+    Friend WithEvents ToolStripLabel6 As System.Windows.Forms.ToolStripLabel
+    Friend WithEvents ToolStripSeparator11 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents ToolStripButton6 As System.Windows.Forms.ToolStripButton
+    Friend WithEvents ToolStripSeparator12 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents ToolStripButton7 As System.Windows.Forms.ToolStripButton
+    Friend WithEvents ToolStripSeparator13 As System.Windows.Forms.ToolStripSeparator
 End Class

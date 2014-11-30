@@ -1,4 +1,6 @@
-﻿Public Class Form10
+﻿Imports System.IO
+
+Public Class Form10
 
     Public kobo As String '攻防
     Public busho_heika As String '兵科
@@ -9,6 +11,9 @@
     Public heicount As Integer = 4 '兵法振りの人数の数
     Public heino() As Integer '兵法振りの武将No
     Public heihousum As Decimal '部隊兵法値
+    Public butaicostsum As Decimal '部隊コスト合計
+    Public butairanksum As Decimal '部隊ランクボーナス（☆合計）
+    Public butairankbonus As Decimal '部隊ランクボーナス値
     Public stpt As Integer 'ステ振りポイント数
     Public simu_ss(3)() As Integer 'Skill Status（各武将のスキル状態）
     Public kitai_val() As Decimal '各武将の期待値
@@ -43,7 +48,7 @@
         End Select
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
         Dim p As DataSet
-        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """", "Busho")
+        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """ ORDER BY Index ASC", "Busho")
         cc.DisplayMember = "名称"
         cc.ValueMember = "Index"
         cc.DataSource = p.Tables("Busho")
@@ -152,6 +157,34 @@
             ComboBox042.Enabled = True
         End If
     End Sub
+    Private Sub 攻防変更(sender As Object, e As EventArgs) Handles ToolStripComboBox2.SelectedIndexChanged
+        If sender.Text = "攻撃" Then
+            kobo = "攻撃"
+        Else
+            kobo = "防御"
+        End If
+    End Sub
+    Private Sub 兵科変更(sender As Object, e As EventArgs) Handles ToolStripComboBox2.SelectedIndexChanged
+        busho_heika = ToolStripComboBox2.Text
+    End Sub
+    Private Sub ランク変更(sender As Object, e As EventArgs) Handles ToolStripComboBox3.SelectedIndexChanged
+        Select Case sender.Text
+            Case "☆☆☆☆☆"
+                busho_rank = 0
+            Case "★☆☆☆☆"
+                busho_rank = 1
+            Case "★★☆☆☆"
+                busho_rank = 2
+            Case "★★★☆☆"
+                busho_rank = 3
+            Case "★★★★☆"
+                busho_rank = 4
+            Case "★★★★★"
+                busho_rank = 5
+            Case "限界突破"
+                busho_rank = 6
+        End Select
+    End Sub
     Private Sub スキルレベル変更(sender As Object, e As EventArgs) Handles ComboBox9.SelectedIndexChanged
         simu_lv = Val(sender.text)
     End Sub
@@ -186,25 +219,10 @@
             busho_heika = ToolStripComboBox2.Text
         End If
         '武将ランク
-        Select Case ToolStripComboBox3.Text
-            Case "☆☆☆☆☆"
-                busho_rank = 0
-            Case "★☆☆☆☆"
-                busho_rank = 1
-            Case "★★☆☆☆"
-                busho_rank = 2
-            Case "★★★☆☆"
-                busho_rank = 3
-            Case "★★★★☆"
-                busho_rank = 4
-            Case "★★★★★"
-                busho_rank = 5
-            Case "限界突破"
-                busho_rank = 6
-            Case Else
-                MsgBox("武将ランクが未設定です")
-                flg = False
-        End Select
+        If ToolStripComboBox3.Text = "" Then
+            MsgBox("武将ランクが未設定です")
+            flg = False
+        End if
         '武将チェック（ちゃんと3将登録されていないとダメ）
         For i As Integer = 1 To 3
             If ComboBox(Me, "00" & CStr(i)).Text = "" Then
@@ -231,7 +249,6 @@
         ElseIf busho_rank = 6 Then
             stpt = 630
         End If
-
         Return flg
     End Function
 
@@ -409,6 +426,7 @@
             For j As Integer = 0 To error_skill.Length - 1
                 If skillname = error_skill(j) Then
                     .tokusyu = 9
+                    .t_flg = フラグ付きスキル参照(add_skl(sno))
                     Exit For
                 End If
             Next
@@ -510,7 +528,7 @@
                 If InStr(.heika, "全") Then
                     .heika = "槍弓馬砲器"
                 End If
-                End If
+            End If
         End With
     End Sub
 
@@ -520,7 +538,11 @@
             .id = bstr(0)
             .rare = bstr(1)
             .name = bstr(2)
-            .cost = bstr(3)
+            .cost = bstr(3) 'ここで4武将の合計コストが確定
+            butaicostsum = 0
+            For i As Integer = 0 To 3
+                butaicostsum = butaicostsum + simu_bs(i).cost
+            Next
             .heisyu = simu_bs(0).heisyu.Clone
             .job = bstr(16)
             .hei_max_d = bstr(4)
@@ -564,7 +586,7 @@
                 Call 追加スキルキャッシュ(i - 1, rec(simu_ss(3)(i) - 1))
             Next
         End If
-            ReDim Preserve simu_bs(3).skill(simu_bs(3).skill_no - 1)
+        ReDim Preserve simu_bs(3).skill(simu_bs(3).skill_no - 1)
         For i As Integer = 0 To simu_ss(3).Length - 1
             Select Case (simu_ss(3)(i))
                 Case 0
@@ -575,7 +597,7 @@
                         If InStr(.kanren, "コスト") Then 'コスト依存スキルの扱い
                             .kanren = Replace(.kanren, "コスト", CStr(simu_bs(3).cost)) '変更。「スキル所持武将の」コストで一括適用
                         End If
-                        If Not .tokusyu = 5 Then 'データが無いスキルの場合は計算しない
+                        If (Not .tokusyu = 5) And (Not .tokusyu = 9) Then 'データが無いスキルの場合は計算しない
                             .kanren = 文字列計算(.kanren)
                             .kouka_f = Decimal.Parse(.kanren)
                         Else
@@ -656,14 +678,16 @@
                 maxheihou = simu_bs(i).st(2)
             End If
             heihou_kei = heihou_kei + simu_bs(i).st(2)
+            butairanksum = butairanksum + simu_bs(i).rank
         Next
         heihousum = (maxheihou + (heihou_kei - maxheihou) / 6) / 100
+        butairankbonus = 部隊ランクボーナス計算(butairanksum)
 
         '小隊戦闘力計算
         For i As Integer = 0 To 3
             With simu_bs(i)
                 .小隊攻撃力計算(kobo)
-                .スキル期待値計算(heihousum)
+                .スキル期待値計算(heihousum, butairankbonus, butaicostsum)
             End With
         Next
     End Sub
@@ -707,7 +731,11 @@
             With simu_bs(i)
                 For j As Integer = 0 To .skill_no - 1 '攻防一致、特殊スキル排除
                     If InStr(kobo, .skill(j).koubou) Then
-                        If .skill(j).tokusyu = 0 Then '通常スキル
+                        If .skill(j).tokusyu = 9 Then
+                            .skill(j).t_flg = 条件依存スキル・フラグスキル判定(.skill(j), butaicostsum) '怪しいスキルを疑う
+                            .skill(j).t_flg = フラグ付きスキル参照(.skill(j))
+                        End If
+                        If .skill(j).tokusyu = 0 Or .skill(j).t_flg Then '通常スキル
                             ReDim Preserve c_skill(c)
                             c_skill(c) = .skill(j).Clone
                             c = c + 1
@@ -775,7 +803,10 @@
         Dim s_y(,) As Decimal = Nothing '総戦闘力f(x)(k) k:k番目の武将の戦闘力
         Dim s_yk() As Decimal = Nothing 'sum(s_y)
         Dim s_yk_max As Decimal = Nothing 'MAX
-        
+        '童関係
+        Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
+        Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+
         ReDim s_yk(c_skillp.Length - 1)
         ReDim s_x(c_skillp.Length - 1), s_y(c_skillp.Length - 1, 3)
 
@@ -818,6 +849,13 @@
                         dk = .heisyu.def
                     End If
                     s_y(i, k) = (ds * .heisyu.ts * (1 + syoplus(k)) + .hei_max * dk * .heisyu.ts) * (1 + heiplus(k))
+                    '童適用(今のところ単科防スキルのみ対応)
+                    For l As Integer = 0 To harr.Length - 1
+                        If InStr(.heisyu.bunrui, harr(l)) And InStr(kobo, "防") Then
+                            s_y(i, k) = s_y(i, k) * (1 + 0.01 * warr(l))
+                            Exit For
+                        End If
+                    Next
                 End With
             Next
         Next
@@ -843,6 +881,7 @@
         kitai_val = Nothing
         kitai_butai = Nothing
         add_skl = Nothing
+        butairanksum = 0
     End Sub
 
     Private Sub 表更新(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
@@ -851,6 +890,9 @@
             MsgBox("必要な条件が設定されていない個所があります")
             Exit Sub
         End If
+
+        simu_execno = 1
+
         Call プログレスバー初期化()
         Call 変数初期化()
         DataGridView1.Rows.Clear() '表をクリア
@@ -884,6 +926,9 @@
         Else
             Call 追加スキルセット_Cus()
         End If
+
+        Call フラグ付きスキル読み込み() '読込（更新）
+        Call 童ボーナス加算()
 
         'ランキング対象武将をDBから取得
         Dim sl()() As String = Nothing
@@ -1008,7 +1053,7 @@
                 Case "29" 'プラチナ極
                     cell.Style.ForeColor = Color.Black
                     cell2.Style.ForeColor = Color.Black
-                Case "30" To "31" '特
+                Case "30" To "32" '特
                     cell.Style.ForeColor = Color.Firebrick
                     cell2.Style.ForeColor = Color.Firebrick
                 Case "37" 'シクレ特
@@ -1020,6 +1065,9 @@
                 Case "50" To "51" '序
                     cell.Style.ForeColor = Color.DarkCyan
                     cell2.Style.ForeColor = Color.DarkCyan
+                Case "57" '輝く平手
+                    cell.Style.ForeColor = Color.Turquoise
+                    cell2.Style.ForeColor = Color.Turquoise
             End Select
         End With
     End Sub
@@ -1179,5 +1227,197 @@
 
     Private Sub 追加スキル詳細設定(sender As Object, e As EventArgs) Handles Button1.Click
         Form11.Show()
+    End Sub
+
+    Private Sub 設定クリア()
+        For i As Integer = 1 To 3
+            ComboBox(Me, CStr(i)).Text = ""
+            ComboBox(Me, "00" & CStr(i)).Text = ""
+        Next
+        ComboBox011.Text = ""
+        ComboBox012.Text = ""
+        ComboBox01.Text = ""
+        ComboBox02.Text = ""
+        CheckBox1.Checked = True
+        ComboBox41.Text = ""
+        ComboBox42.Text = ""
+        ComboBox041.Text = ""
+        ComboBox042.Text = ""
+        CheckBox2.Checked = True
+        CheckBox2.Checked = False
+        syosklflg = False
+        Call Form11.スキル詳細設定関連ONOFF(True)
+    End Sub
+
+    Private Sub お気に入り設定を開く(sender As Object, e As EventArgs) Handles お気に入り設定を開くToolStripMenuItem.Click
+        Dim bini As String '適用するINIファイル
+        'OpenFileDialogクラスのインスタンスを作成
+        Dim ofd As New OpenFileDialog()
+
+        'はじめに表示されるフォルダを指定する
+        '指定しない（空の文字列）の時は、現在のディレクトリが表示される
+        ofd.InitialDirectory = My.Application.Info.DirectoryPath & "\settings"
+        'タイトルを設定する
+        ofd.Title = "設定ファイルを選択してください"
+        If ofd.ShowDialog() = DialogResult.OK Then
+            'OKボタンがクリックされたとき
+            '選択されたファイル名を表示する
+            bini = ofd.FileName
+            ofd.Dispose() '要らなくなれば破棄
+            Call INIファイルから読み込み(bini)
+        Else
+            ofd.Dispose()
+            Exit Sub
+        End If
+    End Sub
+
+    Private Sub INIファイルから読み込み(ByVal bini As String)
+        Cursor.Current = Cursors.WaitCursor
+        Call 設定クリア()
+        '全体設定
+        ToolStripComboBox1.Text = GetINIValue("kobo", "設定", bini)
+        ToolStripComboBox2.Text = GetINIValue("heika", "設定", bini)
+        ToolStripComboBox3.SelectedIndex = CInt(GetINIValue("rank", "設定", bini))
+        ComboBox9.Text = GetINIValue("skilllv", "設定", bini)
+        ComboBox10.SelectedIndex = CInt(GetINIValue("heicount", "設定", bini))
+        '対象武将設定
+        Dim rarearr() = {"天", "極", "特", "上", "序"}
+        For i As Integer = 0 To rarearr.Length - 1
+            CheckBox(Me, "00" & CStr(i + 1)).Checked = GetINIValue(rarearr(i), "対象武将", bini)
+        Next
+        '各種フラグ
+        syosklflg = GetINIValue("detail_skillflg", "設定", bini)
+        simu_skeqflg = GetINIValue("rankbusho_skillflg", "設定", bini)
+        '武将、スキル
+        For i As Integer = 0 To 2
+            Dim bsho As String = Nothing
+            Select Case i
+                Case 0
+                    bsho = "武将A"
+                Case 1
+                    bsho = "武将B"
+                Case 2
+                    bsho = "武将C"
+                Case 3
+                    bsho = "ランキング武将"
+            End Select
+            ComboBox(Me, CStr(i + 1)).SelectedText = GetINIValue("rare", bsho, bini) '（強制的に）R選択
+            R選択(ComboBox(Me, CStr(i + 1)), Nothing)
+            ComboBox(Me, "00" & CStr(i + 1)).SelectedText = GetINIValue("name", bsho, bini) '（強制的に）武将名選択
+            武将名選択(ComboBox(Me, "00" & CStr(i + 1)), Nothing)
+        Next
+        If syosklflg Then 'スキル詳細設定アリならば
+            Form11.スキル詳細設定関連ONOFF(False)
+            For i As Integer = 0 To 3
+                ReDim cus_addskl(i)(3)
+                For j As Integer = 0 To 3
+                    Select Case (j Mod 2)
+                        Case 0
+                            cus_addskl(i)(j) = GetINIValue("add" & CStr(i) & CStr(j \ 2 + 1), "CSKILL", bini)
+                        Case 1
+                            cus_addskl(i)(j) = スキル関連推定(GetINIValue("add" & CStr(i) & CStr(j \ 2 + 1), "CSKILL", bini))
+                    End Select
+                Next
+            Next
+        Else 'スキル通常設定ならば
+            ComboBox01.Focus()
+            ComboBox01.SelectedText = スキル関連推定(GetINIValue("add1", "武将A", bini))
+            ComboBox011.SelectedText = GetINIValue("add1", "武将A", bini)
+            ComboBox02.Focus()
+            ComboBox02.SelectedText = スキル関連推定(GetINIValue("add2", "武将A", bini))
+            ComboBox012.SelectedText = GetINIValue("add2", "武将A", bini)
+            If Not simu_skeqflg Then 'ランキング武将のスキルがオリジナル
+                CheckBox1.Checked = False
+                ComboBox41.Focus()
+                ComboBox41.SelectedText = スキル関連推定(GetINIValue("add1", "ランキング武将", bini))
+                ComboBox041.SelectedText = GetINIValue("add1", "ランキング武将", bini)
+                ComboBox42.Focus()
+                ComboBox42.SelectedText = スキル関連推定(GetINIValue("add2", "ランキング武将", bini))
+                ComboBox042.SelectedText = GetINIValue("add2", "ランキング武将", bini)
+            End If
+        End If
+        Cursor.Current = Cursors.Default
+    End Sub
+
+    Private Sub 設定保存(sender As Object, e As EventArgs) Handles 設定保存ToolStripMenuItem.Click
+        Dim fname As String
+        While 1
+            fname = InputBox("お気に入り設定名", "現在の設定を保存しますか？")
+            FILENAME_ranking = My.Application.Info.DirectoryPath & "\settings\" & fname & ".INI" 'INIファイルの保存場所
+
+            If fname = "" Then '無名の場合は抜ける
+                Exit Sub
+            ElseIf File.Exists(FILENAME_ranking) Then
+                Dim yn As Integer = MsgBox("既に同名設定が保存されています。上書きしますか？", vbYesNo)
+                If yn = vbYes Then
+                    File.Delete(FILENAME_ranking)
+                    Exit While
+                End If
+            Else
+                Exit While
+            End If
+        End While
+        Try
+            '全体設定
+            SetINIValue(ToolStripComboBox1.Text, "kobo", "設定", FILENAME_ranking)
+            SetINIValue(ToolStripComboBox2.Text, "heika", "設定", FILENAME_ranking)
+            SetINIValue(ToolStripComboBox3.SelectedIndex, "rank", "設定", FILENAME_ranking)
+            SetINIValue(ComboBox9.Text, "skilllv", "設定", FILENAME_ranking)
+            SetINIValue(ComboBox10.SelectedIndex, "heicount", "設定", FILENAME_ranking)
+            SetINIValue(syosklflg, "detail_skillflg", "設定", FILENAME_ranking)
+            SetINIValue(simu_skeqflg, "rankbusho_skillflg", "設定", FILENAME_ranking)
+            '対象武将設定
+            Dim rarearr() = {"天", "極", "特", "上", "序"}
+            For i As Integer = 0 To rarearr.Length - 1
+                SetINIValue(taisyo_rare(i), rarearr(i), "対象武将", FILENAME_ranking)
+            Next
+            '3武将設定と追加スキル
+            For i As Integer = 0 To 3
+                Dim bsho As String = Nothing
+                Select Case i
+                    Case 0
+                        bsho = "武将A"
+                    Case 1
+                        bsho = "武将B"
+                    Case 2
+                        bsho = "武将C"
+                    Case 3
+                        bsho = "ランキング武将"
+                End Select
+                With simu_bs(i)
+                    '追加スキルについては、シミュ実行しないと内部データに記録されていないので直取り
+                    If Not simu_skeqflg Then 'ランキングスキルが他3武将と同様
+                        SetINIValue(ComboBox011.Text, "add1", bsho, FILENAME_ranking)
+                        SetINIValue(ComboBox012.Text, "add2", bsho, FILENAME_ranking)
+                    Else
+                        If i < 3 Then
+                            SetINIValue(ComboBox011.Text, "add1", bsho, FILENAME_ranking)
+                            SetINIValue(ComboBox012.Text, "add2", bsho, FILENAME_ranking)
+                        Else
+                            SetINIValue(ComboBox041.Text, "add1", bsho, FILENAME_ranking)
+                            SetINIValue(ComboBox042.Text, "add2", bsho, FILENAME_ranking)
+                        End If
+                    End If
+                    If i < 3 Then
+                        SetINIValue(.name, "name", bsho, FILENAME_ranking)
+                        SetINIValue(.rare, "rare", bsho, FILENAME_ranking)
+                    End If
+                End With
+            Next
+            'スキル詳細設定
+            If syosklflg Then
+                For i As Integer = 0 To 3
+                    SetINIValue(cus_addskl(i)(0), "add" & CStr(i) & "1", "CSKILL", FILENAME_ranking)
+                    SetINIValue(cus_addskl(i)(2), "add" & CStr(i) & "2", "CSKILL", FILENAME_ranking)
+                Next
+            End If
+            MsgBox("登録完了")
+        Catch ex As Exception
+            MsgBox("登録内容に漏れがあります。次回復元時に正しく復元されない可能性があります。")
+        End Try
+    End Sub
+
+    Private Sub 開くボタン(sender As Object, e As EventArgs) Handles ToolStripSplitButton2.ButtonClick
+        Call お気に入り設定を開く(sender, e)
     End Sub
 End Class

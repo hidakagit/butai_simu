@@ -57,7 +57,7 @@
         Dim cc As ComboBox = ComboBox(Me, CStr(武将取得(sender)) & "02")
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
         Dim p As DataSet
-        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """", "Busho")
+        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """ ORDER BY Index ASC", "Busho")
         cc.DataSource = p.Tables("Busho")
         cc.DisplayMember = "名称"
         cc.ValueMember = "Index"

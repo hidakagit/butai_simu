@@ -133,7 +133,7 @@ Partial Class Form11
         'ComboBox010
         '
         Me.ComboBox010.FormattingEnabled = True
-        Me.ComboBox010.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox010.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox010.Location = New System.Drawing.Point(7, 61)
         Me.ComboBox010.Name = "ComboBox010"
         Me.ComboBox010.Size = New System.Drawing.Size(36, 20)
@@ -142,7 +142,7 @@ Partial Class Form11
         'ComboBox009
         '
         Me.ComboBox009.FormattingEnabled = True
-        Me.ComboBox009.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox009.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox009.Location = New System.Drawing.Point(7, 39)
         Me.ComboBox009.Name = "ComboBox009"
         Me.ComboBox009.Size = New System.Drawing.Size(36, 20)
@@ -194,7 +194,7 @@ Partial Class Form11
         'ComboBox110
         '
         Me.ComboBox110.FormattingEnabled = True
-        Me.ComboBox110.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox110.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox110.Location = New System.Drawing.Point(7, 61)
         Me.ComboBox110.Name = "ComboBox110"
         Me.ComboBox110.Size = New System.Drawing.Size(36, 20)
@@ -203,7 +203,7 @@ Partial Class Form11
         'ComboBox109
         '
         Me.ComboBox109.FormattingEnabled = True
-        Me.ComboBox109.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox109.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox109.Location = New System.Drawing.Point(7, 39)
         Me.ComboBox109.Name = "ComboBox109"
         Me.ComboBox109.Size = New System.Drawing.Size(36, 20)
@@ -255,7 +255,7 @@ Partial Class Form11
         'ComboBox210
         '
         Me.ComboBox210.FormattingEnabled = True
-        Me.ComboBox210.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox210.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox210.Location = New System.Drawing.Point(7, 61)
         Me.ComboBox210.Name = "ComboBox210"
         Me.ComboBox210.Size = New System.Drawing.Size(36, 20)
@@ -264,7 +264,7 @@ Partial Class Form11
         'ComboBox209
         '
         Me.ComboBox209.FormattingEnabled = True
-        Me.ComboBox209.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox209.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox209.Location = New System.Drawing.Point(7, 39)
         Me.ComboBox209.Name = "ComboBox209"
         Me.ComboBox209.Size = New System.Drawing.Size(36, 20)
@@ -337,7 +337,7 @@ Partial Class Form11
         'ComboBox310
         '
         Me.ComboBox310.FormattingEnabled = True
-        Me.ComboBox310.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox310.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox310.Location = New System.Drawing.Point(7, 61)
         Me.ComboBox310.Name = "ComboBox310"
         Me.ComboBox310.Size = New System.Drawing.Size(36, 20)
@@ -346,7 +346,7 @@ Partial Class Form11
         'ComboBox309
         '
         Me.ComboBox309.FormattingEnabled = True
-        Me.ComboBox309.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速"})
+        Me.ComboBox309.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox309.Location = New System.Drawing.Point(7, 39)
         Me.ComboBox309.Name = "ComboBox309"
         Me.ComboBox309.Size = New System.Drawing.Size(36, 20)

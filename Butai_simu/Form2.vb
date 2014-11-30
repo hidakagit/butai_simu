@@ -1,7 +1,7 @@
 ﻿Public Class Form2
 
-    Public Xitv As Long = 10000 'X軸の間隔はデフォ1万
-    Public hstitv As Long = 1000 'ヒストグラムの間隔
+    Public Xitv As Long = 100000 'X軸の間隔はデフォ10万
+    Public hstitv As Long = 10000 'ヒストグラムの間隔
     Public xhst() As Decimal 'ヒストグラムの度数
     Public yhst() As Long 'ヒストグラムの横軸
     Dim minhst, maxhst As Long 'ヒストグラムの最大値・最小値

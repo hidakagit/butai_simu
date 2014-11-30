@@ -33,6 +33,8 @@ Public Class Form1
         Dim srbuff As String = sr.ReadToEnd()
         sr.Close()
         error_skill = Split(srbuff, vbCrLf)
+        'フラグ付きスキル情報を読み込み
+        Call フラグ付きスキル読み込み()
     End Sub
 
     Private Sub 攻撃防衛部隊スイッチ(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripComboBox1.SelectedIndexChanged
@@ -155,7 +157,7 @@ Public Class Form1
 
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
         Dim p As DataSet
-        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """", "Busho")
+        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """ ORDER BY Index ASC", "Busho")
         cc.DisplayMember = "名称"
         cc.ValueMember = "Index"
         cc.DataSource = p.Tables("Busho")
@@ -206,6 +208,7 @@ Public Class Form1
             武将データ消去(i, False)
         Next
         ToolTip1.RemoveAll()
+        ToolStripLabel6.Text = "---------"
     End Sub
 
     Public Sub ステ振り設定(ByVal sender As System.Object, ByVal e As System.EventArgs) _
@@ -595,6 +598,9 @@ Public Class Form1
         Next
         heihou_sum = (maxheihou + (heihou_kei - maxheihou) / 6) / 100
 
+        Call フラグ付きスキル読み込み() '読込（更新）
+        Call 童ボーナス加算()
+
         '部隊総戦闘力計算
         For i As Integer = 0 To busho_counter - 1
             bs(i).小隊攻撃力計算()
@@ -854,7 +860,7 @@ Public Class Form1
         For i As Integer = 0 To busho_counter - 1
             For j As Integer = 0 To bs(i).skill_no - 1 '攻防一致、特殊スキル排除
                 If InStr(kb, bs(i).skill(j).koubou) Then
-                    If bs(i).skill(j).tokusyu = 0 Or bs(i).skill(j).sc_dflg Then '通常スキルもしくは総コスト依存スキル
+                    If bs(i).skill(j).tokusyu = 0 Or bs(i).skill(j).t_flg Then '通常スキルもしくは総コスト・フラグ依存スキル
                         ReDim Preserve can_skill(c)
                         can_skill(c) = bs(i).skill(j).Clone
                         c = c + 1
@@ -941,6 +947,10 @@ Public Class Form1
         End If
         ReDim skill_syo(can_skillp.Length - 1, busho_counter - 1) '将攻成分(スキルが乗る時はそのUPも含む)
 
+        '童関係
+        Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
+        Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+
         'スキル状態計算
         For i As Integer = 0 To can_skillp.Length - 1
             skill_x(i) = 1
@@ -983,6 +993,7 @@ Public Class Form1
                     skill_x(i) = skill_x(i) * (1 - can_skill(j - 1).kouka_p_b)
                 End If
             Next
+
             '実際のスキル発動時の戦闘力を計算
             'syo＝各スキルの上乗せ分＋素攻
             For k As Integer = 0 To busho_counter - 1
@@ -997,6 +1008,13 @@ Public Class Form1
                     End If
                     skill_y(i, k) = (ds * .heisyu.ts * (1 + syoplus(k) + heiplus(k))) + (.hei_sum * dk * .heisyu.ts * (1 + heiplus(k)))
                     skill_syo(i, k) = ds * .heisyu.ts * (1 + syoplus(k)) * (1 + heiplus(k))
+                    '童適用(今のところ単科防スキルのみ対応)
+                    For l As Integer = 0 To harr.Length - 1
+                        If InStr(.heisyu.bunrui, harr(l)) And InStr(kb, "防") Then
+                            skill_y(i, k) = skill_y(i, k) * (1 + 0.01 * warr(l))
+                            Exit For
+                        End If
+                    Next
                 End With
             Next
         Next
@@ -1117,6 +1135,9 @@ Public Class Form1
             Exit Sub
         End If
         Cursor.Current = Cursors.WaitCursor
+
+        simu_execno = 0
+
         '武将数があっていない場合自動で訂正
         Dim ts() As Integer = Nothing 'データの抜けている部分
         Dim c As Integer = 0, d As Integer = 0
@@ -1139,14 +1160,17 @@ Public Class Form1
         Next
         ToolStripComboBox2.Text = busho_counter - tbc
         Costsum = 0
+        Ranksum = 0
 
         '攻撃/防御変更によって数値が変わる可能性のあるものを更新する必要がある → 兵科能力値のみ？
         For i As Integer = 0 To busho_counter - 1
             Call bs(i).兵科情報取得(bs(i).heisyu.name)
             Costsum = Costsum + bs(i).cost 'ついでに総コスト計算
+            Ranksum = Ranksum + bs(i).rank '部隊ランクも計算
         Next
 
         Try
+            rank_sum = 部隊ランクボーナス計算(Ranksum)
             Call 部隊初期化()
             Call 部隊兵法値計算・スキルデータ確定()
             Call スキル状態計算()
@@ -1179,16 +1203,16 @@ Public Class Form1
             If InStr(kb, bskill.koubou) And bskill.flg = True Then
                 'bstr = Split("4,5,6,9", ",")
                 fg = True
-                ReDim tmp(10)
-                tmp(8) = vbCrLf & "+++ 部隊スキルON +++" & vbCrLf & _
+                ReDim tmp(12)
+                tmp(10) = vbCrLf & "+++ 部隊スキルON +++" & vbCrLf & _
                 "発動率: " & bskill.kouka_p & "/ 上昇率: " & bskill.kouka_f
-                tmp(9) = "※部隊スキルを無視した場合" & vbCrLf & _
+                tmp(11) = "※部隊スキルを無視した場合" & vbCrLf & _
                     "   |- ※期待値: " & Int(skill_exx) & vbCrLf & _
                     "   |- ※MAX値: " & Int(atksum_maxmax) & vbCrLf & "++++++++++++"
             Else
                 fg = False
                 'bstr = Split("4,5,6", ",")
-                ReDim tmp(8)
+                ReDim tmp(9)
             End If
             tmp(0) = "武将数: " & busho_counter
             tmp(1) = "総コスト: " & Costsum
@@ -1198,10 +1222,12 @@ Public Class Form1
             tmp(5) = "  |- 期待値: " & Int(skill_exk) & " (+" & Format(((skill_exk / Atksum) - 1) * 100, "#0.00") & "%上昇)"
             tmp(6) = "  |- MAX値: " & Int(atksum_max) & " (+" & Format(((atksum_max / Atksum) - 1) * 100, "#0.00") & "%上昇)"
             tmp(7) = "部隊兵法補正値: +" & Math.Ceiling(heihou_sum * 100) / 100 & "%"
+            tmp(8) = "部隊ランクボーナス: +" & Format(rank_sum, "#0.00") & "% (★" & Format(Ranksum, "#0") & ")"
             If InStr(kb, "防") Then
                 tmp(4) = tmp(4) & vbCrLf & "      |- コス1あたり -> " & Int(Atksum / Costsum)
                 tmp(5) = tmp(5) & vbCrLf & "      |- コス1あたり -> " & Int(skill_exk / Costsum)
                 tmp(6) = tmp(6) & vbCrLf & "      |- コス1あたり -> " & Int(atksum_max / Costsum)
+                tmp(9) = "童効果: " + 童効果文字列出力()
             End If
         Else
             bstr = Split("0", ",")
@@ -1224,7 +1250,7 @@ Public Class Form1
                 For i As Integer = 0 To .skill_no - 1
                     With .skill(i)
                         ReDim Preserve tmp(10 + 2 * i)
-                        If .tokusyu = 0 Or .sc_dflg Then '特殊スキル（総コスト依存スキルを除く）じゃなければ
+                        If .tokusyu = 0 Or .t_flg Then '特殊スキル（総コスト依存スキルを除く）じゃなければ
                             Dim tmps As String = .heika
                             If InStr(.heika, "槍弓馬砲器") Then
                                 tmps = "全"
@@ -1233,8 +1259,8 @@ Public Class Form1
                                 .name & "LV" & .lv & " /" & .koubou & " /" & tmps
                             tmp(10 + 2 * i) = "発動率: " & .kouka_p & "/ " & "上昇率: " & .kouka_f & vbCrLf & _
                                 "→ ※期待値 " & Math.Ceiling(.exp_kouka_b * 10000) / 10000
-                            If .sc_dflg Then
-                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & "★☆総コスト依存☆★"
+                            If .t_flg Then
+                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & "★☆特殊条件スキル☆★"
                             End If
                         Else
                             tmp(9 + 2 * i) = "[スキル" & i + 1 & "]" & vbCrLf & .name & "LV" & .lv
@@ -1388,15 +1414,14 @@ Public Class Form1
         Dim fname As String
         While 1
             fname = InputBox("部隊名", "現在表示されている部隊を保存しますか？")
-            FILENAME_bs = fname & ".INI" 'INIファイルの保存場所
-            Dim tmpbs As String = My.Application.Info.DirectoryPath & "\butai\" & FILENAME_bs
+            FILENAME_bs = My.Application.Info.DirectoryPath & "\butai\" & fname & ".INI" 'INIファイルの保存場所
 
             If fname = "" Then '無名の場合は抜ける
                 Exit Sub
-            ElseIf File.Exists(tmpbs) Then
+            ElseIf File.Exists(FILENAME_bs) Then
                 Dim yn As Integer = MsgBox("既に同名の部隊が保存されています。上書きしますか？", vbYesNo)
                 If yn = vbYes Then
-                    File.Delete(tmpbs)
+                    File.Delete(FILENAME_bs)
                     Exit While
                 End If
             Else
@@ -1484,7 +1509,7 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub 速度計測(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles 速度計測ONToolStripMenuItem.Click
+    Private Sub 速度計測(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripButton6.Click
         Dim speed_skl() As Busho.skl = Nothing '速度スキル格納
         Dim ksk() As Decimal = Nothing '加速率
         Dim butai_spd As Integer '行軍速度（秒）
@@ -1510,6 +1535,11 @@ Public Class Form1
             MsgBox("兵科設定に異常があります")
             Exit Sub
         End If
+
+        '勝軍地蔵が居るので読み込み
+        Call フラグ付きスキル読み込み() '読込（更新）
+        Call 童ボーナス加算()
+
         ReDim ksk(bsc - 1), kasoku(bsc - 1), it(bsc - 1)
         c = 0
 
@@ -1517,7 +1547,7 @@ Public Class Form1
             With bs(i)
                 .兵科情報取得(bs(i).heisyu.name)
                 For j As Integer = 0 To .skill.Length - 1
-                    If Not .skill(j).speed = 0 Then '加速スキルがあれば
+                    If Not .skill(j).speed = 0 Or .skill(j).tokusyu = 1 Then '加速スキルがあれば
                         ReDim Preserve speed_skl(c)
                         speed_skl(c) = .skill(j).Clone
                         c = c + 1
@@ -1525,22 +1555,34 @@ Public Class Form1
                 Next
             End With
         Next
-        If Not c = 0 Then '加速スキルが見つかった場合
-            For i As Integer = 0 To bsc - 1 '各武将の速度を計算
+        For i As Integer = 0 To bsc - 1 '各武将の速度を計算
+            '童効果適用
+            For j As Integer = 0 To bsc - 1
+                Select Case (bs(j).heisyu.bunrui)
+                    Case "槍"
+                        ksk(i) = ksk(i) + 0.01 * warabe.speed.yari
+                    Case "弓"
+                        ksk(i) = ksk(i) + 0.01 * warabe.speed.yumi
+                    Case "馬"
+                        ksk(i) = ksk(i) + 0.01 * warabe.speed.uma
+                    Case "砲"
+                        ksk(i) = ksk(i) + 0.01 * warabe.speed.hou
+                    Case "器"
+                        ksk(i) = ksk(i) + 0.01 * warabe.speed.utuwa
+                End Select
+            Next
+            If Not c = 0 Then '加速スキルが見つかった場合
                 For j As Integer = 0 To speed_skl.Length - 1
                     If InStr(speed_skl(j).heika, bs(i).heisyu.bunrui) Or InStr(speed_skl(j).heika, "全") Or InStr(speed_skl(j).heika, "将") Then
+                        speed_skl(j).t_flg = フラグ付きスキル参照(speed_skl(j))
                         ksk(i) = ksk(i) + speed_skl(j).speed
                     End If
                 Next
-                kasoku(i) = Int(3600 / (bs(i).heisyu.spd * (1 + ksk(i))))
-                it(i) = i
-            Next
-        Else
-            For i As Integer = 0 To bsc - 1
-                kasoku(i) = Int(3600 / bs(i).heisyu.spd)
-                it(i) = i
-            Next
-        End If
+            End If
+            kasoku(i) = Int(3600 / (bs(i).heisyu.spd * (1 + ksk(i))))
+            it(i) = i
+        Next
+       
         Array.Sort(kasoku, it)
         If Not bskill.speed = 0 Then
             butai_spd = Int(3600 / (bs(Int(it(bsc - 1))).heisyu.spd * (1 + bskill.speed) * (1 + ksk(Int(it(bsc - 1))))))
@@ -1549,9 +1591,9 @@ Public Class Form1
             butai_spd = kasoku(Int(bsc - 1))
         End If
 
-        With ToolStripLabel3
-            .Text = "行軍速度: " & (butai_spd \ 60) & "分" & (butai_spd Mod 60) & "秒 /(1マス)"
-            .Visible = True
+        With ToolStripLabel6
+            .Text = (butai_spd \ 60) & "分" & (butai_spd Mod 60).ToString("00") & "秒"
+            '.Visible = True
             .ForeColor = Color.Brown
             .ToolTipText = "加速率: " & ksk(Int(it(bsc - 1))).ToString("p")
             If Not bskill.speed = 0 Then
@@ -1560,11 +1602,15 @@ Public Class Form1
                     "(部隊スキル抜き速度: " & (Int(3600 / (bs(Int(it(bsc - 1))).heisyu.spd * (1 + ksk(Int(it(bsc - 1)))))) \ 60) & "分" & _
                     (Int(3600 / (bs(Int(it(bsc - 1))).heisyu.spd * (1 + ksk(Int(it(bsc - 1)))))) Mod 60) & "秒)"
             End If
+            '勝軍地蔵が入る場合、その表示
+            If Not warabe.speed.uma = 0 Then
+                .ToolTipText = .ToolTipText & vbCrLf & "☆童アリ"
+            End If
         End With
     End Sub
 
     'クリックで速度更新
-    Private Sub 速度更新(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripLabel3.Click
+    Private Sub 速度更新(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripLabel6.Click
         Call 速度計測(sender, Nothing)
     End Sub
 
@@ -1976,4 +2022,15 @@ Public Class Form1
         Form10.Show()
     End Sub
 
+    Private Sub 条件設定起動(sender As Object, e As EventArgs) Handles 条件設定ToolStripMenuItem.Click
+
+    End Sub
+
+    Private Sub 防衛オプション表示(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
+        Form12.Show()
+    End Sub
+
+    Private Sub 開くボタン(sender As Object, e As EventArgs) Handles ToolStripSplitButton1.ButtonClick
+        Call 保存部隊を開く(sender, e)
+    End Sub
 End Class
