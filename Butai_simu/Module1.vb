@@ -108,11 +108,18 @@ Public Structure Busho : Implements System.ICloneable
         Public speed As Decimal '速度上昇率
         Public tokusyu As Integer '特殊スキル判定(0:通常, 1:速度のみ, 2:破壊のみ, 5:データ不足, 9:その他)
         Public t_flg As Boolean '総コストorフラグ存在依存
+        Public up_kouka_p As Decimal '部隊内での所定条件を満たしたことで発動率UP
         Public exp_kouka As Decimal '期待値
         Public exp_kouka_b As Decimal '部隊兵法補正後の期待値
         Public Function Clone() As Object Implements System.ICloneable.Clone
             Return Me.MemberwiseClone()
         End Function
+        Public Sub スキル計算状態初期化() 'スキルそのもののデータではなく計算に生じて変化する部分を初期化
+            kouka_p_b = 0
+            exp_kouka = 0
+            exp_kouka_b = 0
+            up_kouka_p = 0
+        End Sub
     End Structure
 
     Public skill_no As Integer 'スキル数
@@ -412,9 +419,12 @@ Public Structure Busho : Implements System.ICloneable
         For k As Integer = 3 To 5
             TextBox(Form1, CStr(bc) & "0" & CStr(k)).Text = Sta(fs)(k - 3)
         Next
+        '攻防兵成長
         For k As Integer = 3 To 5
             Label(Form1, CStr(bc) & "0" & CStr(k)).Text = "(+" & sta_g(k - 3).ToString & ")"
         Next
+        '職
+        GroupBox(Form1, "0" & CStr(bc) & "2").Text = "ステータス[ " & job & " ]"
         ComboBox(Form1, CStr(bc) & "14").Text = skill(0).lv
         ComboBox(Form1, CStr(bc) & "04").Text = rank
         For k As Integer = 5 To 8
@@ -498,46 +508,52 @@ End Structure
 
 Public Structure bskl '部隊スキル関連
     Public flg As Boolean '有効かどうか
-    Public Property ONOFF() As Boolean
+    Public bsk() As _bsk
+    Public activebsk() As _bsk
+    Public Structure _bsk : Implements System.ICloneable
+        Public koubou As String '攻防
+        Public type As String 'タイプ（攻、防、速）
+        'Public name As String '部隊スキル名
+        Public kouka_p As Decimal '発動率
+        Public kouka_f As Decimal '上昇率
+        Public speed As Decimal 'スピード上昇のある場合、加速率
+        Public taisyo As String '対象
+        'Public qq As Boolean '将攻二乗モードONOFF
+        Public Function Clone() As Object Implements System.ICloneable.Clone
+            Return Me.MemberwiseClone()
+        End Function
+    End Structure
+    Public ReadOnly Property speed() As Decimal
         Get
-            If flg = True Then
-                Return True
-            Else
-                Return False
-            End If
-        End Get
-        Set(ByVal value As Boolean)
-            With Form1.ToolStripButton4
-                If value = True Then
-                    flg = True '部隊スキルボタンの画像を変更
-                    .Image = Bitmap.FromFile(My.Application.Info.DirectoryPath & "\settings\ico\prettyxstickxstripe_p24_rd_nl_l.png")
-                    Dim bkb As String
-                    If koubou = "攻" Then
-                        bkb = "攻撃"
-                    Else
-                        bkb = "防衛"
-                    End If
-                    .ToolTipText = "部隊スキル : 有効" & " [" & bkb & "時発動]" & vbCrLf & _
-                        "発動率: " & kouka_p & "/ 上昇率: " & kouka_f
-                    If Not bskill.speed = 0 Then '加速有効
-                        .ToolTipText = .ToolTipText & vbCrLf & "加速: " & speed
-                    End If
-                Else
-                    flg = False
-                    .Image = Bitmap.FromFile(My.Application.Info.DirectoryPath & "\settings\ico\prettyxstickxstripe_p24_bk_nl_l.png")
-                    .ToolTipText = "部隊スキル : 無効"
+            If bsk Is Nothing Then Return 0
+            Dim spdtmp As Decimal = 0
+            For i As Integer = 0 To bsk.Length - 1
+                If spdtmp < bsk(i).speed Then
+                    spdtmp = bsk(i).speed
                 End If
-            End With
-        End Set
+            Next
+            Return spdtmp
+        End Get
+    End Property 'スピードスキルは複数あった場合でも最速のもの
+    '有効な部隊スキルリストを返す
+    Public ReadOnly Property activeskl(ByVal kb As String) As _bsk()
+        Get
+            If bsk Is Nothing Then Return Nothing
+            Dim validcount As Decimal = 0
+            For i As Integer = 0 To bsk.Length - 1
+                If InStr(kb, bsk(i).koubou) And bsk(i).kouka_f > 0 Then
+                    If validcount = 0 Then
+                        ReDim activebsk(0)
+                    Else
+                        ReDim Preserve activebsk(validcount)
+                    End If
+                    activebsk(validcount) = bsk(i).Clone
+                    validcount = validcount + 1
+                End If
+            Next
+            Return activebsk
+        End Get
     End Property
-    Public koubou As String '攻防
-    Public name As String '部隊スキル名
-    Public lv As Integer 'LV
-    Public kouka_p As Decimal '発動率
-    Public kouka_f As Decimal '上昇率
-    Public speed As Decimal 'スピード上昇のある場合、加速率
-    Public taisyo As String '対象
-    Public qq As Boolean '将攻二乗モードONOFF
 End Structure
 
 Public Structure flgskl : Implements System.ICloneable 'フラグスキル格納
@@ -930,7 +946,7 @@ Module Module1
     Public Function 条件依存スキル・フラグスキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal) As Boolean
         'Dim sdata() As String
         With sk
-            Select (.name)
+            Select Case (.name)
                 Case "覇王征軍"
                     '覇王征軍
                     '覇王征軍の増分データ
@@ -975,6 +991,24 @@ Module Module1
                     .koubou = refskl.koubou
                     .kouka_f = refskl.kouka_f
                     Return True
+                Case "花魁心操術"
+                    '花魁心操術
+                    '自分以外の武将に姫がいる場合、そのスキル発動率を操作
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    For i As Integer = 0 To refbs.Length - 1
+                        If refbs(i).job = "姫" Then
+                            For j As Integer = 0 To refbs(i).skill.Length - 1
+                                refbs(i).skill(j).up_kouka_p = 0.01 * .lv 'LVの分だけ発動率上昇
+                            Next
+                        End If
+                    Next
+                    Return False '花魁心操術自体は他に何も影響しない
             End Select
             Return False
         End With

@@ -391,7 +391,7 @@ Partial Class Form6
         'ComboBox101
         '
         Me.ComboBox101.FormattingEnabled = True
-        Me.ComboBox101.Items.AddRange(New Object() {"天", "極", "特", "上", "序"})
+        Me.ComboBox101.Items.AddRange(New Object() {"天", "極", "特", "上", "序", "童", "雅"})
         Me.ComboBox101.Location = New System.Drawing.Point(8, 48)
         Me.ComboBox101.Name = "ComboBox101"
         Me.ComboBox101.Size = New System.Drawing.Size(39, 20)

@@ -668,20 +668,16 @@ Public Class Form10
 
     '部隊兵法値や各小隊の戦闘力を計算
     Private Sub 部隊兵法値計算() 'いわば前段階
-        heihousum = 0
         '部隊兵法値計算
-        Dim maxheihou As Decimal
-        Dim heihou_kei As Decimal
-        maxheihou = 0
+        Dim maxheihou As Decimal = 0
+        Dim heihou_kei As Decimal = 0
         For i As Integer = 0 To 3
             If (maxheihou < simu_bs(i).st(2)) Then
                 maxheihou = simu_bs(i).st(2)
             End If
             heihou_kei = heihou_kei + simu_bs(i).st(2)
-            butairanksum = butairanksum + simu_bs(i).rank
         Next
         heihousum = (maxheihou + (heihou_kei - maxheihou) / 6) / 100
-        butairankbonus = 部隊ランクボーナス計算(butairanksum)
 
         '小隊戦闘力計算
         For i As Integer = 0 To 3
@@ -689,6 +685,20 @@ Public Class Form10
                 .小隊攻撃力計算(kobo)
                 .スキル期待値計算(heihousum, butairankbonus, butaicostsum)
             End With
+        Next
+        '海野六郎のようなスキル（他武将のスキル条件に影響を与えるスキル）がある。その部分を補正
+        '※今は発動率（kouka_p)のみ
+        For i As Integer = 0 To 3
+            For j As Integer = 0 To simu_bs(i).skill.Length - 1
+                With simu_bs(i).skill(j)
+                    If (.kouka_p_b + .up_kouka_p) > 1 Then '合計100%を超えるならば
+                        .kouka_p_b = 1
+                    Else
+                        .kouka_p_b = .kouka_p_b + .up_kouka_p
+                    End If
+                    .exp_kouka_b = .kouka_p_b * .kouka_f
+                End With
+            Next
         Next
     End Sub
     '**********************************
@@ -877,11 +887,22 @@ Public Class Form10
         Return {s_ex(3), s_exk, s_yk_max}
     End Function
     'グローバル変数初期化
-    Private Sub 変数初期化()
+    Private Sub グローバル変数初期化()
         kitai_val = Nothing
         kitai_butai = Nothing
         add_skl = Nothing
         butairanksum = 0
+    End Sub
+
+    '各ランキング毎に回す変数初期化
+    Private Sub 変数初期化()
+        heihousum = 0
+        'スキル計算に使う変数をクリア
+        For i As Integer = 0 To 3
+            For j As Integer = 0 To simu_bs(i).skill_no - 1
+                simu_bs(i).skill(j).スキル計算状態初期化()
+            Next
+        Next
     End Sub
 
     Private Sub 表更新(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
@@ -894,7 +915,7 @@ Public Class Form10
         simu_execno = 1
 
         Call プログレスバー初期化()
-        Call 変数初期化()
+        Call グローバル変数初期化()
         DataGridView1.Rows.Clear() '表をクリア
         DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
 
@@ -903,7 +924,6 @@ Public Class Form10
         For i As Integer = 1 To 3
             simu_bs(i).heisyu = simu_bs(0).heisyu.Clone
         Next
-
         '3武将ランクアップ、統率計算
         For i As Integer = 0 To 2
             With simu_bs(i)
@@ -919,6 +939,9 @@ Public Class Form10
                 .heisyu.ts = 実質統率計算(.heisyu.tousotu, i)
             End With
         Next
+        '部隊ランクボーナス計算
+        butairanksum = simu_bs(0).rank * 4
+        butairankbonus = 部隊ランクボーナス計算(butairanksum)
 
         'スキル状態、スキル数をセット
         If Not syosklflg Then
@@ -967,6 +990,7 @@ Public Class Form10
         For i As Integer = 0 To sc
             Dim tmprec(2) As Decimal
             Call ランキング武将読み込み(sl(i))
+            Call 変数初期化()
             Call 部隊兵法値計算()
             tmprec = 期待値計算()
             kitai_val(i) = tmprec(0)

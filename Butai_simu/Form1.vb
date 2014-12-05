@@ -111,6 +111,7 @@ Public Class Form1
         For i As Integer = 3 To 5 'ステUP率表示の初期化
             Label(Me, CStr(bc) & "0" & CStr(i)).Text = "(---)"
         Next
+        GroupBox(Me, "0" & CStr(bc) & "2").Text = "ステータス" '職表示の初期化
         With GroupBox(Me, 4 * (bc + 1)) '統率表示の初期化
             .Text = "統率"
             .ForeColor = Color.Black
@@ -608,6 +609,20 @@ Public Class Form1
             Atksum = Atksum + bs(i).attack
             bs(i).スキル期待値計算()
         Next
+        '海野六郎のようなスキル（他武将のスキル条件に影響を与えるスキル）がある。その部分を補正
+        '※今は発動率（kouka_p)のみ
+        For i As Integer = 0 To busho_counter - 1
+            For j As Integer = 0 To bs(i).skill_no - 1
+                With bs(i).skill(j)
+                    If (.kouka_p_b + .up_kouka_p) > 1 Then '合計100%を超えるならば
+                        .kouka_p_b = 1
+                    Else
+                        .kouka_p_b = .kouka_p_b + .up_kouka_p
+                    End If
+                    .exp_kouka_b = .kouka_p_b * .kouka_f
+                End With
+            Next
+        Next
         Call 発動スキル候補決定()
     End Sub
 
@@ -616,6 +631,12 @@ Public Class Form1
         heihou_sum = 0
         Atksum = 0
         Call スキル状態初期化()
+        'スキル計算に使う変数をクリア
+        For i As Integer = 0 To busho_counter - 1
+            For j As Integer = 0 To bs(i).skill_no - 1
+                bs(i).skill(j).スキル計算状態初期化()
+            Next
+        Next
     End Sub
 
     'Private Sub デフォルト統率ポップアップ(ByVal sender As System.Object, ByVal e As System.EventArgs) _
@@ -919,6 +940,59 @@ Public Class Form1
         スキル実質上昇率 = tmpatk
     End Function
 
+    '各部隊スキルの発動率を計算（重複発動はしない、内部でダブったらランダム）
+    Private Function 部隊スキル発動確率計算(ByVal activebsk() As bskl._bsk) As Decimal()
+        If activebsk Is Nothing Then Return {"0"}
+        Dim retp() As Decimal '戻す各スキルの発動率が入った配列
+        Dim decp() As String '発動状態パターン文字列
+        Dim sumpdecp() As String 'decpのパターンの生起確率に、指定の重みづけを加えたもの
+        Dim p() As Decimal, rp() As Decimal
+        ReDim retp(activebsk.Length), p(activebsk.Length - 1), rp(activebsk.Length - 1)
+        'pnと^pnを計算
+        For i As Integer = 0 To activebsk.Length - 1
+            With activebsk(i)
+                p(i) = .kouka_p
+                rp(i) = 1 - .kouka_p
+            End With
+        Next
+        '各結合確率を計算
+        'ex: (length=3) → c=8, b1～b3のうち、b1が発動する確率は
+        'b1 = p1^p2^p3 + (1/2)p1p2^p3 + (1/2)p1^p2p3 + (1/3)p1p2p3
+        Dim c As Long = 2 ^ (activebsk.Length) '全部隊スキル有効状態数 ex: "000", "001", "010",etc
+        ReDim decp(c - 1), sumpdecp(c - 1)
+        For i As Integer = 0 To c - 1
+            decp(i) = CStr(Convert10to2(i, Math.Ceiling(Math.Log10(c) / Math.Log10(2))))
+            Dim tmpp As Decimal = 1
+            Dim countz As Integer = 0
+            Dim ktmpp As Decimal = 1
+            For j As Integer = 1 To activebsk.Length
+                If Mid(decp(i), j, 1) = 1 Then '発動ならば
+                    tmpp = tmpp * p(j - 1)
+                Else
+                    tmpp = tmpp * rp(j - 1)
+                    countz = countz + 1
+                End If
+            Next
+            If Not i = 0 Then ktmpp = 1 / (activebsk.Length - countz)
+            sumpdecp(i) = ktmpp * tmpp
+        Next
+        '各部隊スキルの発動確率を計算
+        For i As Integer = 1 To activebsk.Length
+            retp(i) = 0
+            For j As Integer = 0 To c - 1
+                If Mid(decp(j), i, 1) = 1 Then '自分のpが1（発動ビット）ならば
+                    retp(i) = retp(i) + sumpdecp(j)
+                End If
+            Next
+        Next
+        '全ての部隊スキルが未発動
+        retp(0) = sumpdecp(0)
+        'For i As Integer = 0 To activebsk.Length - 1
+        '    retp(0) = retp(0) - retp(i)
+        'Next
+        Return retp
+    End Function
+
     Private Sub スキル状態初期化()
         skill_x = Nothing '初期化
         skill_y = Nothing
@@ -926,7 +1000,7 @@ Public Class Form1
         skill_xx = Nothing
         skill_yy = Nothing
         skill_yyk = Nothing
-        skill_syo = Nothing
+        'skill_syo = Nothing
         skill_ex = Nothing
         skill_exk = 0
         skill_exx = 0
@@ -934,18 +1008,28 @@ Public Class Form1
         skill_axx = 0
     End Sub
 
+    '部隊スキル複数がアリになったので、状態数も可変
     Private Sub スキル状態計算()
 
         Call スキル状態初期化()
-
-        If bskill.flg And InStr(kb, bskill.koubou) Then '部隊スキルが有効ならば
-            ReDim skill_yk(2 * can_skillp.Length - 1)
-            ReDim skill_x(2 * can_skillp.Length - 1), skill_y(2 * can_skillp.Length - 1, busho_counter - 1)
+        Dim activebsk() As bskl._bsk = bskill.activeskl(kb)
+        Dim bskillcount As Integer
+        If activebsk Is Nothing Then
+            bskillcount = 0
         Else
+            bskillcount = activebsk.Length '有効な部隊スキル数
+        End If
+        Dim activebskp() As Decimal = 部隊スキル発動確率計算(activebsk)
+
+        If bskill.flg And bskillcount > 0 Then '部隊スキルが有効ならば
+            ReDim skill_yk((bskillcount + 1) * can_skillp.Length - 1), _
+            skill_x((bskillcount + 1) * can_skillp.Length - 1), _
+            skill_y((bskillcount + 1) * can_skillp.Length - 1, busho_counter - 1)
+        Else '部隊スキル無
             ReDim skill_yk(can_skillp.Length - 1)
             ReDim skill_x(can_skillp.Length - 1), skill_y(can_skillp.Length - 1, busho_counter - 1)
         End If
-        ReDim skill_syo(can_skillp.Length - 1, busho_counter - 1) '将攻成分(スキルが乗る時はそのUPも含む)
+        'ReDim skill_syo(can_skillp.Length - 1, busho_counter - 1) '将攻成分(スキルが乗る時はそのUPも含む)
 
         '童関係
         Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
@@ -965,7 +1049,7 @@ Public Class Form1
 
             '***** DUMMY *****
             If can_skill Is Nothing Then '特殊スキルしかない等でそもそも有効状態が存在しない場合
-                If InStr(kb, bskill.koubou) = 0 Or bskill.flg = False Then 'かつ部隊スキルも有効でない
+                If bskillcount = 0 Or bskill.flg = False Then 'かつ部隊スキルも有効でない
                     Exit For
                 End If
                 '部隊スキルのみ有効な場合、無意味なダミースキルを一つ作ってエラー回避
@@ -1007,7 +1091,7 @@ Public Class Form1
                         dk = .heisyu.def
                     End If
                     skill_y(i, k) = (ds * .heisyu.ts * (1 + syoplus(k) + heiplus(k))) + (.hei_sum * dk * .heisyu.ts * (1 + heiplus(k)))
-                    skill_syo(i, k) = ds * .heisyu.ts * (1 + syoplus(k)) * (1 + heiplus(k))
+                    'skill_syo(i, k) = ds * .heisyu.ts * (1 + syoplus(k)) * (1 + heiplus(k))
                     '童適用(今のところ単科防スキルのみ対応)
                     For l As Integer = 0 To harr.Length - 1
                         If InStr(.heisyu.bunrui, harr(l)) And InStr(kb, "防") Then
@@ -1020,25 +1104,32 @@ Public Class Form1
         Next
 
         '部隊スキルは、「全」しかない事を前提にしている。後々各兵科別に適用・未適用を考えないといけない場合は改良必要
+        '↑「全」以外のものにも対応 InStr(.heika, bs(i).heisyu.bunrui) Or InStr(.heika, "将") Then '兵科が合致するか
         If bskill.flg = True Then '部隊スキルが有効
-            If InStr(kb, bskill.koubou) Then '攻防が一致
-                ReDim skill_xx(can_skillp.Length - 1), skill_yy(can_skillp.Length - 1, busho_counter - 1)
-                skill_xx = skill_x.Clone
-                skill_yy = skill_y.Clone
-                For i As Integer = 0 To can_skillp.Length - 1
-                    skill_x(i) = skill_x(i) * (1 - bskill.kouka_p) '前半は部隊スキル未発動時とする。xのみ変化、yそのまま
-                Next
-                For i As Integer = can_skillp.Length To 2 * can_skillp.Length - 1
-                    skill_x(i) = skill_xx(i - can_skillp.Length) * bskill.kouka_p '後半は発動時。yも変化。
+            ReDim skill_xx(can_skillp.Length - 1), skill_yy(can_skillp.Length - 1, busho_counter - 1)
+            skill_xx = skill_x.Clone
+            skill_yy = skill_y.Clone
+            '部隊スキル未発動時
+            For i As Integer = 0 To can_skillp.Length - 1
+                skill_x(i) = skill_x(i) * activebskp(0) 'xのみ変化、yそのまま
+            Next
+            '部隊スキル発動時
+            For i As Integer = 1 To bskillcount
+                For j As Integer = i * can_skillp.Length To (i + 1) * can_skillp.Length - 1
+                    skill_x(j) = skill_xx(j - i * can_skillp.Length) * activebskp(i) '後半は発動時。yも変化。
                     For k As Integer = 0 To busho_counter - 1
-                        skill_y(i, k) = skill_yy(i - can_skillp.Length, k) * (1 + bskill.kouka_f) '乗算適用。
-                        If bskill.qq = True Then '将攻成分が2乗
-                            skill_y(i, k) = skill_y(i, k) + _
-                                skill_syo(i - can_skillp.Length, k) * (1 + bskill.kouka_f) * bskill.kouka_f
+                        If InStr(activebsk(i - 1).taisyo, bs(k).heisyu.bunrui) Or (activebsk(i - 1).taisyo = "全") Then
+                            skill_y(j, k) = skill_yy(j - i * can_skillp.Length, k) * (1 + activebsk(i - 1).kouka_f) '乗算適用。
+                            'If bskill.qq = True Then '将攻成分が2乗
+                            '    skill_y(i, k) = skill_y(i, k) + _
+                            '        skill_syo(i - can_skillp.Length, k) * (1 + bskill.kouka_f) * bskill.kouka_f
+                            'End If
+                        Else
+                            skill_y(j, k) = skill_yy(j - i * can_skillp.Length, k) '未適用
                         End If
                     Next
                 Next
-            End If
+            Next
         End If
 
         skill_yk = Array_to_Arrayk(skill_y)
@@ -1110,7 +1201,7 @@ Public Class Form1
             skill_ax = skill_ax + skill_x(i) * ((skill_yk(i) - skill_exk) ^ 2) '分散
         Next
         '部隊スキルが有効な場合、スキルを無視した時の期待値、分散、MAX値
-        If bskill.flg = True And InStr(kb, bskill.koubou) Then
+        If bskill.flg = True And bskillcount > 0 Then
             'sQuickSort2(skill_yy, skill_xx)
             'skill_yykも昇順ソートで再生成
             ReDim skill_yyk(UBound(skill_yy))
@@ -1183,7 +1274,6 @@ Public Class Form1
                     Call RTextBox_BOLD(RichTextBox(Form2, i + 2), boldtext(i + 1)) '太字処理
                 Next
             Next
-
         Catch ex As Exception
             MsgBox("必要なデータが不足しているか原因不明のエラーです＞＜")
             Exit Sub
@@ -1200,15 +1290,23 @@ Public Class Form1
         ReDim Preserve boldtext(bn)
         Dim bstr() As String = Nothing '太字にする行
         If bn = 0 Then '全体情報
-            If InStr(kb, bskill.koubou) And bskill.flg = True Then
+            If (Not bskill.activebsk Is Nothing) And bskill.flg = True Then
                 'bstr = Split("4,5,6,9", ",")
                 fg = True
-                ReDim tmp(12)
-                tmp(10) = vbCrLf & "+++ 部隊スキルON +++" & vbCrLf & _
-                "発動率: " & bskill.kouka_p & "/ 上昇率: " & bskill.kouka_f
-                tmp(11) = "※部隊スキルを無視した場合" & vbCrLf & _
-                    "   |- ※期待値: " & Int(skill_exx) & vbCrLf & _
-                    "   |- ※MAX値: " & Int(atksum_maxmax) & vbCrLf & "++++++++++++"
+                ReDim tmp(13)
+                tmp(10) = "+++ 部隊スキルON (" & Int(bskill.activebsk.Length) & "個) +++"
+                For i As Integer = 0 To bskill.activebsk.Length - 1
+                    If i = 0 Then
+                        tmp(11) = "[" & Int(i + 1) & "] " & _
+                        "発動率: " & bskill.activebsk(i).kouka_p & "/ " & "上昇率: " & bskill.activebsk(i).kouka_f & "/ 対象: " & bskill.activebsk(i).taisyo
+                    Else
+                        tmp(11) = tmp(11) & vbCrLf & "[" & Int(i + 1) & "] " & _
+                        "発動率: " & bskill.activebsk(i).kouka_p & "/ " & "上昇率: " & bskill.activebsk(i).kouka_f & "/ 対象: " & bskill.activebsk(i).taisyo
+                    End If
+                Next
+                tmp(12) = "※部隊スキルを全て無視した場合" & vbCrLf & _
+                        "   |- ※期待値: " & Int(skill_exx) & vbCrLf & _
+                        "   |- ※MAX値: " & Int(atksum_maxmax) & vbCrLf & "++++++++++++"
             Else
                 fg = False
                 'bstr = Split("4,5,6", ",")
@@ -1255,15 +1353,18 @@ Public Class Form1
                             If InStr(.heika, "槍弓馬砲器") Then
                                 tmps = "全"
                             End If
-                            tmp(9 + 2 * i) = "[スキル" & i + 1 & "]" & vbCrLf & _
+                            tmp(9 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & _
                                 .name & "LV" & .lv & " /" & .koubou & " /" & tmps
                             tmp(10 + 2 * i) = "発動率: " & .kouka_p & "/ " & "上昇率: " & .kouka_f & vbCrLf & _
-                                "→ ※期待値 " & Math.Ceiling(.exp_kouka_b * 10000) / 10000
+                                "→ ◆期待値 " & Math.Ceiling(.exp_kouka_b * 10000) / 10000
+                            If .up_kouka_p > 0 Then
+                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & " [発動率上昇中 +" & Format(.up_kouka_p * 100, "#0.00") & "%]"
+                            End If
                             If .t_flg Then
                                 tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & "★☆特殊条件スキル☆★"
                             End If
                         Else
-                            tmp(9 + 2 * i) = "[スキル" & i + 1 & "]" & vbCrLf & .name & "LV" & .lv
+                            tmp(9 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & .name & "LV" & .lv
                             tmp(10 + 2 * i) = "***********"
                         End If
                     End With
@@ -1905,7 +2006,7 @@ Public Class Form1
         Call suro(sender, Nothing)
     End Sub
 
-    Public syokiLV As Integer = 5
+    Public syokiLV As Integer = 10
     Public autotou As Boolean = True
     Public sethei As Integer = -1
 

@@ -44,7 +44,7 @@ Partial Class Form1
         Me.Label0004 = New System.Windows.Forms.Label()
         Me.Label0002 = New System.Windows.Forms.Label()
         Me.Label0003 = New System.Windows.Forms.Label()
-        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.GroupBox002 = New System.Windows.Forms.GroupBox()
         Me.CheckBox01 = New System.Windows.Forms.CheckBox()
         Me.Label005 = New System.Windows.Forms.Label()
         Me.Label004 = New System.Windows.Forms.Label()
@@ -91,7 +91,7 @@ Partial Class Form1
         Me.Label1004 = New System.Windows.Forms.Label()
         Me.Label1002 = New System.Windows.Forms.Label()
         Me.Label1003 = New System.Windows.Forms.Label()
-        Me.GroupBox7 = New System.Windows.Forms.GroupBox()
+        Me.GroupBox012 = New System.Windows.Forms.GroupBox()
         Me.CheckBox11 = New System.Windows.Forms.CheckBox()
         Me.Label105 = New System.Windows.Forms.Label()
         Me.Label104 = New System.Windows.Forms.Label()
@@ -142,7 +142,7 @@ Partial Class Form1
         Me.Label2004 = New System.Windows.Forms.Label()
         Me.Label2002 = New System.Windows.Forms.Label()
         Me.Label2003 = New System.Windows.Forms.Label()
-        Me.GroupBox11 = New System.Windows.Forms.GroupBox()
+        Me.GroupBox022 = New System.Windows.Forms.GroupBox()
         Me.CheckBox21 = New System.Windows.Forms.CheckBox()
         Me.Label205 = New System.Windows.Forms.Label()
         Me.Label204 = New System.Windows.Forms.Label()
@@ -193,7 +193,7 @@ Partial Class Form1
         Me.Label3004 = New System.Windows.Forms.Label()
         Me.Label3002 = New System.Windows.Forms.Label()
         Me.Label3003 = New System.Windows.Forms.Label()
-        Me.GroupBox15 = New System.Windows.Forms.GroupBox()
+        Me.GroupBox032 = New System.Windows.Forms.GroupBox()
         Me.CheckBox31 = New System.Windows.Forms.CheckBox()
         Me.Label305 = New System.Windows.Forms.Label()
         Me.Label304 = New System.Windows.Forms.Label()
@@ -252,7 +252,8 @@ Partial Class Form1
         Me.武将シミュToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.武将ランキングToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.条件設定ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator14 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripButton8 = New System.Windows.Forms.ToolStripButton()
         Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.ToolStrip2 = New System.Windows.Forms.ToolStrip()
         Me.ToolStripButton5 = New System.Windows.Forms.ToolStripButton()
@@ -305,19 +306,19 @@ Partial Class Form1
         Me.ToolStripSeparator13 = New System.Windows.Forms.ToolStripSeparator()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
-        Me.GroupBox2.SuspendLayout()
+        Me.GroupBox002.SuspendLayout()
         Me.GroupBox4.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
         Me.GroupBox6.SuspendLayout()
-        Me.GroupBox7.SuspendLayout()
+        Me.GroupBox012.SuspendLayout()
         Me.GroupBox8.SuspendLayout()
         Me.GroupBox9.SuspendLayout()
         Me.GroupBox10.SuspendLayout()
-        Me.GroupBox11.SuspendLayout()
+        Me.GroupBox022.SuspendLayout()
         Me.GroupBox12.SuspendLayout()
         Me.GroupBox13.SuspendLayout()
         Me.GroupBox14.SuspendLayout()
-        Me.GroupBox15.SuspendLayout()
+        Me.GroupBox032.SuspendLayout()
         Me.GroupBox16.SuspendLayout()
         Me.ToolStrip1.SuspendLayout()
         Me.ToolStrip2.SuspendLayout()
@@ -369,7 +370,7 @@ Partial Class Form1
         Me.GroupBox1.BackColor = System.Drawing.SystemColors.InactiveBorder
         Me.GroupBox1.Controls.Add(Me.Button0001)
         Me.GroupBox1.Controls.Add(Me.GroupBox3)
-        Me.GroupBox1.Controls.Add(Me.GroupBox2)
+        Me.GroupBox1.Controls.Add(Me.GroupBox002)
         Me.GroupBox1.Controls.Add(Me.ComboBox001)
         Me.GroupBox1.Controls.Add(Me.Label4)
         Me.GroupBox1.Controls.Add(Me.TextBox001)
@@ -543,33 +544,33 @@ Partial Class Form1
         Me.Label0003.TabIndex = 8
         Me.Label0003.Text = "初期スキル"
         '
-        'GroupBox2
+        'GroupBox002
         '
-        Me.GroupBox2.Controls.Add(Me.CheckBox01)
-        Me.GroupBox2.Controls.Add(Me.Label005)
-        Me.GroupBox2.Controls.Add(Me.Label004)
-        Me.GroupBox2.Controls.Add(Me.Label003)
-        Me.GroupBox2.Controls.Add(Me.Button3)
-        Me.GroupBox2.Controls.Add(Me.ComboBox013)
-        Me.GroupBox2.Controls.Add(Me.Label22)
-        Me.GroupBox2.Controls.Add(Me.TextBox005)
-        Me.GroupBox2.Controls.Add(Me.TextBox004)
-        Me.GroupBox2.Controls.Add(Me.TextBox003)
-        Me.GroupBox2.Controls.Add(Me.Label15)
-        Me.GroupBox2.Controls.Add(Me.Label14)
-        Me.GroupBox2.Controls.Add(Me.Label13)
-        Me.GroupBox2.Controls.Add(Me.GroupBox4)
-        Me.GroupBox2.Controls.Add(Me.TextBox002)
-        Me.GroupBox2.Controls.Add(Me.ComboBox004)
-        Me.GroupBox2.Controls.Add(Me.Label8)
-        Me.GroupBox2.Controls.Add(Me.Label7)
-        Me.GroupBox2.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox2.Location = New System.Drawing.Point(7, 108)
-        Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(199, 205)
-        Me.GroupBox2.TabIndex = 7
-        Me.GroupBox2.TabStop = False
-        Me.GroupBox2.Text = "ステータス"
+        Me.GroupBox002.Controls.Add(Me.CheckBox01)
+        Me.GroupBox002.Controls.Add(Me.Label005)
+        Me.GroupBox002.Controls.Add(Me.Label004)
+        Me.GroupBox002.Controls.Add(Me.Label003)
+        Me.GroupBox002.Controls.Add(Me.Button3)
+        Me.GroupBox002.Controls.Add(Me.ComboBox013)
+        Me.GroupBox002.Controls.Add(Me.Label22)
+        Me.GroupBox002.Controls.Add(Me.TextBox005)
+        Me.GroupBox002.Controls.Add(Me.TextBox004)
+        Me.GroupBox002.Controls.Add(Me.TextBox003)
+        Me.GroupBox002.Controls.Add(Me.Label15)
+        Me.GroupBox002.Controls.Add(Me.Label14)
+        Me.GroupBox002.Controls.Add(Me.Label13)
+        Me.GroupBox002.Controls.Add(Me.GroupBox4)
+        Me.GroupBox002.Controls.Add(Me.TextBox002)
+        Me.GroupBox002.Controls.Add(Me.ComboBox004)
+        Me.GroupBox002.Controls.Add(Me.Label8)
+        Me.GroupBox002.Controls.Add(Me.Label7)
+        Me.GroupBox002.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.GroupBox002.Location = New System.Drawing.Point(7, 108)
+        Me.GroupBox002.Name = "GroupBox002"
+        Me.GroupBox002.Size = New System.Drawing.Size(199, 205)
+        Me.GroupBox002.TabIndex = 7
+        Me.GroupBox002.TabStop = False
+        Me.GroupBox002.Text = "ステータス"
         '
         'CheckBox01
         '
@@ -865,7 +866,7 @@ Partial Class Form1
         Me.GroupBox5.BackColor = System.Drawing.SystemColors.Control
         Me.GroupBox5.Controls.Add(Me.Button1001)
         Me.GroupBox5.Controls.Add(Me.GroupBox6)
-        Me.GroupBox5.Controls.Add(Me.GroupBox7)
+        Me.GroupBox5.Controls.Add(Me.GroupBox012)
         Me.GroupBox5.Controls.Add(Me.ComboBox101)
         Me.GroupBox5.Controls.Add(Me.Label40)
         Me.GroupBox5.Controls.Add(Me.TextBox101)
@@ -1039,33 +1040,33 @@ Partial Class Form1
         Me.Label1003.TabIndex = 8
         Me.Label1003.Text = "初期スキル"
         '
-        'GroupBox7
+        'GroupBox012
         '
-        Me.GroupBox7.Controls.Add(Me.CheckBox11)
-        Me.GroupBox7.Controls.Add(Me.Label105)
-        Me.GroupBox7.Controls.Add(Me.Label104)
-        Me.GroupBox7.Controls.Add(Me.Label103)
-        Me.GroupBox7.Controls.Add(Me.Button4)
-        Me.GroupBox7.Controls.Add(Me.ComboBox113)
-        Me.GroupBox7.Controls.Add(Me.Label30)
-        Me.GroupBox7.Controls.Add(Me.TextBox105)
-        Me.GroupBox7.Controls.Add(Me.TextBox104)
-        Me.GroupBox7.Controls.Add(Me.TextBox103)
-        Me.GroupBox7.Controls.Add(Me.Label31)
-        Me.GroupBox7.Controls.Add(Me.Label32)
-        Me.GroupBox7.Controls.Add(Me.Label33)
-        Me.GroupBox7.Controls.Add(Me.GroupBox8)
-        Me.GroupBox7.Controls.Add(Me.TextBox102)
-        Me.GroupBox7.Controls.Add(Me.ComboBox104)
-        Me.GroupBox7.Controls.Add(Me.Label38)
-        Me.GroupBox7.Controls.Add(Me.Label39)
-        Me.GroupBox7.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox7.Location = New System.Drawing.Point(7, 108)
-        Me.GroupBox7.Name = "GroupBox7"
-        Me.GroupBox7.Size = New System.Drawing.Size(199, 205)
-        Me.GroupBox7.TabIndex = 7
-        Me.GroupBox7.TabStop = False
-        Me.GroupBox7.Text = "ステータス"
+        Me.GroupBox012.Controls.Add(Me.CheckBox11)
+        Me.GroupBox012.Controls.Add(Me.Label105)
+        Me.GroupBox012.Controls.Add(Me.Label104)
+        Me.GroupBox012.Controls.Add(Me.Label103)
+        Me.GroupBox012.Controls.Add(Me.Button4)
+        Me.GroupBox012.Controls.Add(Me.ComboBox113)
+        Me.GroupBox012.Controls.Add(Me.Label30)
+        Me.GroupBox012.Controls.Add(Me.TextBox105)
+        Me.GroupBox012.Controls.Add(Me.TextBox104)
+        Me.GroupBox012.Controls.Add(Me.TextBox103)
+        Me.GroupBox012.Controls.Add(Me.Label31)
+        Me.GroupBox012.Controls.Add(Me.Label32)
+        Me.GroupBox012.Controls.Add(Me.Label33)
+        Me.GroupBox012.Controls.Add(Me.GroupBox8)
+        Me.GroupBox012.Controls.Add(Me.TextBox102)
+        Me.GroupBox012.Controls.Add(Me.ComboBox104)
+        Me.GroupBox012.Controls.Add(Me.Label38)
+        Me.GroupBox012.Controls.Add(Me.Label39)
+        Me.GroupBox012.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.GroupBox012.Location = New System.Drawing.Point(7, 108)
+        Me.GroupBox012.Name = "GroupBox012"
+        Me.GroupBox012.Size = New System.Drawing.Size(199, 205)
+        Me.GroupBox012.TabIndex = 7
+        Me.GroupBox012.TabStop = False
+        Me.GroupBox012.Text = "ステータス"
         '
         'CheckBox11
         '
@@ -1400,7 +1401,7 @@ Partial Class Form1
         Me.GroupBox9.BackColor = System.Drawing.SystemColors.Control
         Me.GroupBox9.Controls.Add(Me.Button2001)
         Me.GroupBox9.Controls.Add(Me.GroupBox10)
-        Me.GroupBox9.Controls.Add(Me.GroupBox11)
+        Me.GroupBox9.Controls.Add(Me.GroupBox022)
         Me.GroupBox9.Controls.Add(Me.ComboBox201)
         Me.GroupBox9.Controls.Add(Me.Label61)
         Me.GroupBox9.Controls.Add(Me.TextBox201)
@@ -1574,33 +1575,33 @@ Partial Class Form1
         Me.Label2003.TabIndex = 8
         Me.Label2003.Text = "初期スキル"
         '
-        'GroupBox11
+        'GroupBox022
         '
-        Me.GroupBox11.Controls.Add(Me.CheckBox21)
-        Me.GroupBox11.Controls.Add(Me.Label205)
-        Me.GroupBox11.Controls.Add(Me.Label204)
-        Me.GroupBox11.Controls.Add(Me.Label203)
-        Me.GroupBox11.Controls.Add(Me.Button5)
-        Me.GroupBox11.Controls.Add(Me.ComboBox213)
-        Me.GroupBox11.Controls.Add(Me.Label51)
-        Me.GroupBox11.Controls.Add(Me.TextBox205)
-        Me.GroupBox11.Controls.Add(Me.TextBox204)
-        Me.GroupBox11.Controls.Add(Me.TextBox203)
-        Me.GroupBox11.Controls.Add(Me.Label52)
-        Me.GroupBox11.Controls.Add(Me.Label53)
-        Me.GroupBox11.Controls.Add(Me.Label54)
-        Me.GroupBox11.Controls.Add(Me.GroupBox12)
-        Me.GroupBox11.Controls.Add(Me.TextBox202)
-        Me.GroupBox11.Controls.Add(Me.ComboBox204)
-        Me.GroupBox11.Controls.Add(Me.Label59)
-        Me.GroupBox11.Controls.Add(Me.Label60)
-        Me.GroupBox11.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox11.Location = New System.Drawing.Point(7, 108)
-        Me.GroupBox11.Name = "GroupBox11"
-        Me.GroupBox11.Size = New System.Drawing.Size(199, 205)
-        Me.GroupBox11.TabIndex = 7
-        Me.GroupBox11.TabStop = False
-        Me.GroupBox11.Text = "ステータス"
+        Me.GroupBox022.Controls.Add(Me.CheckBox21)
+        Me.GroupBox022.Controls.Add(Me.Label205)
+        Me.GroupBox022.Controls.Add(Me.Label204)
+        Me.GroupBox022.Controls.Add(Me.Label203)
+        Me.GroupBox022.Controls.Add(Me.Button5)
+        Me.GroupBox022.Controls.Add(Me.ComboBox213)
+        Me.GroupBox022.Controls.Add(Me.Label51)
+        Me.GroupBox022.Controls.Add(Me.TextBox205)
+        Me.GroupBox022.Controls.Add(Me.TextBox204)
+        Me.GroupBox022.Controls.Add(Me.TextBox203)
+        Me.GroupBox022.Controls.Add(Me.Label52)
+        Me.GroupBox022.Controls.Add(Me.Label53)
+        Me.GroupBox022.Controls.Add(Me.Label54)
+        Me.GroupBox022.Controls.Add(Me.GroupBox12)
+        Me.GroupBox022.Controls.Add(Me.TextBox202)
+        Me.GroupBox022.Controls.Add(Me.ComboBox204)
+        Me.GroupBox022.Controls.Add(Me.Label59)
+        Me.GroupBox022.Controls.Add(Me.Label60)
+        Me.GroupBox022.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.GroupBox022.Location = New System.Drawing.Point(7, 108)
+        Me.GroupBox022.Name = "GroupBox022"
+        Me.GroupBox022.Size = New System.Drawing.Size(199, 205)
+        Me.GroupBox022.TabIndex = 7
+        Me.GroupBox022.TabStop = False
+        Me.GroupBox022.Text = "ステータス"
         '
         'CheckBox21
         '
@@ -1935,7 +1936,7 @@ Partial Class Form1
         Me.GroupBox13.BackColor = System.Drawing.SystemColors.Control
         Me.GroupBox13.Controls.Add(Me.Button3001)
         Me.GroupBox13.Controls.Add(Me.GroupBox14)
-        Me.GroupBox13.Controls.Add(Me.GroupBox15)
+        Me.GroupBox13.Controls.Add(Me.GroupBox032)
         Me.GroupBox13.Controls.Add(Me.ComboBox301)
         Me.GroupBox13.Controls.Add(Me.Label84)
         Me.GroupBox13.Controls.Add(Me.TextBox301)
@@ -2109,33 +2110,33 @@ Partial Class Form1
         Me.Label3003.TabIndex = 8
         Me.Label3003.Text = "初期スキル"
         '
-        'GroupBox15
+        'GroupBox032
         '
-        Me.GroupBox15.Controls.Add(Me.CheckBox31)
-        Me.GroupBox15.Controls.Add(Me.Label305)
-        Me.GroupBox15.Controls.Add(Me.Label304)
-        Me.GroupBox15.Controls.Add(Me.Label303)
-        Me.GroupBox15.Controls.Add(Me.Button6)
-        Me.GroupBox15.Controls.Add(Me.ComboBox313)
-        Me.GroupBox15.Controls.Add(Me.Label72)
-        Me.GroupBox15.Controls.Add(Me.TextBox305)
-        Me.GroupBox15.Controls.Add(Me.TextBox304)
-        Me.GroupBox15.Controls.Add(Me.TextBox303)
-        Me.GroupBox15.Controls.Add(Me.Label73)
-        Me.GroupBox15.Controls.Add(Me.Label74)
-        Me.GroupBox15.Controls.Add(Me.Label75)
-        Me.GroupBox15.Controls.Add(Me.GroupBox16)
-        Me.GroupBox15.Controls.Add(Me.TextBox302)
-        Me.GroupBox15.Controls.Add(Me.ComboBox304)
-        Me.GroupBox15.Controls.Add(Me.Label80)
-        Me.GroupBox15.Controls.Add(Me.Label81)
-        Me.GroupBox15.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox15.Location = New System.Drawing.Point(7, 108)
-        Me.GroupBox15.Name = "GroupBox15"
-        Me.GroupBox15.Size = New System.Drawing.Size(199, 205)
-        Me.GroupBox15.TabIndex = 7
-        Me.GroupBox15.TabStop = False
-        Me.GroupBox15.Text = "ステータス"
+        Me.GroupBox032.Controls.Add(Me.CheckBox31)
+        Me.GroupBox032.Controls.Add(Me.Label305)
+        Me.GroupBox032.Controls.Add(Me.Label304)
+        Me.GroupBox032.Controls.Add(Me.Label303)
+        Me.GroupBox032.Controls.Add(Me.Button6)
+        Me.GroupBox032.Controls.Add(Me.ComboBox313)
+        Me.GroupBox032.Controls.Add(Me.Label72)
+        Me.GroupBox032.Controls.Add(Me.TextBox305)
+        Me.GroupBox032.Controls.Add(Me.TextBox304)
+        Me.GroupBox032.Controls.Add(Me.TextBox303)
+        Me.GroupBox032.Controls.Add(Me.Label73)
+        Me.GroupBox032.Controls.Add(Me.Label74)
+        Me.GroupBox032.Controls.Add(Me.Label75)
+        Me.GroupBox032.Controls.Add(Me.GroupBox16)
+        Me.GroupBox032.Controls.Add(Me.TextBox302)
+        Me.GroupBox032.Controls.Add(Me.ComboBox304)
+        Me.GroupBox032.Controls.Add(Me.Label80)
+        Me.GroupBox032.Controls.Add(Me.Label81)
+        Me.GroupBox032.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.GroupBox032.Location = New System.Drawing.Point(7, 108)
+        Me.GroupBox032.Name = "GroupBox032"
+        Me.GroupBox032.Size = New System.Drawing.Size(199, 205)
+        Me.GroupBox032.TabIndex = 7
+        Me.GroupBox032.TabStop = False
+        Me.GroupBox032.Text = "ステータス"
         '
         'CheckBox31
         '
@@ -2469,7 +2470,7 @@ Partial Class Form1
         '
         Me.ToolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
         Me.ToolStrip1.ImageScalingSize = New System.Drawing.Size(32, 32)
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton1, Me.ToolStripButton2, Me.ToolStripSeparator1, Me.ToolStripLabel1, Me.ToolStripComboBox1, Me.ToolStripLabel2, Me.ToolStripComboBox2, Me.ToolStripSeparator2, Me.ToolStripButton3, Me.ToolStripSeparator3, Me.ToolStripButton4, Me.ToolStripSeparator4, Me.ToolStripSplitButton1, Me.ToolStripDropDownButton1, Me.ToolStripLabel3})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton1, Me.ToolStripButton2, Me.ToolStripSeparator1, Me.ToolStripLabel1, Me.ToolStripComboBox1, Me.ToolStripLabel2, Me.ToolStripComboBox2, Me.ToolStripSeparator2, Me.ToolStripButton3, Me.ToolStripSeparator3, Me.ToolStripButton4, Me.ToolStripSeparator4, Me.ToolStripSplitButton1, Me.ToolStripDropDownButton1, Me.ToolStripSeparator14, Me.ToolStripButton8})
         Me.ToolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Name = "ToolStrip1"
@@ -2632,12 +2633,19 @@ Partial Class Form1
         Me.条件設定ToolStripMenuItem.Text = "【条件設定】"
         Me.条件設定ToolStripMenuItem.Visible = False
         '
-        'ToolStripLabel3
+        'ToolStripSeparator14
         '
-        Me.ToolStripLabel3.Name = "ToolStripLabel3"
-        Me.ToolStripLabel3.Size = New System.Drawing.Size(101, 36)
-        Me.ToolStripLabel3.Text = "速度: ------------"
-        Me.ToolStripLabel3.Visible = False
+        Me.ToolStripSeparator14.Name = "ToolStripSeparator14"
+        Me.ToolStripSeparator14.Size = New System.Drawing.Size(6, 39)
+        '
+        'ToolStripButton8
+        '
+        Me.ToolStripButton8.Image = CType(resources.GetObject("ToolStripButton8.Image"), System.Drawing.Image)
+        Me.ToolStripButton8.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton8.Name = "ToolStripButton8"
+        Me.ToolStripButton8.Size = New System.Drawing.Size(116, 36)
+        Me.ToolStripButton8.Text = "データベース"
+        Me.ToolStripButton8.Visible = False
         '
         'ContextMenuStrip1
         '
@@ -2705,7 +2713,7 @@ Partial Class Form1
         Me.初期スキルLVToolStripMenuItem.Name = "初期スキルLVToolStripMenuItem"
         Me.初期スキルLVToolStripMenuItem.Size = New System.Drawing.Size(176, 22)
         Me.初期スキルLVToolStripMenuItem.Tag = "5"
-        Me.初期スキルLVToolStripMenuItem.Text = "初期スキルLV(5)"
+        Me.初期スキルLVToolStripMenuItem.Text = "初期スキルLV(10)"
         '
         'ToolStripMenuItem2
         '
@@ -2844,7 +2852,7 @@ Partial Class Form1
         Me.ToolStripComboBox8.Items.AddRange(New Object() {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"})
         Me.ToolStripComboBox8.Name = "ToolStripComboBox8"
         Me.ToolStripComboBox8.Size = New System.Drawing.Size(40, 26)
-        Me.ToolStripComboBox8.Text = "5"
+        Me.ToolStripComboBox8.Text = "10"
         '
         'ToolStripSplitButton2
         '
@@ -2988,37 +2996,37 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer2.82"
+        Me.Text = "部隊シミュレータVer2.84"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
-        Me.GroupBox2.ResumeLayout(False)
-        Me.GroupBox2.PerformLayout()
+        Me.GroupBox002.ResumeLayout(False)
+        Me.GroupBox002.PerformLayout()
         Me.GroupBox4.ResumeLayout(False)
         Me.GroupBox4.PerformLayout()
         Me.GroupBox5.ResumeLayout(False)
         Me.GroupBox5.PerformLayout()
         Me.GroupBox6.ResumeLayout(False)
         Me.GroupBox6.PerformLayout()
-        Me.GroupBox7.ResumeLayout(False)
-        Me.GroupBox7.PerformLayout()
+        Me.GroupBox012.ResumeLayout(False)
+        Me.GroupBox012.PerformLayout()
         Me.GroupBox8.ResumeLayout(False)
         Me.GroupBox8.PerformLayout()
         Me.GroupBox9.ResumeLayout(False)
         Me.GroupBox9.PerformLayout()
         Me.GroupBox10.ResumeLayout(False)
         Me.GroupBox10.PerformLayout()
-        Me.GroupBox11.ResumeLayout(False)
-        Me.GroupBox11.PerformLayout()
+        Me.GroupBox022.ResumeLayout(False)
+        Me.GroupBox022.PerformLayout()
         Me.GroupBox12.ResumeLayout(False)
         Me.GroupBox12.PerformLayout()
         Me.GroupBox13.ResumeLayout(False)
         Me.GroupBox13.PerformLayout()
         Me.GroupBox14.ResumeLayout(False)
         Me.GroupBox14.PerformLayout()
-        Me.GroupBox15.ResumeLayout(False)
-        Me.GroupBox15.PerformLayout()
+        Me.GroupBox032.ResumeLayout(False)
+        Me.GroupBox032.PerformLayout()
         Me.GroupBox16.ResumeLayout(False)
         Me.GroupBox16.PerformLayout()
         Me.ToolStrip1.ResumeLayout(False)
@@ -3039,7 +3047,7 @@ Partial Class Form1
     Friend WithEvents GroupBox1 As System.Windows.Forms.GroupBox
     Friend WithEvents ComboBox003 As System.Windows.Forms.ComboBox
     Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
+    Friend WithEvents GroupBox002 As System.Windows.Forms.GroupBox
     Friend WithEvents GroupBox3 As System.Windows.Forms.GroupBox
     Friend WithEvents Label0005 As System.Windows.Forms.Label
     Friend WithEvents Label0004 As System.Windows.Forms.Label
@@ -3075,7 +3083,7 @@ Partial Class Form1
     Friend WithEvents ComboBox013 As System.Windows.Forms.ComboBox
     Friend WithEvents Label22 As System.Windows.Forms.Label
     Friend WithEvents GroupBox5 As System.Windows.Forms.GroupBox
-    Friend WithEvents GroupBox7 As System.Windows.Forms.GroupBox
+    Friend WithEvents GroupBox012 As System.Windows.Forms.GroupBox
     Friend WithEvents ComboBox113 As System.Windows.Forms.ComboBox
     Friend WithEvents Label30 As System.Windows.Forms.Label
     Friend WithEvents TextBox105 As System.Windows.Forms.TextBox
@@ -3106,7 +3114,7 @@ Partial Class Form1
     Friend WithEvents ComboBox103 As System.Windows.Forms.ComboBox
     Friend WithEvents Label43 As System.Windows.Forms.Label
     Friend WithEvents GroupBox9 As System.Windows.Forms.GroupBox
-    Friend WithEvents GroupBox11 As System.Windows.Forms.GroupBox
+    Friend WithEvents GroupBox022 As System.Windows.Forms.GroupBox
     Friend WithEvents ComboBox213 As System.Windows.Forms.ComboBox
     Friend WithEvents Label51 As System.Windows.Forms.Label
     Friend WithEvents TextBox205 As System.Windows.Forms.TextBox
@@ -3137,7 +3145,7 @@ Partial Class Form1
     Friend WithEvents ComboBox203 As System.Windows.Forms.ComboBox
     Friend WithEvents Label64 As System.Windows.Forms.Label
     Friend WithEvents GroupBox13 As System.Windows.Forms.GroupBox
-    Friend WithEvents GroupBox15 As System.Windows.Forms.GroupBox
+    Friend WithEvents GroupBox032 As System.Windows.Forms.GroupBox
     Friend WithEvents ComboBox313 As System.Windows.Forms.ComboBox
     Friend WithEvents Label72 As System.Windows.Forms.Label
     Friend WithEvents TextBox305 As System.Windows.Forms.TextBox
@@ -3235,7 +3243,6 @@ Partial Class Form1
     Friend WithEvents ToolStripSplitButton1 As System.Windows.Forms.ToolStripSplitButton
     Friend WithEvents 保存部隊を開くToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents 名前を付けて現在の部隊を保存ToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents ToolStripLabel3 As System.Windows.Forms.ToolStripLabel
     Friend WithEvents ContextMenuStrip1 As System.Windows.Forms.ContextMenuStrip
     Friend WithEvents 追加合成シミュToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents スキル期待値シミュToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
@@ -3311,4 +3318,6 @@ Partial Class Form1
     Friend WithEvents ToolStripSeparator12 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripButton7 As System.Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripSeparator13 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents ToolStripSeparator14 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents ToolStripButton8 As System.Windows.Forms.ToolStripButton
 End Class
