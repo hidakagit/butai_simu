@@ -8,6 +8,7 @@
         'TrackBar1.Value = 8 '初期位置8
         'Form1.Hide()
         Me.TopMost = True
+        ComboBox1.SelectedIndex = 0
     End Sub
 
     'Private Sub Form3_Closing(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.FormClosing
@@ -78,12 +79,20 @@
                     .skill_name(j) = Mid(ttmp, 1, InStr(ttmp, "LV") - 1)
                     .skill_lv(j) = Val(Mid(ttmp, InStr(ttmp, "LV") + 2))
                 Next
-                Dim ntmp As String = GetINIValue(syokisk, Replace(Replace(tmp(0), "名", ""), "レア", "・"), bnpath)
-                If Not ntmp = "－" Then
-                    .name = ntmp
-                Else
-                    .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
-                End If
+                'Dim ntmp As String = GetINIValue(syokisk, Replace(Replace(tmp(0), "名", ""), "レア", "・"), bnpath)
+                .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
+                Dim repstr As String = "replace(replace(初期スキル名, " & """ "" , """"), " & """　"" , """") = "
+                'Dim repstr As String = "replace(初期スキル名, " & """ "" , """") = "
+                Dim s() As String = DB_DirectOUT("SELECT 武将名, 初期スキル名 FROM BData WHERE 武将R = " _
+                                & ダブルクオート(.rare) & " AND 武将名 LIKE """ & .name & "%""" & " AND " & repstr & ダブルクオート(TrimJ(.skill_name(0))), _
+                                {"武将名", "初期スキル名"})
+                .name = s(0)
+                .skill_name(0) = s(1)
+                'If Not ntmp = "－" Then
+                '    .name = ntmp
+                'Else
+                '    .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
+                'End If
             Catch ex As Exception
                 'Me.Focus()
                 'MsgBox("データの読み込みが正常に行われなかった可能性があります")
@@ -186,8 +195,9 @@
         With bs(selectbs)
             .rare = bd.rare
             .name = bd.name
-            ComboBox(Form1, CStr(selectbs) & "01").SelectedText = bd.rare '（強制的に）R選択
-            Form1.R選択(ComboBox(Form1, CStr(selectbs) & "01"), Nothing)
+            '.SelectedIndex = ComboBox(Me, CStr(i) & "01").FindString(.rare)
+            ComboBox(Form1, CStr(selectbs) & "01").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "01").FindString(bd.rare) '（強制的に）R選択
+            'Form1.R選択(ComboBox(Form1, CStr(selectbs) & "01"), Nothing)
             ComboBox(Form1, CStr(selectbs) & "02").SelectedText = .name '（強制的に）武将名選択
             Form1.武将名選択(ComboBox(Form1, CStr(selectbs) & "02"), Nothing)
             .heisyu.name = bd.heisyu_name
@@ -225,14 +235,14 @@
                     Select Case j
                         Case 1 'スロ2
                             ComboBox(Form1, CStr(selectbs) & "09").Focus()
-                            ComboBox(Form1, CStr(selectbs) & "09").SelectedText = .skill(j).kanren
+                            ComboBox(Form1, CStr(selectbs) & "09").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "09").FindString(.skill(j).kanren)
                             ComboBox(Form1, CStr(selectbs) & "11").SelectedText = .skill(j).name
                             Form1.スキル名入力(ComboBox(Form1, CStr(selectbs) & "11"), Nothing)
                             ComboBox(Form1, CStr(selectbs) & "15").Text = .skill(j).lv
                             Form1.追加スキル追加(ComboBox(Form1, CStr(selectbs) & "15"), Nothing)
                         Case 2 'スロ3
                             ComboBox(Form1, CStr(selectbs) & "10").Focus()
-                            ComboBox(Form1, CStr(selectbs) & "10").SelectedText = .skill(j).kanren
+                            ComboBox(Form1, CStr(selectbs) & "10").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "10").FindString(.skill(j).kanren)
                             ComboBox(Form1, CStr(selectbs) & "12").SelectedText = .skill(j).name
                             Form1.スキル名入力(ComboBox(Form1, CStr(selectbs) & "12"), Nothing)
                             ComboBox(Form1, CStr(selectbs) & "16").Text = .skill(j).lv

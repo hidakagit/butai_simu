@@ -79,11 +79,15 @@
             Case "10"
                 c = ComboBox(Me, String_onlyNumber(sender.name).Substring(0, 1) & "12")
         End Select
-        p = DB_TableOUT(con, cmd, "SELECT Index,分類,名前,LV FROM Skill WHERE 分類 = """ & sender.text & """ AND LV = 1 ORDER BY Index", "Skill")
+        Dim sqlwhere As String = ダブルクオート(sender.text)
+        If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
+            sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
+        End If
+        p = DB_TableOUT("SELECT Sw, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY Sw", "SName")
         With c
-            .ValueMember = "Index"
-            .DisplayMember = "名前"
-            .DataSource = p.Tables("Skill")
+            .ValueMember = "Sw"
+            .DisplayMember = "スキル名"
+            .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
     End Sub

@@ -21,7 +21,7 @@ Public Class Form1
             Dim TopPosition As Integer = Me.Top + 12 ' フォームの上端位置指定
             Me.Location = New Point(LeftPosition, TopPosition)
         End If
-        Call DB_Open(con, cmd, dbpath)
+        Call DB_Open()
         ReDim ss(busho_counter - 1)
         '一括入力設定時の兵科紐づけ
         For i As Integer = 0 To ToolStripComboBox3.Items.Count - 1
@@ -29,12 +29,24 @@ Public Class Form1
         Next
 
         '特殊スキルリストを読み込み
-        Dim sr As New System.IO.StreamReader(espath)
-        Dim srbuff As String = sr.ReadToEnd()
-        sr.Close()
-        error_skill = Split(srbuff, vbCrLf)
+        'Dim sr As New System.IO.StreamReader(espath)
+        'Dim srbuff As String = sr.ReadToEnd()
+        'sr.Close()
+        'error_skill = Split(srbuff, vbCrLf)
         'フラグ付きスキル情報を読み込み
         Call フラグ付きスキル読み込み()
+
+        'ApplicationExitイベントハンドラを追加
+        AddHandler Application.ApplicationExit, AddressOf Application_ApplicationExit
+    End Sub
+
+    'ApplicationExitイベントハンドラ
+    Private Sub Application_ApplicationExit(ByVal sender As Object, ByVal e As EventArgs)
+        Command.Dispose()
+        Connection.Close()
+        Connection.Dispose()
+        'ApplicationExitイベントハンドラを削除
+        RemoveHandler Application.ApplicationExit, AddressOf Application_ApplicationExit
     End Sub
 
     Private Sub 攻撃防衛部隊スイッチ(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripComboBox1.SelectedIndexChanged
@@ -158,10 +170,10 @@ Public Class Form1
 
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
         Dim p As DataSet
-        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """ ORDER BY Index ASC", "Busho")
-        cc.DisplayMember = "名称"
-        cc.ValueMember = "Index"
-        cc.DataSource = p.Tables("Busho")
+        p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " AND Bunf = 'F' ORDER BY id ASC", "BData")
+        cc.DisplayMember = "武将名"
+        cc.ValueMember = "id"
+        cc.DataSource = p.Tables("BData")
         cc.SelectedIndex = -1
         AddHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
     End Sub
@@ -175,12 +187,11 @@ Public Class Form1
 
         武将データ消去(bc)
         bs(bc).武将設定初期化()
-
         Dim r() As String = _
-            {"No", "R", "C", "指揮兵", "槍", "弓", "馬", "器", "攻撃", "防御", "兵法", "攻成長", "防成長", "兵成長", "スキル", "職"}
+            {"Bid", "武将R", "Cost", "指揮兵数", "槍統率", "弓統率", "馬統率", "器統率", "初期攻撃", "初期防御", "初期兵法", "攻成長", "防成長", "兵成長", "初期スキル名", "職"}
         Dim s() As String = _
-        DB_DirectOUT(con, cmd, "SELECT * FROM Busho WHERE R = """ & ComboBox(Me, CStr(bc) & "01").Text & _
-                     """ AND 名称=""" & sender.Text & """", r)
+        DB_DirectOUT("SELECT * FROM BData WHERE 武将R = " & ダブルクオート(ComboBox(Me, CStr(bc) & "01").SelectedItem) & _
+                     " AND 武将名 = " & ダブルクオート(sender.Text) & " AND Bunf = 'F'", r)
         'ここから武将初期化
         With bs(bc)
             .No = bc
@@ -195,9 +206,11 @@ Public Class Form1
             .Sta(False) = {s(8), s(9), s(10)}
             ReDim .sta_g(2)
             .sta_g = {s(11), s(12), s(13)}
-            .skill(0).name = Replace(s(14), Mid(s(14), 1, InStr(s(14), "：")), "")
+            .skill(0).name = s(14)
             .job = s(15)
-            .スキル取得(0, .skill(0).name, .skill(0).lv, {0})
+            Dim sklerror As String = Nothing
+            .スキル取得(0, .skill(0).name, .skill(0).lv, {0}, sklerror)
+            If Not sklerror Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & sklerror
             .情報入力(bc, False)
         End With
         ss(bc) = {0}
@@ -210,6 +223,7 @@ Public Class Form1
         Next
         ToolTip1.RemoveAll()
         ToolStripLabel6.Text = "---------"
+        ToolStripLabel3.Text = "----------"
     End Sub
 
     Public Sub ステ振り設定(ByVal sender As System.Object, ByVal e As System.EventArgs) _
@@ -274,11 +288,15 @@ Public Class Form1
             s = ComboBox(Me, CStr(bc) & "10").Text
             cc = ComboBox(Me, CStr(bc) & "12")
         End If
-        p = DB_TableOUT(con, cmd, "SELECT Index,分類,名前,LV FROM Skill WHERE 分類 = """ & s & """ AND LV = 1 ORDER BY Index", "Skill")
+        Dim sqlwhere As String = ダブルクオート(s)
+        If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
+            sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
+        End If
+        p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         With sender
-            .ValueMember = "Index"
-            .DisplayMember = "名前"
-            .DataSource = p.Tables("Skill")
+            .ValueMember = "id"
+            .DisplayMember = "スキル名"
+            .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
     End Sub
@@ -292,6 +310,7 @@ Public Class Form1
         If ComboBox(Me, CStr(bc) & "02").Text = "" Then '武将指定していない場合はそちらを先に
             Exit Sub
         End If
+
         'スキル数を数える
         If ComboBox(Me, CStr(bc) & "15").Enabled = False Or ComboBox(Me, CStr(bc) & "11").Text = Nothing Then
             If ComboBox(Me, CStr(bc) & "16").Enabled = False Or ComboBox(Me, CStr(bc) & "12").Text = Nothing Then
@@ -315,20 +334,22 @@ Public Class Form1
             Exit Sub
         End If
 
+        Dim sklerror As String = Nothing
         Select Case CInt(Mid(CStr(sender.Name), 10, 2))
             Case 14 '初期スキルに関する変更
-                bs(bc).スキル取得(0, Label(Me, CStr(bc) & "002").Text, CInt(sender.text), ss(bc))
+                bs(bc).スキル取得(0, Label(Me, CStr(bc) & "002").Text, CInt(sender.text), ss(bc), sklerror)
             Case 15 'スロ2に関する変更
-                bs(bc).スキル取得(1, ComboBox(Me, CStr(bc) & "11").Text, CInt(sender.text), ss(bc))
+                bs(bc).スキル取得(1, ComboBox(Me, CStr(bc) & "11").Text, CInt(sender.text), ss(bc), sklerror)
                 If bs(bc).skill.Length - 1 >= 1 Then
                     bs(bc).skill(1).kanren = ComboBox(Me, CStr(bc) & "09").Text
                 End If
             Case 16 'スロ3に関する変更
-                bs(bc).スキル取得(2, ComboBox(Me, CStr(bc) & "12").Text, CInt(sender.text), ss(bc))
+                bs(bc).スキル取得(2, ComboBox(Me, CStr(bc) & "12").Text, CInt(sender.text), ss(bc), sklerror)
                 If bs(bc).skill.Length - 1 >= 2 Then
                     bs(bc).skill(2).kanren = ComboBox(Me, CStr(bc) & "10").Text
                 End If
         End Select
+        If Not sklerror Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & sklerror
     End Sub
 
     Public Sub スキルレベル一括変更(ByVal sender As Object, ByVal e As MouseEventArgs) _
@@ -817,8 +838,8 @@ Public Class Form1
         With bsd
             'この2つは面倒なので入力→更新する
             '----------
-            ComboBox(Me, CStr(bno) & "01").SelectedText = .rare '（強制的に）R選択
-            R選択(ComboBox(Me, CStr(bno) & "01"), Nothing)
+            ComboBox(Me, CStr(bno) & "01").SelectedText = ComboBox(Me, CStr(bno) & "01").FindString(.rare) '（強制的に）R選択
+            'R選択(ComboBox(Me, CStr(bno) & "01"), Nothing)
             ComboBox(Me, CStr(bno) & "02").Text = .name '（強制的に）武将名選択
             武将名選択(ComboBox(Me, CStr(bno) & "02"), Nothing)
             For i As Integer = 1 To .skill_no - 1
@@ -826,11 +847,11 @@ Public Class Form1
                     Select Case i
                         Case 1 'スロ2
                             ComboBox(Me, CStr(bno) & "09").Focus()
-                            ComboBox(Me, CStr(bno) & "09").SelectedText = .skill(i).kanren
+                            ComboBox(Me, CStr(bno) & "09").SelectedIndex = ComboBox(Me, CStr(bno) & "09").FindString(.skill(i).kanren)
                             ComboBox(Me, CStr(bno) & "11").Text = .skill(i).name
                         Case 2 'スロ3
                             ComboBox(Me, CStr(bno) & "10").Focus()
-                            ComboBox(Me, CStr(bno) & "10").SelectedText = .skill(i).kanren
+                            ComboBox(Me, CStr(bno) & "10").SelectedIndex = ComboBox(Me, CStr(bno) & "10").FindString(.skill(i).kanren)
                             ComboBox(Me, CStr(bno) & "12").Text = .skill(i).name
                     End Select
                 End If
@@ -872,10 +893,8 @@ Public Class Form1
 
     'can_skill, can_skillp生成
     Private Sub 発動スキル候補決定()
-
         can_skill = Nothing '初期化
         can_skillp = Nothing
-
         Dim c As Integer = 0 'カウンター
         '全有効スキル数カウント
         For i As Integer = 0 To busho_counter - 1
@@ -908,30 +927,40 @@ Public Class Form1
         Next
     End Sub
 
-    Private Function スキル実質上昇率(ByVal sk As Busho.skl) As Decimal(,) 'そのスキルが発動することによりプラスされる上昇率
+    Public Function スキル実質上昇率(ByVal sk As Busho.skl) As Decimal(,) 'そのスキルが発動することによりプラスされる上昇率
         '二次元配列が戻り値になる。(x,0)->将スキル, (x,1)->一般スキル
         Dim tmpatk(,) As Decimal
-        ReDim tmpatk(busho_counter - 1, 1)
+        Dim refbs() As Busho = Nothing
+        Dim refbsc As Integer = 0
+
+        If simu_execno = 0 Then
+            refbs = bs.Clone
+            refbsc = busho_counter
+        ElseIf simu_execno = 1 Then
+            refbs = Form10.simu_bs.Clone
+            refbsc = 4
+        End If
+        ReDim tmpatk(refbsc - 1, 1)
 
         With sk
-            For i As Integer = 0 To busho_counter - 1
-                If InStr(.heika, bs(i).heisyu.bunrui) Or InStr(.heika, "将") Then '兵科が合致するか
-                    '（攻防一致、特殊スキル排除、通常スキル確認は発動スキル候補決定の段階で除外）
+            For i As Integer = 0 To refbsc - 1
+                If (InStr(.heika, refbs(i).heisyu.bunrui) Or InStr(.heika, "将")) And 条件付スキル適用チェック(refbs(i), sk) Then '兵科が合致するか＋条件付チェック
+                    '（攻防一致、特殊スキル排除、通常スキル確認は発動スキル候補決定の段階で除外
                     If InStr(.heika, "将") Then '将スキルかどうか
                         tmpatk(i, 0) = .kouka_f
                     Else
                         tmpatk(i, 1) = .kouka_f
                     End If
                 ElseIf InStr(kb, "攻") And InStr(.koubou, "上級器") Then '上級器スキルならば
-                    If bs(i).heisyu.jyk_utuwa Then '上級器に含まれる兵科を積んでいれば（今は『上級器攻』のみ）
+                    If refbs(i).heisyu.jyk_utuwa Then '上級器に含まれる兵科を積んでいれば（今は『上級器攻』のみ）
                         tmpatk(i, 1) = .kouka_f
                     End If
                 ElseIf InStr(kb, "防") And InStr(.koubou, "上級砲") Then '上級砲スキルならば
-                    If bs(i).heisyu.jyk_hou Then '上級砲に含まれる兵科を積んでいれば（今は『上級砲防』のみ）
+                    If refbs(i).heisyu.jyk_hou Then '上級砲に含まれる兵科を積んでいれば（今は『上級砲防』のみ）
                         tmpatk(i, 1) = .kouka_f
                     End If
                 ElseIf InStr(kb, "攻") And InStr(.koubou, "秘境兵") Then '秘境兵スキルならば
-                    If bs(i).heisyu.tok_hikyo Then '秘境兵に含まれる兵科を積んでいれば（今は『秘境兵攻』のみ）
+                    If refbs(i).heisyu.tok_hikyo Then '秘境兵に含まれる兵科を積んでいれば（今は『秘境兵攻』のみ）
                         tmpatk(i, 1) = .kouka_f
                     End If
                 End If
@@ -1033,7 +1062,15 @@ Public Class Form1
 
         '童関係
         Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
-        Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+        'Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+        Dim warr() As Decimal = warabe.warabe_gets(kb)
+        Dim wflg As Boolean = False
+        For i As Integer = 0 To warr.Length - 1
+            If Not (warr(i) = 0) Then
+                wflg = True
+                Exit For
+            End If
+        Next
 
         'スキル状態計算
         For i As Integer = 0 To can_skillp.Length - 1
@@ -1050,9 +1087,9 @@ Public Class Form1
             '***** DUMMY *****
             If can_skill Is Nothing Then '特殊スキルしかない等でそもそも有効状態が存在しない場合
                 If bskillcount = 0 Or bskill.flg = False Then 'かつ部隊スキルも有効でない
-                    Exit For
+                    If Not (wflg) Then Exit For 'さらに童も有効でない
                 End If
-                '部隊スキルのみ有効な場合、無意味なダミースキルを一つ作ってエラー回避
+                '部隊スキルのみ、童のみ有効な場合、無意味なダミースキルを一つ作ってエラー回避
                 ReDim can_skill(0)
                 With can_skill(0)
                     If InStr(kb, "攻") Then
@@ -1094,9 +1131,8 @@ Public Class Form1
                     'skill_syo(i, k) = ds * .heisyu.ts * (1 + syoplus(k)) * (1 + heiplus(k))
                     '童適用(今のところ単科防スキルのみ対応)
                     For l As Integer = 0 To harr.Length - 1
-                        If InStr(.heisyu.bunrui, harr(l)) And InStr(kb, "防") Then
+                        If InStr(.heisyu.bunrui, harr(l)) Then
                             skill_y(i, k) = skill_y(i, k) * (1 + 0.01 * warr(l))
-                            Exit For
                         End If
                     Next
                 End With
@@ -1105,7 +1141,7 @@ Public Class Form1
 
         '部隊スキルは、「全」しかない事を前提にしている。後々各兵科別に適用・未適用を考えないといけない場合は改良必要
         '↑「全」以外のものにも対応 InStr(.heika, bs(i).heisyu.bunrui) Or InStr(.heika, "将") Then '兵科が合致するか
-        If bskill.flg = True Then '部隊スキルが有効
+        If bskill.flg And bskillcount > 0 Then '部隊スキルが有効ならば
             ReDim skill_xx(can_skillp.Length - 1), skill_yy(can_skillp.Length - 1, busho_counter - 1)
             skill_xx = skill_x.Clone
             skill_yy = skill_y.Clone
@@ -1325,8 +1361,8 @@ Public Class Form1
                 tmp(4) = tmp(4) & vbCrLf & "      |- コス1あたり -> " & Int(Atksum / Costsum)
                 tmp(5) = tmp(5) & vbCrLf & "      |- コス1あたり -> " & Int(skill_exk / Costsum)
                 tmp(6) = tmp(6) & vbCrLf & "      |- コス1あたり -> " & Int(atksum_max / Costsum)
-                tmp(9) = "童効果: " + 童効果文字列出力()
             End If
+            tmp(9) = "童効果: " + 童効果文字列出力(kb)
         Else
             bstr = Split("0", ",")
             With bs(bn - 1)
@@ -1422,8 +1458,8 @@ Public Class Form1
                 .rare = GetINIValue("rare", bsho, bini)
                 .name = GetINIValue("name", bsho, bini)
 
-                ComboBox(Me, CStr(i) & "01").SelectedText = .rare '（強制的に）R選択
-                R選択(ComboBox(Me, CStr(i) & "01"), Nothing)
+                ComboBox(Me, CStr(i) & "01").SelectedIndex = ComboBox(Me, CStr(i) & "01").FindString(.rare) '（強制的に）R選択
+                'R選択(ComboBox(Me, CStr(i) & "01"), Nothing)
                 ComboBox(Me, CStr(i) & "02").SelectedText = .name '（強制的に）武将名選択
                 武将名選択(ComboBox(Me, CStr(i) & "02"), Nothing)
 
@@ -1465,14 +1501,14 @@ Public Class Form1
                         Select Case j
                             Case 1 'スロ2
                                 ComboBox(Me, CStr(i) & "09").Focus()
-                                ComboBox(Me, CStr(i) & "09").SelectedText = .skill(j).kanren
+                                ComboBox(Me, CStr(i) & "09").SelectedIndex = ComboBox(Me, CStr(i) & "09").FindString(.skill(j).kanren)
                                 ComboBox(Me, CStr(i) & "11").SelectedText = .skill(j).name
                                 スキル名入力(ComboBox(Me, CStr(i) & "11"), Nothing)
                                 ComboBox(Me, CStr(i) & "15").Text = .skill(j).lv
                                 追加スキル追加(ComboBox(Me, CStr(i) & "15"), Nothing)
                             Case 2 'スロ3
                                 ComboBox(Me, CStr(i) & "10").Focus()
-                                ComboBox(Me, CStr(i) & "10").SelectedText = .skill(j).kanren
+                                ComboBox(Me, CStr(i) & "10").SelectedIndex = ComboBox(Me, CStr(i) & "10").FindString(.skill(j).kanren)
                                 ComboBox(Me, CStr(i) & "12").SelectedText = .skill(j).name
                                 スキル名入力(ComboBox(Me, CStr(i) & "12"), Nothing)
                                 ComboBox(Me, CStr(i) & "16").Text = .skill(j).lv
@@ -1703,7 +1739,7 @@ Public Class Form1
                     "(部隊スキル抜き速度: " & (Int(3600 / (bs(Int(it(bsc - 1))).heisyu.spd * (1 + ksk(Int(it(bsc - 1)))))) \ 60) & "分" & _
                     (Int(3600 / (bs(Int(it(bsc - 1))).heisyu.spd * (1 + ksk(Int(it(bsc - 1)))))) Mod 60) & "秒)"
             End If
-            '勝軍地蔵が入る場合、その表示
+            '勝軍地蔵等が入る場合、その表示
             If Not warabe.speed.uma = 0 Then
                 .ToolTipText = .ToolTipText & vbCrLf & "☆童アリ"
             End If
@@ -1822,13 +1858,17 @@ Public Class Form1
 
     '********** 以下、一括入力に関する関数 **********
     Private Sub 一括入力_追加スキル表示(sender As Object, e As EventArgs) Handles ToolStripComboBox7.GotFocus
+        Dim sqlwhere As String = ダブルクオート(ToolStripComboBox6.Text)
+        If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
+            sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
+        End If
         Dim p As DataSet = _
-            DB_TableOUT(con, cmd, "SELECT Index,分類,名前,LV FROM Skill WHERE 分類 = """ & ToolStripComboBox6.Text & """ AND LV = 1 ORDER BY Index", "Skill")
+            DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         With ToolStripComboBox7.ComboBox
             .BindingContext = Me.BindingContext
-            .DisplayMember = "名前"
-            .ValueMember = "Index"
-            .DataSource = p.Tables("Skill")
+            .DisplayMember = "スキル名"
+            .ValueMember = "id"
+            .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
     End Sub
@@ -2057,7 +2097,7 @@ Public Class Form1
     Private Function 自動統率(ByVal heika As String, ByVal st() As Decimal, ByVal rc As Integer) As String()
         Dim stt() As Decimal = st.Clone
         Dim s() As String = _
-         DB_DirectOUT(con, cmd, "SELECT 統率,兵種名 FROM Heika WHERE 兵種名=""" & heika & """", {"統率"})
+         DB_DirectOUT("SELECT 統率, 兵種名 FROM HData WHERE 兵種名= " & ダブルクオート(heika) & "", {"統率"})
         Dim tt As New Hashtable
         Dim touk As String() = {"槍", "弓", "馬", "器"}
         Dim output As String() = {数値_統率変換(st(0)), 数値_統率変換(st(1)), 数値_統率変換(st(2)), 数値_統率変換(st(3))}
@@ -2123,11 +2163,11 @@ Public Class Form1
         Form10.Show()
     End Sub
 
-    Private Sub 条件設定起動(sender As Object, e As EventArgs) Handles 条件設定ToolStripMenuItem.Click
+    'Private Sub 条件設定起動(sender As Object, e As EventArgs) Handles 条件設定ToolStripMenuItem.Click
 
-    End Sub
+    'End Sub
 
-    Private Sub 防衛オプション表示(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
+    Private Sub 条件付スキルオプション表示(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
         Form12.Show()
     End Sub
 

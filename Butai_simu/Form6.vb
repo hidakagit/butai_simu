@@ -1,6 +1,6 @@
 ﻿Public Class Form6  
     Public Structure Kouho
-        Public rare As Integer 'レア度
+        Public rare As String 'レア度
         Public name As String 'スキル名
         Public pp As Decimal '成功確率（銅銭での場合）
         Public Function pp_kin() As Decimal
@@ -20,6 +20,7 @@
     Public suro1sno As Integer 'スロ1武将スキル数
     Public suro1() As String
     Public suro2stable()() 'スロ2のスキルの基本テーブル
+    Public okikaeindex As Integer '置換対象のスキル
 
     Private Sub Form6_Load(sender As Object, e As EventArgs) Handles Me.Load
         GroupBox1.AllowDrop = True
@@ -56,11 +57,11 @@
         Handles ComboBox001.SelectedIndexChanged, ComboBox101.SelectedIndexChanged
         Dim cc As ComboBox = ComboBox(Me, CStr(武将取得(sender)) & "02")
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
-        Dim p As DataSet
-        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """ ORDER BY Index ASC", "Busho")
-        cc.DataSource = p.Tables("Busho")
-        cc.DisplayMember = "名称"
-        cc.ValueMember = "Index"
+        Dim p As DataSet = _
+        DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY id ASC", "BData")
+        cc.DisplayMember = "武将名"
+        cc.ValueMember = "id"
+        cc.DataSource = p.Tables("BData")
         cc.SelectedIndex = -1
         AddHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
     End Sub
@@ -69,8 +70,8 @@
         Handles ComboBox002.SelectedValueChanged, ComboBox102.SelectedValueChanged
         Dim bc As String = 武将取得(sender)
         Dim s() As String = _
-        DB_DirectOUT(con, cmd, "SELECT * FROM Busho WHERE R = """ & ComboBox(Me, CStr(bc) & "01").Text & _
-                     """ AND 名称=""" & sender.Text & """", {"No", "スキル"})
+        DB_DirectOUT("SELECT * FROM BData WHERE 武将R = " & ダブルクオート(ComboBox(Me, CStr(bc) & "01").Text) & _
+                     " AND 武将名 = " & ダブルクオート(sender.Text) & " AND Bunf = 'F'", {"id", "初期スキル名"})
         Label(Me, CStr(bc) & "02").Text = s(1)
         If bc = 0 Then
             s1 = s(0)
@@ -81,11 +82,13 @@
     End Sub
 
     Private Sub 追加スキル表示(ByVal sender As Object, ByVal e As System.EventArgs) _
-        Handles ComboBox021.GotFocus, ComboBox121.GotFocus, ComboBox131.GotFocus, ComboBox111.GotFocus
+        Handles ComboBox021.GotFocus, ComboBox031.GotFocus, ComboBox121.GotFocus, ComboBox131.GotFocus, ComboBox111.GotFocus
         Dim p As DataSet
         Dim s As String 'スキル分類
         If Equals(sender, ComboBox021) Then '武将1-スロ2
             s = ComboBox020.Text
+        ElseIf Equals(sender, ComboBox031) Then '武将1-スロ3
+            s = ComboBox030.Text
         ElseIf Equals(sender, ComboBox121) Then '武将2-スロ2
             s = ComboBox120.Text
         ElseIf Equals(sender, ComboBox131) Then '武将2-スロ3
@@ -93,50 +96,74 @@
         Else '逆引き
             s = ComboBox222.Text
         End If
-        p = DB_TableOUT(con, cmd, "SELECT Index,分類,名前,LV FROM Skill WHERE 分類 = """ & s & """ AND LV = 1 ORDER BY Index", "Skill")
+        Dim sqlwhere As String = ダブルクオート(s)
+        If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
+            sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
+        End If
+        p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         With sender
-            .ValueMember = "Index"
-            .DisplayMember = "名前"
-            .DataSource = p.Tables("Skill")
+            .ValueMember = "id"
+            .DisplayMember = "スキル名"
+            .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
     End Sub
 
     Private Sub 追加スキル入力(ByVal sender As Object, ByVal e As System.EventArgs) _
-        Handles ComboBox021.SelectedIndexChanged, ComboBox121.SelectedIndexChanged, ComboBox131.SelectedIndexChanged
+        Handles ComboBox021.SelectedIndexChanged, ComboBox031.SelectedIndexChanged, ComboBox121.SelectedIndexChanged, ComboBox131.SelectedIndexChanged
+        Dim cbi As Integer = String_onlyNumber(sender.Name.ToString)
         If Not sender.text = "" Then
-            If Equals(sender, ComboBox021) And (Not ComboBox020.Text = "") Then
-                ComboBox022.Enabled = True
-                ComboBox022.Text = 1
-            Else
-                If Equals(sender, ComboBox121) And (Not ComboBox120.Text = "") Then
-                    ComboBox122.Enabled = True
-                    ComboBox122.Text = 1
-                ElseIf Equals(sender, ComboBox131) And (Not ComboBox130.Text = "") Then
-                    ComboBox132.Enabled = True
-                    ComboBox132.Text = 1
-                End If
+            If Equals(sender, ComboBox(Me, Format(cbi, "000"))) And (Not ComboBox(Me, Format((cbi - 1), "000")).Text = "") Then
+                With ComboBox(Me, Format((cbi + 1), "000"))
+                    .Enabled = True
+                    .Text = 1
+                End With
             End If
         Else
-            If Equals(sender, ComboBox021) Then
-                ComboBox022.Enabled = False
-                ComboBox022.Text = ""
-            Else
-                If Equals(sender, ComboBox121) Then
-                    ComboBox122.Enabled = False
-                    ComboBox122.Text = ""
-                ElseIf Equals(sender, ComboBox131) Then
-                    ComboBox132.Enabled = False
-                    ComboBox132.Text = ""
-                End If
+            If Equals(sender, ComboBox(Me, Format(cbi, "000"))) Then
+                With ComboBox(Me, Format((cbi + 1), "000"))
+                    .Enabled = False
+                    .Text = ""
+                End With
             End If
         End If
+        'If Not sender.text = "" Then
+        '    If Equals(sender, ComboBox021) And (Not ComboBox020.Text = "") Then
+        '        ComboBox022.Enabled = True
+        '        ComboBox022.Text = 1
+        '    ElseIf Equals(sender, ComboBox031) And (Not ComboBox030.Text = "") Then
+        '        ComboBox032.Enabled = True
+        '        ComboBox032.Text = 1
+
+        '    Else
+        '        If Equals(sender, ComboBox121) And (Not ComboBox120.Text = "") Then
+        '            ComboBox122.Enabled = True
+        '            ComboBox122.Text = 1
+        '        ElseIf Equals(sender, ComboBox131) And (Not ComboBox130.Text = "") Then
+        '            ComboBox132.Enabled = True
+        '            ComboBox132.Text = 1
+        '        End If
+        '    End If
+        'Else
+        '    If Equals(sender, ComboBox021) Then
+        '        ComboBox022.Enabled = False
+        '        ComboBox022.Text = ""
+        '    Else
+        '        If Equals(sender, ComboBox121) Then
+        '            ComboBox122.Enabled = False
+        '            ComboBox122.Text = ""
+        '        ElseIf Equals(sender, ComboBox131) Then
+        '            ComboBox132.Enabled = False
+        '            ComboBox132.Text = ""
+        '        End If
+        '    End If
+        'End If
     End Sub
 
-    Private Function skill_to_SKILL_T(ByVal skill As String)
-        Dim sl As Integer = InStr(skill, "：")
-        Return Mid(skill, sl + 1, skill.Length - sl)
-    End Function
+    'Private Function skill_to_SKILL_T(ByVal skill As String)
+    '    Dim sl As Integer = InStr(skill, "：")
+    '    Return Mid(skill, sl + 1, skill.Length - sl)
+    'End Function
 
     Private Sub 合成関連初期化()
         st = Nothing
@@ -147,12 +174,23 @@
         suro1 = Nothing
         kouho_sum = 0
         errorflg = 0
+        okikaeindex = 0
     End Sub
+
+    'Private Function 置換スキル決定() As Integer
+    '    If CheckBox02.Checked Then 'スロ2にチェック
+    '        If CheckBox03.Checked Then Return -1 'スロ2も3にもチェックはエラー
+    '        Return 1
+    '    ElseIf CheckBox03.Checked Then
+    '        Return 2
+    '    End If
+    '    Return 0
+    'End Function
 
     Private Sub 合成実行(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
 
         Call 合成関連初期化()
-        Call DB_Open(con2, cmd2, dbpath2) 'スキルDBを開く
+        'Call DB_Open() 'スキルDBを開く
 
         If gyakuflg = True Then '逆引きモードの時はそちらへ
             Call スキル逆引きモード()
@@ -170,6 +208,11 @@
                 Exit Sub
             End If
         Next
+        'okikaeindex = 置換スキル決定()
+        'If okikaeindex = -1 Then
+        '    MsgBox("付け替えスキルを複数選ぶことはできません")
+        '    Exit Sub
+        'End If
 
         '*** スキル数を数える ***
         suro2sno = 1 '最初は初期スキルのみ
@@ -178,19 +221,33 @@
                 suro2sno += 1
             End If
         Next
-        If Not ComboBox021.Text = "" Then 'スロ1武将のスキル数
-            suro1sno = 2
-            ReDim suro1(1)
-            suro1(0) = skill_to_SKILL_T(Label002.Text)
-            suro1(1) = ComboBox021.Text
-        Else
-            suro1sno = 1
-            ReDim suro1(0)
-            suro1(0) = skill_to_SKILL_T(Label002.Text)
-        End If
+        suro1sno = 1 '最初は初期スキルのみ
+        ReDim suro1(0)
+        suro1(0) = Label002.Text
+        For i As Integer = 2 To 3 'スロ2武将のスキル数
+            If Not ComboBox(Me, "0" & CStr(i) & "1").Text = "" Then
+                ReDim Preserve suro1(i - 1)
+                suro1(i - 1) = ComboBox(Me, "0" & CStr(i) & "1").Text
+                suro1sno += 1
+            End If
+        Next
+        'If Not ComboBox021.Text = "" Then 'スロ1武将のスキル数
+        '    suro1sno = 2
+        '    ReDim suro1(1)
+        '    suro1(0) = Label002.Text
+        '    suro1(1) = ComboBox021.Text
+        'Else
+        '    suro1sno = 1
+        '    ReDim suro1(0)
+        '    suro1(0) = Label002.Text
+        'End If
         '************************
         If (Not ComboBox131.Text = "") And suro2sno = 2 Then 'スロ2が空いていてスロ3が埋まっている状態
             MsgBox("生贄側付加スキル内容の設定異常")
+            Exit Sub
+        End If
+        If (Not ComboBox031.Text = "") And suro1sno = 2 Then 'スロ2が空いていてスロ3が埋まっている状態
+            MsgBox("合成側付加スキル内容の設定異常")
             Exit Sub
         End If
 
@@ -224,13 +281,13 @@
         ReDim st(2) 'スキル候補数は3がデフォ
         For i As Integer = 0 To suro2sno - 1 'スロ2武将の各スキルの合成テーブルを読み込み
             ReDim Preserve suro2stable(i)
-            Dim r() As String = {"レア度", "A", "B", "C", "S1", "S2"}
+            Dim r() As String = {"スキルR", "候補A", "候補B", "候補C", "候補S1", "候補S2"}
             If i = 0 Then '初期スキル
                 suro2stable(i) = _
-                    DB_DirectOUT(con2, cmd2, "SELECT * FROM Skill_T WHERE 基本スキル = """ & Label102.Text & """", r)
+                    DB_DirectOUT("SELECT * FROM SName WHERE スキル名 = " & ダブルクオート(Label102.Text) & "", r)
             Else
                 suro2stable(i) = _
-                    DB_DirectOUT(con2, cmd2, "SELECT * FROM Skill_T WHERE 基本スキル LIKE """ & "%：" & ComboBox(Me, "1" & CStr(i + 1) & "1").Text & """", r)
+                    DB_DirectOUT("SELECT * FROM SName WHERE スキル名 = " & ダブルクオート(ComboBox(Me, "1" & CStr(i + 1) & "1").Text) & "", r)
             End If
             '致命的な空白がある（＝wikiが埋まり切っていない、未解明の部分があるスキルが含まれている）場合はエラー
             'ちょっと緩和（A,B,Cがそもそも埋まっていない:1, S1が埋まっていない:2, S2が埋まっていない:3, S1,S2とも埋まっていない:6）
@@ -267,7 +324,7 @@
             Exit Sub
         End If
         Dim output As String = "******** 逆引き探索結果 ********" '出力文字列
-        Dim r() As String = {"A", "B", "C", "S1", "S2"}
+        Dim r() As String = {"候補A", "候補B", "候補C", "候補S1", "候補S2"}
         Dim tmpsl As String()
         For i As Integer = 0 To 4
             tmpsl = 逆引き検索(r(i), ComboBox111.Text)
@@ -277,9 +334,9 @@
             For j As Integer = 0 To tmpsl.Length - 1
                 If j = 0 Then
                     output = output & vbCrLf & "～～ 合成候補" & r(i) & " ～～"
-                    output = output & vbCrLf & skill_to_SKILL_T(tmpsl(j))
+                    output = output & vbCrLf & tmpsl(j)
                 Else
-                    output = output & ", " & skill_to_SKILL_T(tmpsl(j))
+                    output = output & ", " & tmpsl(j)
                 End If
             Next
         Next
@@ -292,7 +349,7 @@
 
     Private Function 逆引き検索(ByVal col_name As String, ByVal skillname As String) As String() 'col_name: A,B,C,S1,S2
         逆引き検索 = _
-        DB_DirectOUT2(con2, cmd2, "SELECT * FROM Skill_T WHERE " & col_name & " LIKE """ & "%：" & skillname & """", "基本スキル")
+        DB_DirectOUT2("SELECT * FROM SName WHERE " & col_name & " = " & ダブルクオート(skillname) & "", "スキル名")
     End Function
 
     '基本テーブルを代入、合成テーブル作成
@@ -301,17 +358,17 @@
         Select Case suro2sno
             Case 1 '初期スキルのみ
                 For i As Integer = 0 To 2
-                    st(i).name = skill_to_SKILL_T(suro2stable(0)(i + 1))
+                    st(i).name = suro2stable(0)(i + 1)
                 Next
             Case 2
                 Dim stmp() As String = {suro2stable(0)(2), suro2stable(0)(3), suro2stable(1)(4)}
                 For i As Integer = 0 To 2
-                    st(i).name = skill_to_SKILL_T(stmp(i))
+                    st(i).name = stmp(i)
                 Next
             Case 3
                 Dim stmp() As String = {suro2stable(0)(3), suro2stable(1)(4), suro2stable(2)(4)}
                 For i As Integer = 0 To 2
-                    st(i).name = skill_to_SKILL_T(stmp(i))
+                    st(i).name = stmp(i)
                 Next
         End Select
 
@@ -324,7 +381,7 @@
             End If
             ReDim Preserve st(4) '4候補目にS2が出てくる（S1が出現する場合を考慮して都合5候補目に登録）
             st(3).name = "-"
-            st(4).name = skill_to_SKILL_T(suro2stable(0)(5))
+            st(4).name = suro2stable(0)(5)
         End If
 
         For i As Integer = 0 To st.Length - 1
@@ -350,7 +407,7 @@
                 errorflg = 0
                 Return -2
             End If
-            Dim s1name As String = skill_to_SKILL_T(suro2stable(0)(4))
+            Dim s1name As String = suro2stable(0)(4)
             For i As Integer = 0 To suro1sno - 1
                 If s1name = suro1(i) Then
                     s1flg = False
@@ -410,13 +467,13 @@
         For i As Integer = 0 To suro2sno - 1
             Dim suro2name As String
             If i = 0 Then
-                suro2name = skill_to_SKILL_T(Label102.Text)
+                suro2name = Label102.Text
             Else
                 suro2name = ComboBox(Me, "1" & CStr(i + 1) & "1").Text
             End If
             output = output & vbCrLf & "『" & suro2name & "』 → "
             For j As Integer = 0 To 4
-                output = output & " | " & skill_to_SKILL_T(suro2stable(i)(j + 1))
+                output = output & " | " & suro2stable(i)(j + 1)
             Next
         Next
         Return output
@@ -428,7 +485,7 @@
             Val(ComboBox112.Text) + Val(ComboBox122.Text) + Val(ComboBox132.Text)
         For i As Integer = 0 To st.Length - 1
             Dim tmp() As String = _
-                DB_DirectOUT(con2, cmd2, "SELECT * FROM Skill_P WHERE ランク = """ & st(i).rare & """", {"第" & (i + 1) & "候補"})
+                DB_DirectOUT("SELECT * FROM UTable WHERE スキルR = " & ダブルクオート(st(i).rare) & "", {"第" & (i + 1) & "候補"})
             If tmp Is Nothing Then
                 errorflg = 2
                 Exit Sub
@@ -436,24 +493,26 @@
             If tmp(0) = Nothing Then 'レア度の情報が無い場合
                 st(i).pp = 0
             Else
-                st(i).pp = 文字列計算(Replace(Replace(tmp(0), "合計Lv", skilllv_sum), "%", ""))
+                st(i).pp = 文字列計算(Replace(Replace(tmp(0), "L", skilllv_sum), "%", ""))
             End If
         Next
     End Sub
 
-    Private Function スキルレア度取得(ByVal skillname As String) As Integer
+    Private Function スキルレア度取得(ByVal skillname As String) As String
         Dim si() As String = _
-        DB_DirectOUT(con2, cmd2, "SELECT * FROM Skill_T WHERE 基本スキル LIKE """ & "%：" & skillname & """", {"レア度"})
-        Dim rare As New Hashtable
-        Dim alpha() As String = {"F", "E", "D", "C", "B", "A", "S"}
-        For i As Integer = 0 To alpha.Length - 1
-            rare.Add(alpha(i), i + 1)
-        Next
-        If si(0) = Nothing Or si(0) = "-" Then
-            Return -1
-        Else
-            Return Val(rare(si(0)))
-        End If
+        DB_DirectOUT("SELECT * FROM SName WHERE スキル名 = " & ダブルクオート(skillname) & "", {"スキルR"})
+        'Dim rare As New Hashtable
+        'Dim alpha() As String = {"F", "E", "D", "C", "B", "A", "S"}
+        If si(0) Is Nothing Or si(0) = "-" Then Return Nothing
+        Return si(0)
+        'For i As Integer = 0 To alpha.Length - 1
+        '    rare.Add(alpha(i), i + 1)
+        'Next
+        'If si(0) = Nothing Or si(0) = "-" Then
+        '    Return -1
+        'Else
+        '    Return Val(rare(si(0)))
+        'End If
     End Function
 
     Private Sub 逆引きモード切替(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CheckBox1.CheckedChanged
@@ -484,9 +543,10 @@
         sstr = Trim(Replace(sstr, ",", ""))
         sstr = Trim(Replace(sstr, "|", ""))
         sstr = Trim(Replace(sstr, ":", ""))
+        sstr = Trim(Replace(sstr, "：", ""))
         sstr = Trim(Replace(sstr, vbLf, "")) '選択を楽にする（「,」, LF,「|」,「:」を含んでも大丈夫に）
-        Dim sbsho As String() = DB_DirectOUT2(con, cmd, "SELECT * FROM Busho WHERE スキル LIKE """ & "%：" & sstr & """", "名称")
-        Dim sbshor As String() = DB_DirectOUT2(con, cmd, "SELECT * FROM Busho WHERE スキル LIKE """ & "%：" & sstr & """", "R")
+        Dim sbsho As String() = DB_DirectOUT2("SELECT * FROM BData WHERE 初期スキル名 = " & ダブルクオート(sstr) & "", "武将名")
+        Dim sbshor As String() = DB_DirectOUT2("SELECT * FROM BData WHERE 初期スキル名 = " & ダブルクオート(sstr) & "", "武将R")
         ContextMenuStrip1.Items.Clear()
         If sbsho Is Nothing Then '所持武将がいないスキル、つまり合成のみでしか出て来ないスキル
             ContextMenuStrip1.Items.Add("所持武将不明")
@@ -581,11 +641,11 @@
                 Next
             End If
             If sender Is GroupBox1 Then '合成される側
-                If skillname.Length = 3 Then 'スロットに空きが無ければ
-                    Me.Focus()
-                    MsgBox("スロットに空きがありません")
-                    Exit Sub
-                End If
+                'If skillname.Length = 3 Then 'スロットに空きが無ければ
+                '    Me.Focus()
+                '    MsgBox("スロットに空きがありません")
+                '    Exit Sub
+                'End If
                 Call 武将データ代入(0, rare, bname, skillname, skilllv)
             Else '生贄側
                 Call 武将データ代入(1, rare, bname, skillname, skilllv)
@@ -596,12 +656,17 @@
         End Try
     End Sub
     Private Sub 武将データ代入(ByVal bf As Integer, ByVal rare As String, ByVal name As String, ByVal sname() As String, ByVal slv() As Integer)
-        ComboBox(Me, CStr(bf) & "01").SelectedText = rare '（強制的に）R選択
-        R選択(ComboBox(Me, CStr(bf) & "01"), Nothing)
-        Dim ntmp As String = GetINIValue(sname(0), name & "・" & rare, bnpath) '同名武将区別
-        If Not ntmp = "－" Then
-            name = ntmp
-        End If
+        ComboBox(Me, CStr(bf) & "01").SelectedIndex = ComboBox(Me, CStr(bf) & "01").FindString(rare) '（強制的に）R選択
+        'R選択(ComboBox(Me, CStr(bf) & "01"), Nothing)
+        'Dim ntmp As String = GetINIValue(sname(0), name & "・" & rare, bnpath) '同名武将区別
+        'If Not ntmp = "－" Then
+        '    name = ntmp
+        'End If
+        Dim repstr As String = "replace(replace(初期スキル名, " & """ "" , """"), " & """　"" , """") = "
+        'Dim repstr As String = "replace(初期スキル名, " & """ "" , """") = "
+        name = DB_DirectOUT("SELECT 武将名, 初期スキル名 FROM BData WHERE 武将R = " _
+            & ダブルクオート(rare) & " AND 武将名 LIKE """ & name & "%""" & " AND " & repstr & ダブルクオート(TrimJ(sname(0))), _
+            {"武将名", "初期スキル名"})(0)
         ComboBox(Me, CStr(bf) & "02").SelectedText = name '（強制的に）武将名選択
         武将名選択(ComboBox(Me, CStr(bf) & "02"), Nothing)
         'If Not Label(Me, CStr(bf) & "02").Text = sname(0) Then
@@ -610,7 +675,7 @@
         ComboBox(Me, CStr(bf) & "12").Text = slv(0) '初期スキルのLV
         For i As Integer = 1 To sname.Length - 1
             ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").Focus()
-            ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").Text = スキル関連推定(sname(i))
+            ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").SelectedIndex = ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").FindString(スキル関連推定(sname(i)))
             ComboBox(Me, CStr(bf) & CStr(i + 1) & "1").Text = sname(i)
             Call 追加スキル入力(ComboBox(Me, CStr(bf) & CStr(i + 1) & "1"), Nothing)
             ComboBox(Me, CStr(bf) & CStr(i + 1) & "2").Text = slv(i)
@@ -632,6 +697,7 @@
             Call ClearTextBox(GroupBox1)
             Label002.Text = " -------------"
             ComboBox022.Enabled = False
+            ComboBox032.Enabled = False
         Else '生贄側
             Call ClearTextBox(GroupBox2)
             Label102.Text = " -------------"
@@ -639,4 +705,5 @@
             ComboBox132.Enabled = False
         End If
     End Sub
+
 End Class

@@ -33,6 +33,8 @@ Public Class Form10
                 Label(Form11, "00" & Val(i)).Text = "------------"
             End If
         Next
+        ComboBox9.SelectedIndex = 9
+        ComboBox10.SelectedIndex = 0
     End Sub
 
     Public Sub R選択(ByVal sender As System.Object, ByVal e As System.EventArgs) _
@@ -47,11 +49,12 @@ Public Class Form10
                 cc = ComboBox003
         End Select
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
+
         Dim p As DataSet
-        p = DB_TableOUT(con, cmd, "SELECT Index,R, 名称  FROM Busho WHERE R = """ & sender.SelectedItem & """ ORDER BY Index ASC", "Busho")
-        cc.DisplayMember = "名称"
-        cc.ValueMember = "Index"
-        cc.DataSource = p.Tables("Busho")
+        p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY id ASC", "BData")
+        cc.DisplayMember = "武将名"
+        cc.ValueMember = "id"
+        cc.DataSource = p.Tables("BData")
         cc.SelectedIndex = -1
         AddHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
     End Sub
@@ -70,10 +73,10 @@ Public Class Form10
         simu_bs(selbsho).武将設定初期化()
         Label(Form11, "00" & Val(selbsho + 1)).Text = "------------"
         Dim r() As String = _
-            {"No", "R", "C", "指揮兵", "槍", "弓", "馬", "器", "攻撃", "防御", "兵法", "攻成長", "防成長", "兵成長", "スキル", "職"}
+         {"Bid", "武将R", "Cost", "指揮兵数", "槍統率", "弓統率", "馬統率", "器統率", "初期攻撃", "初期防御", "初期兵法", "攻成長", "防成長", "兵成長", "初期スキル名", "職"}
         Dim s() As String = _
-        DB_DirectOUT(con, cmd, "SELECT * FROM Busho WHERE R = """ & ComboBox(Me, CStr(selbsho + 1)).Text & _
-                     """ AND 名称=""" & sender.Text & """", r)
+        DB_DirectOUT("SELECT * FROM BData WHERE 武将R = " & ダブルクオート(ComboBox(Me, CStr(selbsho + 1)).Text) & _
+                     " AND 武将名 = " & ダブルクオート(sender.Text) & " AND Bunf = 'F'", r)
         'ここから武将初期化
         With simu_bs(selbsho)
             .No = selbsho
@@ -110,11 +113,15 @@ Public Class Form10
             Case "42"
                 c = ComboBox042
         End Select
-        p = DB_TableOUT(con, cmd, "SELECT Index,分類,名前,LV FROM Skill WHERE 分類 = """ & sender.text & """ AND LV = 1 ORDER BY Index", "Skill")
+        Dim sqlwhere As String = ダブルクオート(sender.text)
+        If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
+            sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
+        End If
+        p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         With c
-            .ValueMember = "Index"
-            .DisplayMember = "名前"
-            .DataSource = p.Tables("Skill")
+            .ValueMember = "id"
+            .DisplayMember = "スキル名"
+            .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
     End Sub
@@ -288,15 +295,15 @@ Public Class Form10
             If taisyo_rare(i) Then
                 Select Case i
                     Case 0
-                        target_rare = target_rare & "R = " & """天""" & " OR "
+                        target_rare = target_rare & "武将R = " & """天""" & " OR "
                     Case 1
-                        target_rare = target_rare & "R = " & """極""" & " OR "
+                        target_rare = target_rare & "武将R = " & """極""" & " OR "
                     Case 2
-                        target_rare = target_rare & "R = " & """特""" & " OR "
+                        target_rare = target_rare & "武将R = " & """特""" & " OR "
                     Case 3
-                        target_rare = target_rare & "R = " & """上""" & " OR "
+                        target_rare = target_rare & "武将R = " & """上""" & " OR "
                     Case 4
-                        target_rare = target_rare & "R = " & """序""" & " OR "
+                        target_rare = target_rare & "武将R = " & """序""" & " OR "
                 End Select
             End If
         Next
@@ -409,62 +416,50 @@ Public Class Form10
             ReDim Preserve add_skl(sno)
         End If
         Dim tmp() As String = Skill_ref(skillname, simu_lv)
-        Dim s, u As String
         With add_skl(sno)
-            If tmp(0) = "" Then '最近wikiの更新で、データが無い部分が"+"も無い場合がある
-                tmp(0) = 0
-            End If
+            If tmp(7) Is Nothing Then Exit Sub
             .name = skillname
             .lv = simu_lv
-            .kouka_p = Decimal.Parse(tmp(0))
-            .heika = tmp(1)
-            s = Mid(tmp(2), 1, InStr(tmp(2), "："))
-            .koubou = Replace(Replace(s, "：", ""), .heika, "")
-            '.speed = スピードスキル取得(tmp(2), tmp(3)) 'スピードスキル確認（速度は関係ない）
-            '特殊スキルリスト確認
-            .tokusyu = 0 'リセット
-            For j As Integer = 0 To error_skill.Length - 1
-                If skillname = error_skill(j) Then
-                    .tokusyu = 9
-                    .t_flg = フラグ付きスキル参照(add_skl(sno))
-                    Exit For
-                End If
-            Next
-            If (InStr(.koubou, "攻") = 0 And InStr(.koubou, "防") = 0) Or .tokusyu = 9 Then '特殊スキルの扱い
-                Select Case .koubou
-                    Case "速"
-                        .tokusyu = 1
-                    Case "破壊"
-                        .tokusyu = 2
-                    Case Else
-                        .tokusyu = 9
-                End Select
-            Else
-                .tokusyu = 0
-                u = Replace(tmp(2), s, "")
-                u = Replace(u, "上昇", "")
-                If u = "%" Then
-                    .tokusyu = 5 'データが無い
-                End If
-                '現在はDBを更新するタイミングで限定コスト下の情報しか無いものは弾いている
-                'For k As Decimal = 1 To 4 Step 0.5
-                '    If InStr(u, "(コスト" & k & ")") Then
-                '        MsgBox("このスキル・LVは限定されたコスト下での情報しかありません" & vbCrLf & "シミュレーションエラーを起こす場合があります" & vbCrLf & _
-                '               "【" & .name & "LV" & .lv & "】")
-                '        .tokusyu = 5
-                '    End If
-                '    u = Replace(u, "(コスト " & k & " )", "")
-                'Next
-                If InStr(.heika, "全") Then
-                    .heika = "槍弓馬砲器"
-                End If
-                .kanren = u 'こちらではkanrenは使わないので一時的にuを格納
+            .kanren = tmp(1)
+            .heika = tmp(2)
+            If InStr(.heika, "全") Then
+                .heika = "槍弓馬砲器"
             End If
+            .koubou = tmp(3)
+            'データ不足の場合を除く
+            If tmp(7) = "U" Then
+                .tokusyu = 5
+                .kouka_p = 0
+                .kouka_f = 0
+                Exit Sub
+            End If
+            .kouka_p = Decimal.Parse(tmp(0))
+            Select Case (.kanren)
+                '特殊スキル
+                Case "特殊", "条件" ', "童"
+                    .tokusyu = 9
+                    '.t_flg = フラグ付きスキル参照(add_skl(sno)) '条件付きスキルの場合
+                Case Else
+                    Select Case (.koubou)
+                        Case "速" '速度オンリー
+                            .tokusyu = 1
+                            .speed = Decimal.Parse(tmp(4)) '速度はコスト依存・・・しない・・・（現状
+                        Case "破壊" '破壊オンリー
+                            .tokusyu = 2
+                        Case Else '通常スキルの場合
+                            .tokusyu = 0
+                            'If InStr(tmp(4), "C") Then tmp(4) = 文字列計算(Replace(tmp(4), "C", CStr(cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
+                            '.kouka_f = Decimal.Parse(tmp(4))
+                            .kanren = tmp(4)
+                            If Not InStr(tmp(4), "C") Then .kouka_f = Decimal.Parse(tmp(4))
+                            If tmp(5) = "速" Then .speed = Decimal.Parse(tmp(6)) '付与効果に速度がある
+                    End Select
+            End Select
         End With
     End Sub
     '初期スキルをキャッシュから生成
     Private Sub 初期スキル読み込み(ByVal skillname As String)
-        Dim zero_no As Integer = 0 '対応するスキルのIndex
+        Dim zero_no As Integer = -1 '対応するスキルのIndex
         For i As Integer = 0 To zero_skl.GetLength(0) - 1
             If zero_skl(i)(0) = skillname Then
                 zero_no = i
@@ -472,63 +467,51 @@ Public Class Form10
             End If
         Next
         With simu_bs(3).skill(0)
-            Dim s, u As String
-            If zero_skl(zero_no)(1) = "" Then '最近wikiの更新で、データが無い部分が"+"も無い場合がある
-                zero_skl(zero_no)(1) = 0
-            End If
+            'If zero_skl(zero_no)(8) Is Nothing Then Exit Sub
             .name = skillname
             .lv = simu_lv
-            .kouka_p = Decimal.Parse(zero_skl(zero_no)(1))
-            .heika = zero_skl(zero_no)(2)
-            s = Mid(zero_skl(zero_no)(3), 1, InStr(zero_skl(zero_no)(3), "："))
-            .koubou = Replace(Replace(s, "：", ""), .heika, "")
-            '.speed = スピードスキル取得(tmp(2), tmp(3)) 'スピードスキル確認（速度は関係ない）
-            '特殊スキルリスト確認
-            .tokusyu = 0 'リセット
-            For j As Integer = 0 To error_skill.Length - 1
-                If skillname = error_skill(j) Then
-                    .tokusyu = 9
-                    Exit For
-                End If
-            Next
-            If (InStr(.koubou, "攻") = 0 And InStr(.koubou, "防") = 0) Or .tokusyu = 9 Then '特殊スキルの扱い
-                Select Case .koubou
-                    Case "速"
-                        .tokusyu = 1
-                    Case "破壊"
-                        .tokusyu = 2
-                    Case Else
-                        .tokusyu = 9
-                End Select
-            Else
-                .tokusyu = 0
-                u = Replace(zero_skl(zero_no)(3), s, "")
-                u = Replace(u, "上昇", "")
-                If u = "%" Then
-                    .tokusyu = 5 'データが無い
-                End If
-                '現在はDBを更新するタイミングで限定コスト下の情報しか無いものは弾いている
-                'For k As Decimal = 1 To 4 Step 0.5
-                '    If InStr(u, "(コスト" & k & ")") Then
-                '        MsgBox("このスキル・LVは限定されたコスト下での情報しかありません" & vbCrLf & "シミュレーションエラーを起こす場合があります" & vbCrLf & _
-                '               "【" & .name & "LV" & .lv & "】")
-                '        .tokusyu = 5
-                '    End If
-                '    u = Replace(u, "(コスト " & k & " )", "")
-                'Next
-                If InStr(u, "コスト") Then 'コスト依存スキルの扱い
-                    u = Replace(u, "コスト", CStr(simu_bs(3).cost)) '変更。「スキル所持武将の」コストで一括適用
-                End If
-                If Not .tokusyu = 5 Then 'データが無いスキルの場合は計算しない
-                    u = 文字列計算(u)
-                    .kouka_f = Decimal.Parse(u)
-                Else
-                    .kouka_f = 0
-                End If
-                If InStr(.heika, "全") Then
-                    .heika = "槍弓馬砲器"
-                End If
+            If zero_no = -1 Then '正常に登録されていない場合
+                .tokusyu = 5
+                .kouka_p = 0
+                .kouka_f = 0
+                Exit Sub
             End If
+            .kanren = zero_skl(zero_no)(2)
+            .heika = zero_skl(zero_no)(3)
+            If InStr(.heika, "全") Then
+                .heika = "槍弓馬砲器"
+            End If
+            .koubou = zero_skl(zero_no)(4)
+            'データ不足の場合を除く
+            If zero_skl(zero_no)(8) = "U" Then
+                .tokusyu = 5
+                .kouka_p = 0
+                .kouka_f = 0
+                Exit Sub
+            End If
+            .kouka_p = Decimal.Parse(zero_skl(zero_no)(1))
+            Select Case (.kanren)
+                '特殊スキル
+                Case "特殊", "条件" ', "童"
+                    .tokusyu = 9
+                    '.t_flg = フラグ付きスキル参照(simu_bs(3).skill(0)) '条件付きスキルの場合
+                Case Else
+                    Select Case (.koubou)
+                        Case "速" '速度オンリー
+                            .tokusyu = 1
+                            .speed = Decimal.Parse(zero_skl(zero_no)(5)) '速度はコスト依存・・・しない・・・（現状
+                        Case "破壊" '破壊オンリー
+                            .tokusyu = 2
+                        Case Else '通常スキルの場合
+                            .tokusyu = 0
+                            'If InStr(tmp(4), "C") Then tmp(4) = 文字列計算(Replace(tmp(4), "C", CStr(cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
+                            '.kouka_f = Decimal.Parse(tmp(4))
+                            If InStr(zero_skl(zero_no)(5), "C") Then zero_skl(zero_no)(5) = _
+                                文字列計算(Replace(zero_skl(zero_no)(5), "C", CStr(simu_bs(3).cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
+                            .kouka_f = Decimal.Parse(zero_skl(zero_no)(5))
+                            If zero_skl(zero_no)(6) = "速" Then .speed = Decimal.Parse(zero_skl(zero_no)(7)) '付与効果に速度がある
+                    End Select
+            End Select
         End With
     End Sub
 
@@ -564,7 +547,7 @@ Public Class Form10
             heino = 兵振り武将決定() '誰を兵法振りにするか決める
             Call ステ振りセット() '全武将のステ振りが確定できる
             .heisyu.ts = 実質統率計算(.heisyu.tousotu, .No)
-            .skill(0).name = Replace(bstr(15), Mid(bstr(15), 1, InStr(bstr(15), "：")), "")
+            .skill(0).name = bstr(15)
             Call ランキング武将スキル()
         End With
     End Sub
@@ -594,15 +577,19 @@ Public Class Form10
                 Case Else
                     simu_bs(3).skill(i) = add_skl(i - 1).Clone
                     With simu_bs(3).skill(i)
-                        If InStr(.kanren, "コスト") Then 'コスト依存スキルの扱い
-                            .kanren = Replace(.kanren, "コスト", CStr(simu_bs(3).cost)) '変更。「スキル所持武将の」コストで一括適用
-                        End If
-                        If (Not .tokusyu = 5) And (Not .tokusyu = 9) Then 'データが無いスキルの場合は計算しない
+                        If InStr(.kanren, "C") Then 'コスト依存スキルの扱い
+                            .kanren = Replace(.kanren, "C", CStr(simu_bs(3).cost)) '変更。「スキル所持武将の」コストで一括適用
                             .kanren = 文字列計算(.kanren)
                             .kouka_f = Decimal.Parse(.kanren)
                         Else
-                            .kouka_f = 0
+                            .kouka_f = Decimal.Parse(.kanren)
                         End If
+                        'If .kanren Then 'データが無いスキルの場合は計算しない
+                        '    .kanren = 文字列計算(.kanren)
+                        '    .kouka_f = Decimal.Parse(.kanren)
+                        'Else
+                        '    .kouka_f = 0
+                        'End If
                     End With
             End Select
         Next
@@ -678,7 +665,6 @@ Public Class Form10
             heihou_kei = heihou_kei + simu_bs(i).st(2)
         Next
         heihousum = (maxheihou + (heihou_kei - maxheihou) / 6) / 100
-
         '小隊戦闘力計算
         For i As Integer = 0 To 3
             With simu_bs(i)
@@ -772,37 +758,7 @@ Public Class Form10
             c_skillp(i) = Convert10to2(i, Math.Ceiling(Math.Log10(c) / Math.Log10(2)))
         Next
     End Sub
-    'ほぼModulu1にあるものと同じ＾＾；
-    Private Function スキル実質上昇率(ByVal sk As Busho.skl) As Decimal(,) 'そのスキルが発動することによりプラスされる上昇率
-        '二次元配列が戻り値になる。(x,0)->将スキル, (x,1)->一般スキル
-        Dim tmpatk(,) As Decimal
-        ReDim tmpatk(3, 1)
-        With sk
-            For i As Integer = 0 To 3
-                If InStr(.heika, simu_bs(i).heisyu.bunrui) Or InStr(.heika, "将") Then '兵科が合致するか
-                    '（攻防一致、特殊スキル排除、通常スキル確認は発動スキル候補決定の段階で除外）
-                    If InStr(.heika, "将") Then '将スキルかどうか
-                        tmpatk(i, 0) = .kouka_f
-                    Else
-                        tmpatk(i, 1) = .kouka_f
-                    End If
-                ElseIf InStr(kobo, "攻") And InStr(.koubou, "上級器") Then '上級器スキルならば
-                    If simu_bs(i).heisyu.jyk_utuwa Then '上級器に含まれる兵科を積んでいれば（今は『上級器攻』のみ）
-                        tmpatk(i, 1) = .kouka_f
-                    End If
-                ElseIf InStr(kobo, "防") And InStr(.koubou, "上級砲") Then '上級砲スキルならば
-                    If simu_bs(i).heisyu.jyk_hou Then '上級砲に含まれる兵科を積んでいれば（今は『上級砲防』のみ）
-                        tmpatk(i, 1) = .kouka_f
-                    End If
-                ElseIf InStr(kobo, "攻") And InStr(.koubou, "秘境兵") Then '秘境兵スキルならば
-                    If simu_bs(i).heisyu.tok_hikyo Then '秘境兵に含まれる兵科を積んでいれば（今は『秘境兵攻』のみ）
-                        tmpatk(i, 1) = .kouka_f
-                    End If
-                End If
-            Next
-        End With
-        スキル実質上昇率 = tmpatk
-    End Function
+    
     '期待値計算(0:ランキング武将の期待値, 1:全体期待値, 2:MAX発動時)
     Private Function 期待値計算() As Decimal()
         Dim c_skill() As Busho.skl = Nothing '発動するスキル
@@ -815,7 +771,7 @@ Public Class Form10
         Dim s_yk_max As Decimal = Nothing 'MAX
         '童関係
         Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
-        Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+        Dim warr() As Decimal = warabe.warabe_gets(kobo)
 
         ReDim s_yk(c_skillp.Length - 1)
         ReDim s_x(c_skillp.Length - 1), s_y(c_skillp.Length - 1, 3)
@@ -831,7 +787,7 @@ Public Class Form10
             If Not c_skill Is Nothing Then 'どれか意味のあるスキルが存在する
                 For j As Integer = 1 To c_skill.Length
                     If Mid(c_skillp(i), j, 1) = 1 Then '発動ならば
-                        Dim ttmp(,) As Decimal = スキル実質上昇率(c_skill(j - 1))
+                        Dim ttmp(,) As Decimal = Form1.スキル実質上昇率(c_skill(j - 1))
                         s_x(i) = s_x(i) * c_skill(j - 1).kouka_p_b
                         For k As Integer = 0 To 3
                             syoplus(k) = syoplus(k) + ttmp(k, 0)
@@ -861,9 +817,8 @@ Public Class Form10
                     s_y(i, k) = (ds * .heisyu.ts * (1 + syoplus(k)) + .hei_max * dk * .heisyu.ts) * (1 + heiplus(k))
                     '童適用(今のところ単科防スキルのみ対応)
                     For l As Integer = 0 To harr.Length - 1
-                        If InStr(.heisyu.bunrui, harr(l)) And InStr(kobo, "防") Then
+                        If InStr(.heisyu.bunrui, harr(l)) Then
                             s_y(i, k) = s_y(i, k) * (1 + 0.01 * warr(l))
-                            Exit For
                         End If
                     Next
                 End With
@@ -956,10 +911,10 @@ Public Class Form10
         'ランキング対象武将をDBから取得
         Dim sl()() As String = Nothing
         Dim slbl() As String = _
-           {"No", "R", "名称", "C", "指揮兵", "槍", "弓", "馬", "器", "攻撃", "防御", "兵法", "攻成長", "防成長", "兵成長", "スキル", "職"}
+        {"Bid", "武将R", "武将名", "Cost", "指揮兵数", "槍統率", "弓統率", "馬統率", "器統率", "初期攻撃", "初期防御", "初期兵法", "攻成長", "防成長", "兵成長", "初期スキル名", "職"}
         Dim target_r As String = 対象範囲文字列出力()
-        Dim sqlstr As String = "SELECT * FROM Busho WHERE " & target_r & ""
-        sl = DB_DirectOUT3(con, cmd, sqlstr, slbl)
+        Dim sqlstr As String = "SELECT * FROM BData WHERE " & target_r & " AND Bunf = 'F'"
+        sl = DB_DirectOUT3(sqlstr, slbl)
 
         '各武将の初期スキルの性能をまとめて取ってくる
         Dim syoki_skl() As String = Nothing
@@ -969,7 +924,7 @@ Public Class Form10
         For i As Integer = 0 To sl.GetLength(0) - 1
             'スキル重複登録を防ぐ
             sdflg = False
-            syoki_skinm = Replace(sl(i)(15), Mid(sl(i)(15), 1, InStr(sl(i)(15), "：")), "")
+            syoki_skinm = sl(i)(15)
             If Not syoki_skl Is Nothing Then '空でないならば
                 For j As Integer = 0 To syoki_skl.Length - 1
                     If syoki_skinm = syoki_skl(j) Then '既にsyoki_sklに登録済
@@ -987,6 +942,9 @@ Public Class Form10
 
         Dim sc As Integer = sl.GetLength(0) - 1 '合致したデータ個数
         ReDim kitai_val(sc), kitai_butai(sc), kitai_max(sc)
+        Dim rows As DataGridViewRow()
+        ReDim rows(sc)
+
         For i As Integer = 0 To sc
             Dim tmprec(2) As Decimal
             Call ランキング武将読み込み(sl(i))
@@ -1017,18 +975,20 @@ Public Class Form10
                                             "+" & (Math.Ceiling(((kitai_butai(i) / (.attack + batk)) - 1) * 10000) / 10000) * 100.ToString & "%", _
                                             Math.Floor(kitai_val(i)).ToString("#,#"), _
                                             kitai_cost, Math.Floor(kitai_max(i)).ToString("#,#")})
-                DataGridView1.Rows.AddRange(row)
-                Call 表色付け()
+                'DataGridView1.Rows.AddRange(row)
+                Call 表色付け(row)
             End With
+            rows(i) = row
         Next
+        DataGridView1.Rows.AddRange(rows)
         DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells
         Call プログレスバー変化(0)
     End Sub
 
-    Private Sub 表色付け()
+    Private Sub 表色付け(ByRef row As DataGridViewRow)
         Dim cell As DataGridViewCell = Nothing
         With simu_bs(3)
-            cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(6)
+            cell = row.Cells(6)
             If .sta_g(2) >= 3.0 Then '兵法成長で色づけ(3.0->紫, 2.5->赤)
                 cell.Style.ForeColor = Color.DarkMagenta
                 cell.Style.Font = New Font("Consolas", 10, FontStyle.Bold)
@@ -1054,7 +1014,7 @@ Public Class Form10
                     syflg = True '秘境兵攻対応
                 End If
             End If
-            cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(8)
+            cell = row.Cells(8)
             If syflg Then '兵科対応スキル持ち色付け
                 cell.Style.ForeColor = Color.DarkGreen
                 cell.Style.Font = New Font("Consolas", 10, FontStyle.Bold)
@@ -1062,13 +1022,13 @@ Public Class Form10
             If .skill(0).tokusyu = 5 Then '初期スキルがDBにデータ×
                 cell.Style.ForeColor = Color.RosyBrown
             End If
-            cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(1) '武将レアリティによる色分け
-            Dim cell2 As DataGridViewCell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(2)
-            Select Case Mid(CStr(DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(0).Value), 1, 2)
+            cell = row.Cells(1) '武将レアリティによる色分け
+            Dim cell2 As DataGridViewCell = row.Cells(2)
+            Select Case Mid(CStr(row.Cells(0).Value), 1, 2)
                 Case "10" '天
                     cell.Style.ForeColor = Color.Goldenrod
                     cell2.Style.ForeColor = Color.Goldenrod
-                Case "20" To "21" '極
+                Case "20" To "25" '極
                     cell.Style.ForeColor = Color.DimGray
                     cell2.Style.ForeColor = Color.DimGray
                 Case "27" 'シクレ極
@@ -1077,16 +1037,16 @@ Public Class Form10
                 Case "29" 'プラチナ極
                     cell.Style.ForeColor = Color.Black
                     cell2.Style.ForeColor = Color.Black
-                Case "30" To "32" '特
+                Case "30" To "35" '特
                     cell.Style.ForeColor = Color.Firebrick
                     cell2.Style.ForeColor = Color.Firebrick
                 Case "37" 'シクレ特
                     cell.Style.ForeColor = Color.DarkOliveGreen
                     cell2.Style.ForeColor = Color.DarkOliveGreen
-                Case "40" To "41" '上
+                Case "40" To "45" '上
                     cell.Style.ForeColor = Color.Orange
                     cell2.Style.ForeColor = Color.Orange
-                Case "50" To "51" '序
+                Case "50" To "55" '序
                     cell.Style.ForeColor = Color.DarkCyan
                     cell2.Style.ForeColor = Color.DarkCyan
                 Case "57" '輝く平手
@@ -1192,7 +1152,7 @@ Public Class Form10
                     kh = "全"
                 End If
                 Dim koukaft As String = (.kouka_f * 100).ToString
-                If InStr(.kanren, "コスト") Then 'コストが含まれている＝コスト依存
+                If InStr(.kanren, "C") Then 'コストが含まれている＝コスト依存
                     koukaft = .kanren
                 End If
                 strResult.Append(.name & "," & kh & kskb & "," & .kouka_p * 100 & "," & koukaft & vbCrLf)
@@ -1325,8 +1285,8 @@ Public Class Form10
                 Case 3
                     bsho = "ランキング武将"
             End Select
-            ComboBox(Me, CStr(i + 1)).SelectedText = GetINIValue("rare", bsho, bini) '（強制的に）R選択
-            R選択(ComboBox(Me, CStr(i + 1)), Nothing)
+            ComboBox(Me, CStr(i + 1)).SelectedIndex = ComboBox(Me, CStr(i + 1)).FindString(GetINIValue("rare", bsho, bini)) '（強制的に）R選択
+            'R選択(ComboBox(Me, CStr(i + 1)), Nothing)
             ComboBox(Me, "00" & CStr(i + 1)).SelectedText = GetINIValue("name", bsho, bini) '（強制的に）武将名選択
             武将名選択(ComboBox(Me, "00" & CStr(i + 1)), Nothing)
         Next
@@ -1345,18 +1305,18 @@ Public Class Form10
             Next
         Else 'スキル通常設定ならば
             ComboBox01.Focus()
-            ComboBox01.SelectedText = スキル関連推定(GetINIValue("add1", "武将A", bini))
+            ComboBox01.SelectedIndex = ComboBox01.FindString(スキル関連推定(GetINIValue("add1", "武将A", bini)))
             ComboBox011.SelectedText = GetINIValue("add1", "武将A", bini)
             ComboBox02.Focus()
-            ComboBox02.SelectedText = スキル関連推定(GetINIValue("add2", "武将A", bini))
+            ComboBox02.SelectedIndex = ComboBox02.FindString(スキル関連推定(GetINIValue("add2", "武将A", bini)))
             ComboBox012.SelectedText = GetINIValue("add2", "武将A", bini)
             If Not simu_skeqflg Then 'ランキング武将のスキルがオリジナル
                 CheckBox1.Checked = False
                 ComboBox41.Focus()
-                ComboBox41.SelectedText = スキル関連推定(GetINIValue("add1", "ランキング武将", bini))
+                ComboBox41.SelectedIndex = ComboBox41.FindString(スキル関連推定(GetINIValue("add1", "ランキング武将", bini)))
                 ComboBox041.SelectedText = GetINIValue("add1", "ランキング武将", bini)
                 ComboBox42.Focus()
-                ComboBox42.SelectedText = スキル関連推定(GetINIValue("add2", "ランキング武将", bini))
+                ComboBox42.SelectedIndex = ComboBox42.FindString(スキル関連推定(GetINIValue("add2", "ランキング武将", bini)))
                 ComboBox042.SelectedText = GetINIValue("add2", "ランキング武将", bini)
             End If
         End If

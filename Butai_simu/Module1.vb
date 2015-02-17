@@ -1,6 +1,7 @@
 ﻿Imports System.IO
-Imports System.Data.OleDb
+'Imports System.Data.OleDb
 Imports System.Runtime.InteropServices
+Imports System.Data.SQLite
 Imports Microsoft.VisualBasic.FileIO
 Imports System.Text
 
@@ -119,6 +120,10 @@ Public Structure Busho : Implements System.ICloneable
             exp_kouka = 0
             exp_kouka_b = 0
             up_kouka_p = 0
+            speed = 0
+            'heika = Nothing
+            'kanren = Nothing
+            'koubou = Nothing
         End Sub
     End Structure
 
@@ -134,15 +139,14 @@ Public Structure Busho : Implements System.ICloneable
         skill(0).lv = 1
     End Sub
 
-    'outflgがOFFならば、スキルが取得できなかった時のエラーMsgboxを表示せずにkanrenにスキル効果説明を放り込む
-    Sub スキル取得(ByVal sno As Integer, ByVal sname As String, ByVal slv As Integer, ByVal fss As Integer(), Optional ByVal outflg As Boolean = True)
+    Sub スキル取得(ByVal sno As Integer, ByVal sname As String, ByVal slv As Integer, ByVal fss As Integer(), Optional ByRef outlog As String = Nothing)
         'fssはその武将のスキル登録状態
         For i As Integer = 0 To skill_no - 1
             If skill.Length - 1 < i Then 'skillの要素数がiよりも小さければ
                 ReDim Preserve skill(i)
             End If
             If fss(i) = sno Then
-                Dim tmp(), u, s As String
+                Dim tmp() As String
                 If Not skill_no = skill.Length And Not skill(i).koubou = "" Then '既にスキルが格納されている場合
                     ReDim Preserve skill(i + 1)
                     If skill(i + 1).koubou = "" Then 'その下が空欄ならば
@@ -153,73 +157,47 @@ Public Structure Busho : Implements System.ICloneable
                     .name = sname
                     .lv = slv
                     tmp = Skill_ref(.name, .lv)
-                    If tmp(0) = "" Then '最近wikiの更新で、データが無い部分が"+"も無い場合がある
-                        tmp(0) = 0
+                    If tmp(7) Is Nothing Then 'エントリ自体が存在しない
+                        outlog = "データベースに存在しないスキル。要更新。" & "【" & .name & "LV" & .lv & "】"
+                        Continue For
+                    End If
+
+                    .kanren = tmp(1)
+                    .heika = tmp(2)
+                    If InStr(.heika, "全") Then
+                        .heika = "槍弓馬砲器"
+                    End If
+                    .koubou = tmp(3)
+                    'データ不足の場合を除く
+                    If tmp(7) = "U" Then
+                        .tokusyu = 5
+                        outlog = outlog & "登録情報が無いスキル・LV。結果には反映されません。" & _
+                                   "【" & .name & "LV" & .lv & "】"
+                        .kouka_p = 0
+                        .kouka_f = 0
+                        Continue For
                     End If
                     .kouka_p = Decimal.Parse(tmp(0))
-                    .heika = tmp(1)
-
-                    s = Mid(tmp(2), 1, InStr(tmp(2), "："))
-                    .koubou = Replace(Replace(s, "：", ""), .heika, "")
-                    .speed = スピードスキル取得(tmp(2), tmp(3)) 'スピードスキル確認
-                    '特殊スキルリスト確認
-                    .tokusyu = 0 'リセット
-                    For j As Integer = 0 To error_skill.Length - 1
-                        If sname = error_skill(j) Then
+                    Select Case (.kanren)
+                        '特殊スキル
+                        Case "特殊", "条件" ', "童"
                             .tokusyu = 9
-                            .t_flg = フラグ付きスキル参照(skill(i))
-                            Exit For
-                        End If
-                    Next
-                    If (InStr(.koubou, "攻") = 0 And InStr(.koubou, "防") = 0) Or .tokusyu = 9 Then '特殊スキルの扱い
-                        Select Case .koubou
-                            Case "速"
-                                .tokusyu = 1
-                            Case "破壊"
-                                .tokusyu = 2
-                            Case Else
-                                .tokusyu = 9
-                        End Select
-                    Else
-                        .tokusyu = 0
-                        u = Replace(tmp(2), s, "")
-                        u = Replace(u, "上昇", "")
-                        '***** 情報がない、もしくはコスト限定情報 *****
-                        If u = "%" Then
-                            .tokusyu = 5 'データが無い
-                            If outflg Then
-                                MsgBox("このスキル・LVはWikiに登録情報がありません。" & vbCrLf & "シミュレーション結果には反映されません" & vbCrLf & _
-                                       "【" & .name & "LV" & .lv & "】")
-                            End If
-                        End If
-                        For k As Decimal = 1 To 4 Step 0.5
-                            If InStr(u, "(コスト" & k & ")") Then
-                                .tokusyu = 5
-                                If outflg Then
-                                    MsgBox("このスキル・LVは限定されたコスト下での情報しかありません" & vbCrLf & "シミュレーションエラーを起こす場合があります" & vbCrLf & _
-                                           "【" & .name & "LV" & .lv & "】")
-                                End If
-                                u = Replace(u, "(コスト " & k & " )", "")
-                            End If
-                        Next
-                        '**********************************************
-                        If outflg Then
-                            .kanren = u 'kanrenにスキル効果文字列を
-                        End If
-                        If InStr(u, "コスト") Then 'コスト依存スキルの扱い
-                            u = Replace(u, "コスト", CStr(cost)) '変更。「スキル所持武将の」コストで一括適用
-                        End If
-                        If Not .tokusyu = 5 Then 'データが無いスキルの場合は計算しない
-                            u = 文字列計算(u)
-                            .kouka_f = Decimal.Parse(u)
-                        Else
-                            .kouka_f = 0
-                        End If
-
-                        If InStr(.heika, "全") Then
-                            .heika = "槍弓馬砲器"
-                        End If
-                    End If
+                            .kouka_f = Val(tmp(4))
+                            .t_flg = フラグ付きスキル参照(skill(i)) '条件付きスキルの場合
+                        Case Else
+                            Select Case (.koubou)
+                                Case "速" '速度オンリー
+                                    .tokusyu = 1
+                                    .speed = Decimal.Parse(tmp(4)) '速度はコスト依存・・・しない・・・（現状
+                                Case "破壊" '破壊オンリー
+                                    .tokusyu = 2
+                                Case Else '通常スキルの場合
+                                    .tokusyu = 0
+                                    If InStr(tmp(4), "C") Then tmp(4) = 文字列計算(Replace(tmp(4), "C", CStr(cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
+                                    .kouka_f = Decimal.Parse(tmp(4))
+                                    If tmp(5) = "速" Then .speed = Decimal.Parse(tmp(6)) '付与効果に速度がある
+                            End Select
+                    End Select
                 End With
             Else
                 skill(i) = skill(fss(i)).Clone
@@ -229,35 +207,35 @@ Public Structure Busho : Implements System.ICloneable
     End Sub
 
     '基本効果、付加効果を入力、加速率を出力
-    Function スピードスキル取得(ByVal kihon As String, ByVal huka As String) As Decimal
-        If InStr(kihon, "速") = 0 And InStr(huka, "速") = 0 Then '一般スキルにはゼロ
-            Return 0
-            Exit Function
-        End If
-        Dim spd As String = "0"
-        Dim dsp As String = vbNullString
-        Dim ss, se, sf As Integer
-        '基本欄にあるか付加欄にあるか
-        If InStr(kihon, "速") Then
-            dsp = kihon
-        ElseIf InStr(huka, "速") Then
-            dsp = huka
-        End If
-        ss = InStr(dsp, "：") + 1
-        If InStr(dsp, "上昇") Then
-            se = InStr(dsp, "上昇") - ss
-            sf = 1
-        ElseIf InStr(dsp, "低下") Then
-            se = InStr(dsp, "低下") - ss
-            sf = -1
-        End If
-        spd = Mid(dsp, ss, se)
-        If sf = -1 Then '低下スキルならば
-            spd = "-" & spd
-        End If
-        '特殊な付加要素が加わったスピードスキルが増えてきたためエラーチェックFalse
-        スピードスキル取得 = 文字列計算(spd, False)
-    End Function
+    'Function スピードスキル取得(ByVal kihon As String, ByVal huka As String) As Decimal
+    '    If InStr(kihon, "速") = 0 And InStr(huka, "速") = 0 Then '一般スキルにはゼロ
+    '        Return 0
+    '        Exit Function
+    '    End If
+    '    Dim spd As String = "0"
+    '    Dim dsp As String = vbNullString
+    '    Dim ss, se, sf As Integer
+    '    '基本欄にあるか付加欄にあるか
+    '    If InStr(kihon, "速") Then
+    '        dsp = kihon
+    '    ElseIf InStr(huka, "速") Then
+    '        dsp = huka
+    '    End If
+    '    ss = InStr(dsp, "：") + 1
+    '    If InStr(dsp, "上昇") Then
+    '        se = InStr(dsp, "上昇") - ss
+    '        sf = 1
+    '    ElseIf InStr(dsp, "低下") Then
+    '        se = InStr(dsp, "低下") - ss
+    '        sf = -1
+    '    End If
+    '    spd = Mid(dsp, ss, se)
+    '    If sf = -1 Then '低下スキルならば
+    '        spd = "-" & spd
+    '    End If
+    '    '特殊な付加要素が加わったスピードスキルが増えてきたためエラーチェックFalse
+    '    スピードスキル取得 = 文字列計算(spd, False)
+    'End Function
 
     Public Structure heisu : Implements System.ICloneable
         Public name As String '兵種名
@@ -290,7 +268,7 @@ Public Structure Busho : Implements System.ICloneable
             kobo_ = kb
         End If
         Dim s() As String = _
-         DB_DirectOUT(con, cmd, "SELECT 統率,兵種名,兵科,攻撃,防御,移動 FROM Heika WHERE 兵種名=""" & h & """", {"兵科", "統率", "攻撃", "防御", "移動"})
+         DB_DirectOUT("SELECT 統率, 兵種名, 兵科, 攻撃値, 防御値, 移動値 FROM HData WHERE 兵種名=" & ダブルクオート(h) & "", {"兵科", "統率", "攻撃値", "防御値", "移動値"})
         With heisyu
             .name = h
             .bunrui = s(0)
@@ -425,7 +403,11 @@ Public Structure Busho : Implements System.ICloneable
         Next
         '職
         GroupBox(Form1, "0" & CStr(bc) & "2").Text = "ステータス[ " & job & " ]"
-        ComboBox(Form1, CStr(bc) & "14").Text = skill(0).lv
+        'スキルレベルを埋める段階でremovehandlerしていないと二度埋めになる
+        Dim cc As ComboBox = ComboBox(Form1, CStr(bc) & "14")
+        RemoveHandler cc.SelectedValueChanged, AddressOf Form1.追加スキル追加
+        cc.Text = skill(0).lv
+        AddHandler cc.SelectedValueChanged, AddressOf Form1.追加スキル追加
         ComboBox(Form1, CStr(bc) & "04").Text = rank
         For k As Integer = 5 To 8
             ComboBox(Form1, CStr(bc) & "0" & CStr(k)).Text = Tousotu(fs)(k - 5)
@@ -567,6 +549,7 @@ Public Structure flgskl : Implements System.ICloneable 'フラグスキル格納
     Public heika As String '兵科
     Public speed As Decimal '加速率    
     Public onoff As Boolean 'ONOFF
+    Public wflg As Boolean '童フラグ
     Public Function Clone() As Object Implements System.ICloneable.Clone
         Return Me.MemberwiseClone()
     End Function
@@ -620,6 +603,109 @@ Public Structure _warabe
             .utuwa = 0
         End With
     End Sub
+    Public Sub warabe_itemset(ByVal kb As String, ByVal t As String, ByVal value As Decimal)
+        If InStr(kb, "攻") Then
+            Select Case t
+                Case "槍"
+                    warabe.atk.yari += value
+                Case "弓"
+                    warabe.atk.yumi += value
+                Case "馬"
+                    warabe.atk.uma += value
+                Case "砲"
+                    warabe.atk.hou += value
+                Case "器"
+                    warabe.atk.utuwa += value
+            End Select
+        ElseIf InStr(kb, "防") Then
+            Select Case t
+                Case "槍"
+                    warabe.def.yari += value
+                Case "弓"
+                    warabe.def.yumi += value
+                Case "馬"
+                    warabe.def.uma += value
+                Case "砲"
+                    warabe.def.hou += value
+                Case "器"
+                    warabe.def.utuwa += value
+            End Select
+        ElseIf InStr(kb, "速") Then
+            Select Case t
+                Case "槍"
+                    warabe.speed.yari += value
+                Case "弓"
+                    warabe.speed.yumi += value
+                Case "馬"
+                    warabe.speed.uma += value
+                Case "砲"
+                    warabe.speed.hou += value
+                Case "器"
+                    warabe.speed.utuwa += value
+            End Select
+        End If
+    End Sub
+    Public Sub warabe_set(ByVal kb As String, ByVal heika As String, ByVal value As Decimal)
+        Dim hlen As Integer = heika.Length
+        Dim tstr As String = Nothing
+        For i As Integer = 0 To hlen - 1
+            tstr = Mid(heika, i + 1, 1)
+            warabe_itemset(kb, tstr, value)
+        Next
+    End Sub
+    Public Function warabe_get(ByVal kb As String, ByVal t As String) As Decimal
+        If InStr(kb, "攻") Then
+            Select Case t
+                Case "槍"
+                    Return warabe.atk.yari
+                Case "弓"
+                    Return warabe.atk.yumi
+                Case "馬"
+                    Return warabe.atk.uma
+                Case "砲"
+                    Return warabe.atk.hou
+                Case "器"
+                    Return warabe.atk.utuwa
+            End Select
+        ElseIf InStr(kb, "防") Then
+            Select Case t
+                Case "槍"
+                    Return warabe.def.yari
+                Case "弓"
+                    Return warabe.def.yumi
+                Case "馬"
+                    Return warabe.def.uma
+                Case "砲"
+                    Return warabe.def.hou
+                Case "器"
+                    Return warabe.def.utuwa
+            End Select
+        ElseIf InStr(kb, "速") Then
+            Select Case t
+                Case "槍"
+                    Return warabe.speed.yari
+                Case "弓"
+                    Return warabe.speed.yumi
+                Case "馬"
+                    Return warabe.speed.uma
+                Case "砲"
+                    Return warabe.speed.hou
+                Case "器"
+                    Return warabe.speed.utuwa
+            End Select
+        End If
+        Return 0
+    End Function
+    Public Function warabe_gets(ByVal kb As String) As Decimal()
+        If InStr(kb, "攻") Then
+            Return {warabe.atk.yari, warabe.atk.yumi, warabe.atk.uma, warabe.atk.hou, warabe.atk.utuwa}
+        ElseIf InStr(kb, "防") Then
+            Return {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+        ElseIf InStr(kb, "速") Then
+            Return {warabe.speed.yari, warabe.speed.yumi, warabe.speed.uma, warabe.speed.hou, warabe.speed.utuwa}
+        End If
+        Return {0, 0, 0, 0, 0}
+    End Function
 End Structure
 
 Module Module1
@@ -692,15 +778,20 @@ Module Module1
     '*** 部隊スキル関係 ***
     Public bskill As bskl '武将スキル
     '*** DB関連の変数 ***
-    Public con, con2, con3 As New OleDbConnection 'DB接続設定に必要な変数 1:武将DB, 2:スキルDB, 3:NPC空き地情報
-    Public cmd, cmd2, cmd3 As New OleDbCommand
-    Public dbpath As String = Application.StartupPath & "\Busho.mdb" '実行ファイルのある階層に武将DBは置く
-    Public dbpath2 As String = Application.StartupPath & "\Skill.mdb" '同じく、スキルDB
-    Public dbpath3 As String = Application.StartupPath & "\npc.mdb"
-    Public bnpath As String = Application.StartupPath & "\BName2.INI" '同名武将区別ファイル
-    Public espath As String = Application.StartupPath & "\ERRORSKILL.txt" '特殊スキルリストの場所
+    'Public con, con2, con3 As New OleDbConnection 'DB接続設定に必要な変数 1:武将DB, 2:スキルDB, 3:NPC空き地情報
+    Public Connection As New SQLiteConnection
+    Public Command As New SQLiteCommand
+    'Public Command_sklref As SQLite.SQLiteCommand
+    'Public cmd, cmd2, cmd3 As New OleDbCommand
+    'Public dbpath As String = Application.StartupPath & "\Busho.mdb" '実行ファイルのある階層に武将DBは置く
+    'Public dbpath2 As String = Application.StartupPath & "\Skill.mdb" '同じく、スキルDB
+    'Public dbpath3 As String = Application.StartupPath & "\npc.mdb"
+
+    'Public bnpath As String = Application.StartupPath & "\BName2.INI" '同名武将区別ファイル
+    'Public espath As String = Application.StartupPath & "\ERRORSKILL.txt" '特殊スキルリストの場所
     Public fdpath As String = Application.StartupPath & "\optionskill.csv" 'フラグ付きスキルリストの場所
-    Public error_skill() As String '特殊スキルリスト
+    Public fspath As String = Application.StartupPath & "\defoption.csv" 'フラグ付きスキル設定ファイルの場所
+    'Public error_skill() As String '特殊スキルリスト
     Public fskill_data() As flgskl 'フラグ付きスキルデータリスト
     Public simu_execno As Integer 'どこから計算しているのかを格納 0:シミュレータ本体, 1:ランキングモード
     '*** INIファイルの場所 ***
@@ -709,52 +800,50 @@ Module Module1
     '*** CSVファイルの場所 ***
     Public FILENAME_csv As String
 
-    Public Sub DB_Open(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal dbpath As String) '開始時にDBを開く設定
-        If Not con.State = ConnectionState.Open Then
-            'If dbcomp = False Then
-            'Dim jroJet As New JRO.JetEngine '最適化
-            'jroJet.CompactDatabase( _
-            '    "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & dbpath, _
-            '   "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & Application.StartupPath & "\Busho_new.mdb")
-            'My.Computer.FileSystem.RenameFile(Application.StartupPath & "\Busho_new.mdb", "Busho.mdb")
-            'dbcomp = True
-            'End If
-            con.ConnectionString = _
-              "Provider=Microsoft.Jet.OLEDB.4.0; Data Source=" & dbpath
-            cmd.Connection = con
-        End If
+    'Public Sub DB_Open(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal dbpath As String) '開始時にDBを開く設定
+    Public Sub DB_Open() '開始時にDBを開く設定
+        Connection.ConnectionString = "Version=3;Data Source=ixadb.db3;New=False;Compress=True;" 'Read Only=True;"
+        Connection.Open()
+        Command = Connection.CreateCommand
+        'Command_sklref = Connection.CreateCommand
+        'Command_sklref.CommandText = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE SData.スキル名 = @param1 AND スキルLV = @param2"
+        'Command_sklref.CommandType = CommandType.Text
+        ''パスワードを変更
+        'Connection.ChangePassword("password")
     End Sub
 
-    Public Sub DB_Connection(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand) 'オープンorクローズ
-        Try
-            con.Open()
-        Catch ex As Exception
-            con.Close()
-            con.Open()
-        End Try
-    End Sub
+    Public Function ダブルクオート(ByVal Tstr As String) As String
+        Return ("""" & Tstr & """")
+    End Function
+
+
+    Public Function TrimJ(ByVal str As String) As String
+        Dim ret As String = Trim(str)
+        Return (Replace(Replace(ret, " ", ""), "　", ""))
+    End Function
 
     'データベースからSQL文を用いて出力(DataSet出力)
-    Public Function DB_TableOUT(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outTable As String) As DataSet
-        Dim da As New OleDbDataAdapter
-        Dim ds As DataSet = New DataSet
-        Call DB_Connection(con, cmd)
-        cmd.CommandText = sql_str
-        da.SelectCommand = cmd
-        ds.Clear()
+    'Public Function DB_TableOUT(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outTable As String) As DataSet
+    Public Function DB_TableOUT(ByVal sql_str As String, ByVal outTable As String) As DataSet
+        'Dim da As New SQLiteDataAdapter 'OleDbDataAdapter
+        Dim ds As DataSet = New DataSet()
+        Dim da As SQLiteDataAdapter = New SQLiteDataAdapter(sql_str, Connection)
         da.Fill(ds, outTable)
         Return ds
     End Function
 
     '(直接出力)
-    Public Function DB_DirectOUT(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outlist As String()) As String()
-        Dim dr As OleDbDataReader
+    'Public Function DB_DirectOUT(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outlist As String()) As String()
+    Public Function DB_DirectOUT(ByVal sql_str As String, ByVal outlist As String()) As String()
+        'Dim Command As New SQLiteCommand
+        Dim dr As SQLiteDataReader 'OleDbDataReader
         Dim output() As String
         Dim l As Integer = outlist.Length
         ReDim output(l - 1)
-        Call DB_Connection(con, cmd)
-        cmd.CommandText = sql_str
-        dr = cmd.ExecuteReader()
+        'Command = Connection.CreateCommand
+        Command.CommandText = sql_str
+        dr = Command.ExecuteReader()
+        'Command.Dispose()
         While dr.Read()
             For i As Integer = 0 To l - 1
                 If TypeOf dr(outlist(i)) Is DBNull Then 'DBが空欄
@@ -769,12 +858,12 @@ Module Module1
     End Function
 
     '基本はDB_DirectOUTと同じだが、こちらはリスト形式（縦向き配列）で出力する必要のある場合用いる
-    Public Function DB_DirectOUT2(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outlist As String) As String()
-        Dim dr As OleDbDataReader
+    'Public Function DB_DirectOUT2(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outlist As String) As String()
+    Public Function DB_DirectOUT2(ByVal sql_str As String, ByVal outlist As String) As String()
+        Dim dr As SQLiteDataReader 'OleDbDataReader
         Dim output() As String = Nothing
-        Call DB_Connection(con, cmd)
-        cmd.CommandText = sql_str
-        dr = cmd.ExecuteReader()
+        Command.CommandText = sql_str
+        dr = Command.ExecuteReader()
         Dim c As Integer = 0
         While dr.Read()
             ReDim Preserve output(c)
@@ -790,14 +879,14 @@ Module Module1
     End Function
 
     '基本は上の二つのDB_DirectOUTと同じだが、これは二次元配列で一気に表形式で出力する場合に用いる
-    Public Function DB_DirectOUT3(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outlist() As String) As String()()
-        Dim dr As OleDbDataReader
+    'Public Function DB_DirectOUT3(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal sql_str As String, ByVal outlist() As String) As String()()
+    Public Function DB_DirectOUT3(ByVal sql_str As String, ByVal outlist() As String) As String()()
+        Dim dr As SQLiteDataReader 'OleDbDataReader
         Dim output()() As String = Nothing
         Dim l As Integer = outlist.Length
         ReDim output(l - 1)
-        Call DB_Connection(con, cmd)
-        cmd.CommandText = sql_str
-        dr = cmd.ExecuteReader()
+        Command.CommandText = sql_str
+        dr = Command.ExecuteReader()
         Dim d As Integer = 0
         While dr.Read()
             Dim outputtmp() As String = Nothing
@@ -848,9 +937,30 @@ Module Module1
 
     'スキルを検索
     Public Function Skill_ref(ByVal skillName As String, ByVal skillLv As Integer) As String()
-        Dim s As String = "SELECT * FROM Skill WHERE 名前=""" & skillName & """ AND LV=" & skillLv & ""
+        Dim s As String = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE SData.スキル名 = " & ダブルクオート(skillName) & " AND スキルLV = " & skillLv & ""
         Dim t() As String = _
-        DB_DirectOUT(con, cmd, s, {"確率", "対象", "基本効果", "付加効果"})
+        DB_DirectOUT(s, {"発動率", "分類", "対象", "攻防", "上昇率", "付与効果", "付与率", "Sunf"})
+        'Dim t() As String = {"発動率", "分類", "対象", "攻防", "上昇率", "付与効果", "付与率", "Sunf"}
+        'Dim dr As SQLiteDataReader 'OleDbDataReader
+        'Dim output() As String
+        'ReDim output(t.Length - 1)
+        'Dim sp1 As SQLite.SQLiteParameter = New SQLite.SQLiteParameter("@param1", skillName)
+        'Dim sp2 As SQLite.SQLiteParameter = New SQLite.SQLiteParameter("@param2", CStr(skillLv))
+        'Command_sklref.Parameters.Add(sp1)
+        'Command_sklref.Parameters.Add(sp2)
+        'dr = Command_sklref.ExecuteReader()
+        ''Command.Dispose()
+        'While dr.Read()
+        '    For i As Integer = 0 To t.Length - 1
+        '        If TypeOf dr(t(i)) Is DBNull Then 'DBが空欄"
+        '            output(i) = ""
+        '        Else
+        '            output(i) = CStr(dr(t(i)))
+        '        End If
+        '    Next
+        'End While
+        'dr.Close()
+        'Return output
         Return t
     End Function
 
@@ -860,10 +970,10 @@ Module Module1
             skillstr = skillstr & """" & skillName(i) & """" & ","
         Next
         skillstr = skillstr.Remove(skillstr.Length - 1, 1)
-        Dim s As String = "SELECT * FROM Skill WHERE LV=" & skillLv & " AND 名前 IN(" & skillstr & ")" & ""
+        Dim s As String = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE スキルLV = " & skillLv & " AND SData.スキル名 IN(" & skillstr & ")" & ""
         s.Remove(s.Length - 1, 1)
         Dim t()() As String = _
-        DB_DirectOUT3(con, cmd, s, {"名前", "確率", "対象", "基本効果", "付加効果"})
+        DB_DirectOUT3(s, {"スキル名", "発動率", "分類", "対象", "攻防", "上昇率", "付与効果", "付与率", "Sunf"})
         Return t
     End Function
 
@@ -936,12 +1046,12 @@ Module Module1
 
     'スキル関連推定
     Public Function スキル関連推定(ByVal skill_name As String) As String
-        Dim stmp() As String = DB_DirectOUT(con, cmd, "SELECT * FROM Skill WHERE 名前 = """ & skill_name & _
-                         """ AND LV=1", {"分類"})
+        Dim stmp() As String = DB_DirectOUT("SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE SData.スキル名 = " & ダブルクオート(skill_name) & " AND スキルLV = 1", {"分類"})
+        If stmp(0) = "条件" Then stmp(0) = "特殊" '条件付きスキルは特殊カテゴリーに含む
         スキル関連推定 = stmp(0)
     End Function
 
-    '部隊条件に依存したスキルの扱い（覇王征軍、武神八幡陣、遁世影武者）
+    '部隊条件に依存したスキルの扱い（アドホック対応※）
     'データベースから静的に参照するだけではどうしようもないスキルはココでデータ確定
     Public Function 条件依存スキル・フラグスキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal) As Boolean
         'Dim sdata() As String
@@ -1009,9 +1119,24 @@ Module Module1
                         End If
                     Next
                     Return False '花魁心操術自体は他に何も影響しない
+                Case "穢土の礎"
+                    '穢土の礎
+                    '姫武将にのみスキル効果を適用。
+                    '効果自体は変動しないため、ここではflgをONにするだけ
+                    Return True
             End Select
             Return False
         End With
+        Return True
+    End Function
+
+    '武将データとスキルデータを引数に取り、武将がスキル効果適用条件に合致しなければFalse
+    '（攻防一致、兵科一致は既に判定されているとして省略）
+    Public Function 条件付スキル適用チェック(ByVal b As Busho, ByVal s As Busho.skl) As Boolean
+        Select Case (s.name)
+            Case "穢土の礎" '姫武将にのみ適用
+                If Not (b.job = "姫") Then Return False
+        End Select
         Return True
     End Function
 
@@ -1039,7 +1164,7 @@ Module Module1
         Dim srbuff As String = sr.ReadToEnd()
         sr.Close()
         Dim tmpbuf() As String = Split(srbuff, vbCrLf)
-        Dim onoffstr()() As String = CsvLoad("defoption.csv")
+        Dim onoffstr()() As String = CsvLoad(fspath)
         ReDim fskill_data(tmpbuf.Length - 3)
         For i As Integer = 0 To tmpbuf.Length - 3
             Dim dmp() As String = Split(tmpbuf(i + 1), ",") 'csvのインデックスを飛ばす+1
@@ -1051,6 +1176,11 @@ Module Module1
                 .lv = dmp(4)
                 For j As Integer = 0 To onoffstr.GetLength(0) - 1
                     If (onoffstr(j)(1) = .name) Then
+                        If InStr(onoffstr(j)(2), "[童]") Then
+                            .wflg = True
+                        Else
+                            .wflg = False
+                        End If
                         If (onoffstr(j)(3) = "ON") Then
                             .onoff = True
                         Else
@@ -1104,37 +1234,44 @@ Module Module1
         Call warabe.warabe_clean()
         '今は単調ボーナスだけなのでここに記述したほうが軽いかな・・・
         For i As Integer = 0 To fskill_data.Length - 1
-            If Not (fskill_data(i).onoff) Then
+            If Not (fskill_data(i).wflg) Or Not (fskill_data(i).onoff) Then
                 Continue For
             End If
             With fskill_data(i)
-                Select Case (.name)
-                    Case "傾奇爛漫"
-                        warabe.def.yari += 3
-                    Case "日輪の子"
-                        warabe.def.yari += 5
-                    Case "華の童子"
-                        warabe.def.yumi += 5
-                    Case "勝軍地蔵"
-                        warabe.speed.yari += 3
-                        warabe.speed.yumi += 3
-                        warabe.speed.uma += 3
-                        warabe.speed.hou += 3
-                        warabe.speed.utuwa += 3
-                    Case Else
-                        Continue For
-                End Select
+                Dim h As String = .heika
+                Dim f As Decimal = Nothing
+                If h = "全" Then h = "槍弓馬砲器"
+                If InStr(kb, "速") Then f = .speed * 100 Else f = .kouka_f * 100
+                warabe.warabe_set(.koubou, h, f)
+                'Select Case (.name)
+                '    Case "傾奇爛漫"
+                '        warabe.def.yari += 3
+                '    Case "日輪の子"
+                '        warabe.def.yari += 5
+                '    Case "華の童子"
+                '        warabe.def.yumi += 5
+                '    Case "勝軍地蔵"
+                '        warabe.speed.yari += 3
+                '        warabe.speed.yumi += 3
+                '        warabe.speed.uma += 3
+                '        warabe.speed.hou += 3
+                '        warabe.speed.utuwa += 3
+                '    Case Else
+                '        Continue For
+                'End Select
             End With
         Next
     End Sub
 
-    Public Function 童効果文字列出力()
+    Public Function 童効果文字列出力(ByVal kb As String)
         Dim harr() As String = {"槍", "弓", "馬", "砲", "器"}
-        Dim warr() As Decimal = {warabe.def.yari, warabe.def.yumi, warabe.def.uma, warabe.def.hou, warabe.def.utuwa}
+        Dim warr() As Decimal = warabe.warabe_gets(kb)
         Dim strret As String = ""
+        Dim kbstr As String = Nothing
+        If InStr(kb, "攻") Then kbstr = "攻+" Else kbstr = "防+"
         For i As Integer = 0 To harr.Length - 1
             If warr(i) > 0 Then
-                strret = strret & ", " & harr(i) & "防+" & warr(i) & "%"
+                strret = strret & ", " & harr(i) & kbstr & CInt(warr(i)) & "%" '童効果は現在整数値のみ
 
             End If
         Next
@@ -1221,7 +1358,16 @@ Module Module1
             ' コントロールの型が TextBoxBase||Combobox からの派生型の場合は Text をクリアする
             If TypeOf cControl Is TextBoxBase Or TypeOf cControl Is ComboBox Then
                 If Not (cControl Is ex Or cControl Is ex2) Then
-                    cControl.Text = String.Empty
+                    If TypeOf cControl Is ComboBox Then
+                        Dim ctmp As ComboBox = CType(cControl, ComboBox)
+                        If ctmp.DropDownStyle = ComboBoxStyle.DropDownList Then 'DropDownList型のcomboboxがある場合、Textをクリアではダメ
+                            ctmp.SelectedIndex = -1
+                            Continue For
+                        End If
+                        ctmp.Text = String.Empty
+                    Else
+                        cControl.Text = String.Empty
+                    End If
                 End If
             End If
         Next cControl

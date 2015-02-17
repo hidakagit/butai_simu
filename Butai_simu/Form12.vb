@@ -5,7 +5,7 @@ Public Class Form12
     Private Sub Form_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         ' データをすべてクリア
         DataGridView1.Rows.Clear()
-        Call CsvLoad("defoption.csv", DataGridView1)
+        Call CsvLoad(fspath, DataGridView1)
     End Sub
 
     Public Sub SaveToCsv(ByVal tempDgv As DataGridView)
@@ -34,7 +34,7 @@ Public Class Form12
             Next
         Next
         'Shift-JISで保存します。
-        Dim swText As New System.IO.StreamWriter("defoption.csv", False, System.Text.Encoding.GetEncoding(932))
+        Dim swText As New System.IO.StreamWriter(fspath, False, System.Text.Encoding.GetEncoding(932))
         swText.Write(strResult.ToString)
         swText.Dispose()
     End Sub

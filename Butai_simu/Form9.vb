@@ -11,7 +11,7 @@
         Public rank As Integer
         Public toti As String
         Public Structure npc_hei_
-            Public name As String '取得文字列（分類:兵科）
+            'Public name As String '取得文字列（分類:兵科）
             Public heika As String '兵科
             Public sum As Decimal '兵数
             Public bunrui As String '分類
@@ -27,9 +27,9 @@
     End Structure
     Public akiti As akiti_
 
-    Private Sub Form1_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        Call DB_Open(con3, cmd3, dbpath3) '空き地DBを開く
-    End Sub
+    'Private Sub Form9_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+    '    Call DB_Open() '空き地DBを開く
+    'End Sub
 
     Private Sub NPC情報初期化()
         akiti.npc_hei = Nothing
@@ -41,7 +41,7 @@
             Exit Sub
         End If
 
-        Call NPC兵素防御力()
+        'Call NPC兵素防御力()
         Call 距離減衰計算()
         Call 勝率計算()
 
@@ -133,17 +133,17 @@
         akiti.rank = Val(sender.Text)
         RemoveHandler ComboBox3.SelectedIndexChanged, AddressOf Me.空き地変更 'これが無いと空き地を選べなくなる
         Dim p As DataSet
-        p = DB_TableOUT(con3, cmd3, "SELECT DISTINCT 土地ランク, タイル分布  FROM `" & syou_ki & "` WHERE 土地ランク = """ & "☆" & akiti.rank & """", syou_ki)
+        p = DB_TableOUT("SELECT 土地ランク, パネル配置 FROM LName WHERE 土地ランク = " & ダブルクオート("☆" & akiti.rank) & "", "LName")
         With ComboBox3
-            .DataSource = p.Tables(syou_ki)
-            .DisplayMember = "タイル分布"
+            .DataSource = p.Tables("LName")
+            .DisplayMember = "パネル配置"
             '.ValueMember = "Index"
             .SelectedIndex = -1
         End With
         AddHandler ComboBox3.SelectedIndexChanged, AddressOf Me.空き地変更
     End Sub
 
-    '現在はまだ6章6期のみ対応
+    '現在は6章以降のみ対応
     Private Sub 章期変更(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
         If sender.Text = "" Then
             Exit Sub
@@ -160,35 +160,42 @@
         End If
         Call NPC情報初期化()
         akiti.toti = sender.text
-        'NPC兵を取得・表示
+        'NPC兵を取得・表示   兵種名, 土地ランク, パネル配置, NPC兵数
         RichTextBox1.Clear()
-        Dim sqlstr As String, heika() As String
-        sqlstr = "SELECT 土地ランク, タイル分布, NPC兵 FROM `" & syou_ki & "` WHERE 土地ランク = """ & "☆" & akiti.rank & """ AND タイル分布 = """ & akiti.toti & """"
-        heika = DB_DirectOUT2(con3, cmd3, sqlstr, "NPC兵")
+        Dim sqlstr As String, heika()() As String
+        sqlstr = "SELECT * FROM HData INNER JOIN (LData INNER JOIN LName ON LData.id = LName.id) ON HData.兵種名 = LData.兵種名 WHERE 土地ランク = " & _
+        ダブルクオート("☆" & akiti.rank) & " AND パネル配置 = " & ダブルクオート(akiti.toti) & ""
+        heika = DB_DirectOUT3(sqlstr, {"兵科", "兵種名", "防御値", "経験値", "NPC兵数"})
         For i As Integer = 0 To heika.Length - 1
             ReDim Preserve akiti.npc_hei(i)
             With akiti.npc_hei(i)
-                .name = heika(i)
+                '.name = heika(i)
+                .bunrui = heika(i)(0)
+                .heika = heika(i)(1)
+                .heika_def = heika(i)(2)
+                .keiken = heika(i)(3)
+                .sum = heika(i)(4)
+                .def = .heika_def * .sum
+                RichTextBox1.Text = RichTextBox1.Text & .bunrui & ":" & .heika & " " & .sum & vbCrLf
             End With
-            RichTextBox1.Text = RichTextBox1.Text & akiti.npc_hei(i).name & vbCrLf
         Next
     End Sub
 
-    Private Sub NPC兵素防御力()
-        For i As Integer = 0 To akiti.npc_hei.Length - 1
-            With akiti.npc_hei(i)
-                Dim tmp() As String = Split(Mid(.name, 3), " ")
-                .heika = tmp(0)
-                .bunrui = Mid(.name, 1, 1)
-                .sum = tmp(1)
-                Dim s() As String = _
-                    DB_DirectOUT(con, cmd, "SELECT 兵種名,兵科,防御,経験値 FROM Heika WHERE 兵種名=""" & .heika & """", {"防御", "経験値"})
-                .heika_def = s(0)
-                .keiken = s(1)
-                .def = .heika_def * .sum
-            End With
-        Next
-    End Sub
+    'Private Sub NPC兵素防御力()
+    '    For i As Integer = 0 To akiti.npc_hei.Length - 1
+    '        With akiti.npc_hei(i)
+    '            Dim tmp() As String = Split(Mid(.name, 3), " ")
+    '            .heika = tmp(0)
+    '            .bunrui = Mid(.name, 1, 1)
+    '            .sum = tmp(1)
+    '            Dim s() As String = _
+    '                DB_DirectOUT("SELECT 兵種名, 防御値, 経験値 FROM HData WHERE 兵種名 = " & ダブルクオート(.heika) & "", {"防御値", "経験値"})
+    '            .heika_def = s(0)
+    '            .keiken = s(1)
+    '            .def = .heika_def * .sum
+    '        End With
+    '    Next
+    'End Sub
 
     Private Sub 距離課金の有無(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
         If CheckBox1.Checked = True Then '有ならば

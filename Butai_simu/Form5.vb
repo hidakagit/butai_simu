@@ -94,12 +94,20 @@
                     .skill_lv(j) = Val(Mid(ttmp, InStr(ttmp, "LV") + 2))
                     ss(cc) = ss(cc) & vbCrLf & ttmp
                 Next
-                Dim ntmp As String = GetINIValue(syokisk, Replace(Replace(tmp(0), "名", ""), "レア", "・"), bnpath)
-                If Not ntmp = "－" Then
-                    .name = ntmp
-                Else
-                    .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
-                End If
+                .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
+                Dim repstr As String = "replace(replace(初期スキル名, " & """ "" , """"), " & """　"" , """") = "
+                'Dim repstr As String = "replace(初期スキル名, " & """ "" , """") = "
+                Dim s() As String = DB_DirectOUT("SELECT 武将名, 初期スキル名 FROM BData WHERE 武将R = " _
+                                & ダブルクオート(.rare) & " AND 武将名 LIKE """ & .name & "%""" & " AND " & repstr & ダブルクオート(TrimJ(.skill_name(0))), _
+                                {"武将名", "初期スキル名"})
+                .name = s(0)
+                .skill_name(0) = s(1)
+                'Dim ntmp As String = GetINIValue(syokisk, Replace(Replace(tmp(0), "名", ""), "レア", "・"), bnpath)
+                'If Not ntmp = "－" Then
+                '    .name = ntmp
+                'Else
+                '    .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
+                'End If
                 ss(cc) = .name & vbCrLf & ss(cc)
             Catch ex As Exception
                 Me.Focus()

@@ -126,9 +126,9 @@
     Private Function 武将データ取得() As Integer
         Dim sl()() As String = Nothing
         Dim slbl() As String = _
-           {"No", "R", "名称", "C", "指揮兵", "槍", "弓", "馬", "器", "攻撃", "防御", "兵法", "攻成長", "防成長", "兵成長", "スキル", "職"}
-        Dim sqlstr As String = "SELECT * FROM Busho ORDER BY Index ASC"
-        sl = DB_DirectOUT3(con, cmd, sqlstr, slbl)
+        {"Bid", "武将R", "武将名", "Cost", "指揮兵数", "槍統率", "弓統率", "馬統率", "器統率", "初期攻撃", "初期防御", "初期兵法", "攻成長", "防成長", "兵成長", "初期スキル名", "職"}
+        Dim sqlstr As String = "SELECT * FROM BData WHERE ( NOT 武将R IN('祝', '雅', '化')) AND Bunf = 'F' ORDER BY id ASC"
+        sl = DB_DirectOUT3(sqlstr, slbl)
         Dim sc As Integer = sl.GetLength(0) - 1 '合致したデータ個数
         For i As Integer = 0 To sc
             ReDim Preserve Busho(i)
@@ -207,9 +207,8 @@
                 hik_f = True
             End If
         Next
-
         Dim s() As String = _
-         DB_DirectOUT(con, cmd, "SELECT 統率,兵種名,兵科,攻撃,防御,移動 FROM Heika WHERE 兵種名=""" & busho_heika & """", {"兵科", "統率", "攻撃", "防御"})
+         DB_DirectOUT("SELECT 統率, 兵種名, 兵科, 攻撃値, 防御値 FROM HData WHERE 兵種名 = " & ダブルクオート(busho_heika) & "", {"兵科", "統率", "攻撃値", "防御値"})
         Dim t As Integer = s(1).Length '統率に関係する兵科の種類数
         Dim heika As String = s(0) '兵種兵科
         Dim tousotu As String = s(1) '兵種の対応兵科
@@ -278,13 +277,21 @@
                     jih(i) = Math.Floor(((.hei * heika_bou + syou(i)) * td(i)) / heika_bou)
                     tanh(i) = Math.Floor(((.hei * heika_bou + .ini.bou) * td(i)) / heika_bou)
                 End If
-                jik(i) = Math.Floor(jih(i) / .cost)
-                tank(i) = Math.Floor(tanh(i) / .cost)
+                If .cost = 0 Then
+                    jik(i) = 99999
+                    tank(i) = 99999
+                Else
+                    jik(i) = Math.Floor(jih(i) / .cost)
+                    tank(i) = Math.Floor(tanh(i) / .cost)
+                End If
             End With
         Next
 
         'Datagridに追加
         'DataGridView1.VirtualMode = True
+        Dim rows As DataGridViewRow()
+        ReDim rows(bc)
+
         For i As Integer = 0 To bc
             Call プログレスバー変化(500 + ((i + 1) / (bc + 1)) * 500)
             Dim row As DataGridViewRow = New DataGridViewRow()
@@ -292,34 +299,45 @@
             row.CreateCells(DataGridView1)
             With Busho(i)
                 If .cost = 193 Then Continue For 'デッキセットできないカードは飛ばす
+                'Dim jikX As String
+                'If jik(i) = -1 Then jikX = "∞" Else jikX = jik(i)
+                'Dim tankX As String
+                'If tank(i) = -1 Then tankX = "∞" Else tankX = tank(i)
                 row.SetValues(New Object() {.bno, .r, .name, .cost, .hei, td(i), .skill.name, heih(i), .grow.hei, syou(i), tanh(i), jih(i), tank(i), jik(i)})
-                DataGridView1.Rows.AddRange(row)
-                cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(8)
+                'DataGridView1.Rows.AddRange(row)
+                'cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(8)
+                cell = row.Cells(8)
                 If cell.Value >= heiho Then '兵法成長色づけ
                     cell.Style.ForeColor = Color.DarkRed
                     cell.Style.Font = New Font("Consolas", 10, FontStyle.Bold)
                 End If
-                cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(13)
-                If cell.Value >= kosuhi Then 'コス比色づけ
+                'cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(13)
+                'If cell.Value = "∞" Then 'コス比色づけ
+                'cell.Style.ForeColor = Color.DarkGreen
+                'cell.Style.Font = New Font("Consolas", 10, FontStyle.Bold)
+                cell = row.Cells(13)
+                If cell.Value >= kosuhi Then
                     cell.Style.ForeColor = Color.DarkGreen
                     cell.Style.Font = New Font("Consolas", 10, FontStyle.Bold)
                 End If
-                cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(5)
+                'cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(5)
+                cell = row.Cells(5)
                 If cell.Value >= tous Then '統率色づけ
                     cell.Style.ForeColor = Color.MidnightBlue
                     cell.Style.Font = New Font("Consolas", 10, FontStyle.Bold)
                 End If
             End With
-            cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(1) '武将レアリティによる色分け
-            Dim cell2 As DataGridViewCell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(2)
-            Select Case Mid(CStr(DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(0).Value), 1, 2)
+            'cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(1) '武将レアリティによる色分け
+            cell = row.Cells(1)
+            Dim cell2 As DataGridViewCell = row.Cells(2) 'DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(2)
+            Select Case Mid(CStr(row.Cells(0).Value), 1, 2) 'Mid(CStr(DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(0).Value), 1, 2)
                 Case "10" '天
                     cell.Style.ForeColor = Color.Goldenrod
                     cell2.Style.ForeColor = Color.Goldenrod
                 Case "19" '祝
                     cell.Style.ForeColor = Color.Magenta
                     cell2.Style.ForeColor = Color.Magenta
-                Case "20" To "21" '極
+                Case "20" To "25" '極
                     cell.Style.ForeColor = Color.DimGray
                     cell2.Style.ForeColor = Color.DimGray
                 Case "27" 'シクレ極
@@ -328,20 +346,25 @@
                 Case "29" 'プラチナ極
                     cell.Style.ForeColor = Color.Black
                     cell2.Style.ForeColor = Color.Black
-                Case "30" To "31" '特
+                Case "30" To "35" '特
                     cell.Style.ForeColor = Color.Firebrick
                     cell2.Style.ForeColor = Color.Firebrick
                 Case "37" 'シクレ特
                     cell.Style.ForeColor = Color.DarkOliveGreen
                     cell2.Style.ForeColor = Color.DarkOliveGreen
-                Case "40" To "41" '上
+                Case "40" To "45" '上
                     cell.Style.ForeColor = Color.Orange
                     cell2.Style.ForeColor = Color.Orange
-                Case "50" To "51" '序
+                Case "50" To "55" '序
                     cell.Style.ForeColor = Color.DarkCyan
                     cell2.Style.ForeColor = Color.DarkCyan
+                Case "57" '輝く平手
+                    cell.Style.ForeColor = Color.Turquoise
+                    cell2.Style.ForeColor = Color.Turquoise
             End Select
+            rows(i) = row
         Next
+        DataGridView1.Rows.AddRange(rows)
         DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells
         Call プログレスバー変化(0)
     End Sub

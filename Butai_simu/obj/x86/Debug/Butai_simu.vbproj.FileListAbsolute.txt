@@ -51,3 +51,13 @@ C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\Butai_simu.exe.manifest
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\Butai_simu.application
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\WindowsApplication1.Form12.resources
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\Butai_simu.exe.config
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\EntityFramework.dll
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\System.Data.SQLite.dll
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\System.Data.SQLite.EF6.dll
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\System.Data.SQLite.Linq.dll
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\EntityFramework.xml
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Debug\System.Data.SQLite.xml
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Debug\Butai_simu.vbprojResolveAssemblyReference.cache

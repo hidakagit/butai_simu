@@ -102,13 +102,13 @@ Partial Class Form3
         '
         'ComboBox1
         '
+        Me.ComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox1.FormattingEnabled = True
         Me.ComboBox1.Items.AddRange(New Object() {"部隊長", "小隊長A", "小隊長B", "小隊長C"})
         Me.ComboBox1.Location = New System.Drawing.Point(317, 272)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(75, 20)
         Me.ComboBox1.TabIndex = 24
-        Me.ComboBox1.Text = "部隊長"
         '
         'Label4
         '

@@ -64,9 +64,8 @@
         Dim hp(), kp(), dp(), kitai(), dkitai() As Decimal
         Dim costd() As Boolean
         Dim slid() As Decimal
-        Dim de() As Integer
         Dim tk(), erck() As String
-        Dim slbl() As String = {"名前", "対象", "確率", "基本効果", "付加効果"}
+        Dim slbl() As String = {"スキル名", "攻防", "対象", "発動率", "上昇率", "付与効果", "付与率", "Sunf"}
         Dim target_u() As String = {"武士", "弓騎馬", "赤備え", "騎馬鉄砲", "鉄砲足軽", "焙烙火矢", "大筒兵", "破城鎚", "攻城櫓"}
         Dim target_h() As String = {"武士", "弓騎馬", "赤備え", "騎馬鉄砲", "鉄砲足軽", "焙烙火矢", "大筒兵", "雑賀衆"}
         Dim target_hi() As String = {"国人衆", "雑賀衆", "海賊衆", "母衣衆"}
@@ -76,7 +75,7 @@
 
         Dim h() As String
         If syo_skill = False Then '将スキルじゃない場合
-            h = DB_DirectOUT(con, cmd, "SELECT 兵種名,兵科 FROM Heika WHERE 兵種名=""" & busho_heika & """", {"兵科"})
+            h = DB_DirectOUT("SELECT 兵種名, 兵科 FROM HData WHERE 兵種名 = " & ダブルクオート(busho_heika) & "", {"兵科"})
             For i As Integer = 0 To target_u.Length - 1 '上級器対応かどうか
                 If InStr(busho_heika, target_u(i)) Then
                     jkf_u = True
@@ -101,128 +100,93 @@
             Dim sqlstr As String
             Dim kobos As String
             If kobo = "攻" Then
-                kobos = "( 基本効果 LIKE """ & "%攻%" & """ OR 基本効果" & " LIKE """ & "%破%" & """ )"
+                kobos = "( 攻防 = " & ダブルクオート("攻") & " OR 攻防 = " & ダブルクオート("破壊") & " )"
             Else
-                kobos = "基本効果 LIKE """ & "%防%" & """"
+                kobos = " 攻防 = " & ダブルクオート("防")
             End If
             If syo_skill Then '将スキルの場合は全スキルを除く
                 'sqlstr = "SELECT * FROM Skill WHERE 基本効果 LIKE """ & "%" & kobo & "%" & """ AND NOT 分類 =""" & "特殊""" & " AND LV =" & skill_lv & " AND ( 対象 LIKE """ & "%" & h(0) & "%" & """ )"
-                sqlstr = "SELECT * FROM Skill WHERE " & kobos & " AND NOT 分類 =""" & "特殊""" & " AND LV =" & skill_lv & " AND ( 対象 LIKE """ & "%" & h(0) & "%" & ""
+                sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
+                    & " AND NOT 分類 =" & ダブルクオート("特殊") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%")
             Else
-                sqlstr = "SELECT * FROM Skill WHERE " & kobos & " AND NOT 分類 =""" & "特殊""" & " AND LV =" & skill_lv & " AND ( 対象 LIKE """ & "%" & h(0) & "%" & """ OR 対象 =" & """全" & ""
+                sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
+                    & " AND NOT 分類 =" & ダブルクオート("特殊") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%") & " OR 対象 = " & ダブルクオート("全")
             End If
             If jkf_u Then
-                sqlstr = sqlstr & """ OR 対象 =" & """上級器*" & ""
+                sqlstr = sqlstr & " OR 対象 = " & ダブルクオート("上級器")
             End If
             If jkf_u Then
-                sqlstr = sqlstr & """ OR 対象 =" & """上級砲*" & ""
+                sqlstr = sqlstr & " OR 対象 = " & ダブルクオート("上級砲")
             End If
             If hik_f Then
-                sqlstr = sqlstr & """ OR 対象 =" & """秘境兵*" & ""
+                sqlstr = sqlstr & " OR 対象 = " & ダブルクオート("秘境兵")
             End If
-            sqlstr = sqlstr & """ )"
-            sl(i) = DB_DirectOUT2(con, cmd, sqlstr, slbl(i))
+            sqlstr = sqlstr & " )"
+            sl(i) = DB_DirectOUT2(sqlstr, slbl(i))
         Next
         Dim sc As Integer = sl(0).Length - 1 '合致したスキルの個数
-        ReDim hp(sc), kp(sc), dp(sc), kitai(sc), dkitai(sc), tk(sc), de(sc), erck(sc), costd(sc)
+        ReDim hp(sc), kp(sc), dp(sc), kitai(sc), dkitai(sc), tk(sc), erck(sc), costd(sc)
 
-        For i = 2 To 4 '取得してきたデータを加工
-            For j As Integer = 0 To sc
-                If i = 2 Then '発動率
-                    If sl(i)(j) = "" Or sl(i)(j) = "+%" Then 'データなし
-                        erck(j) = "D無"
-                        hp(j) = 0
-                    ElseIf Val(sl(i)(j)) <> 1 Then
-                        hp(j) = Val(sl(i)(j)) + butai_heiho / 100
-                    Else
-                        hp(j) = 1
-                    End If
+        For j As Integer = 0 To sc '取得してきたデータを加工
+            Dim dflg As Boolean = False
+            Dim sflg As Boolean = False
+            costd(j) = False
+            If sl(7)(j) = "U" Then 'データなし
+                erck(j) = "D無"
+                hp(j) = 0
+                kp(j) = 0
+                dp(j) = 0
+                Continue For
+            End If
+            If Val(sl(3)(j)) + (butai_heiho / 100) < 1 Then '発動率
+                hp(j) = Val(sl(3)(j)) + butai_heiho / 100
+            Else
+                hp(j) = 1
+            End If
+            '上昇率
+            If sl(5)(j) = "破壊" Then '破壊を含むスキル
+                dflg = True
+                If sl(1)(j) = "破壊" Then
+                    sl(6)(j) = sl(4)(j) '破壊のみのスキル。付加効果にコピー
+                    sl(4)(j) = 0
                 End If
-                If i = 3 Then '上昇率
-                    If kobo = "攻" And InStr(sl(i)(j), "破") Then
-                        de(j) = 1 '破壊のみのスキル
-                        sl(4)(j) = sl(3)(j) '付加効果へコピー
-                    End If
-                    Dim rk As String = sl(1)(j) & kobo & "："
-                    sl(i)(j) = Replace(sl(i)(j), rk, "")
-                    If jkf_u = True Then
-                        rk = "上級器" & kobo & "："
-                        sl(i)(j) = Replace(sl(i)(j), rk, "")
-                    End If
-                    If jkf_h = True Then
-                        rk = "上級砲" & kobo & "："
-                        sl(i)(j) = Replace(sl(i)(j), rk, "")
-                    End If
-                    If hik_f = True Then
-                        rk = "秘境兵" & kobo & "："
-                        sl(i)(j) = Replace(sl(i)(j), rk, "")
-                    End If
-
-                    If erck(j) <> "" Or sl(i)(j) = "%上昇" Then 'データなし
-                        kp(j) = 0
-                        erck(j) = "D無"
-                    Else
-                        sl(i)(j) = Replace(sl(i)(j), "上昇", "")
-                        If InStr(sl(i)(j), "コスト") Then
-                            sl(i)(j) = Replace(sl(i)(j), "コスト", busho_cost)
-                            costd(j) = True
-                        Else
-                            costd(j) = False
-                        End If
-                        kp(j) = Decimal.Parse(文字列計算(sl(i)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
-                        If kp(j) = 0 And de(j) <> 1 Then '文字列計算をした結果、ゼロ
-                            erck(j) = "D異常"
-                        End If
-                        '期待値計算
-                        kitai(j) = hp(j) * kp(j)
-                    End If
+            End If
+            If sl(5)(j) = "速" Then '速度を含むスキル
+                sflg = True
+                If sl(1)(j) = "速" Then
+                    sl(6)(j) = sl(4)(j) '速度のみのスキル。付加効果にコピー
+                    sl(4)(j) = 0
                 End If
-                If i = 4 Then '付加効果
-                    If InStr(sl(i)(j), "破壊") Then
-                        de(j) = 1
-
-                        Dim rk As String = sl(1)(j) & "破壊" & "："
-                        sl(i)(j) = Replace(sl(i)(j), rk, "")
-                        If jkf_u = True Then
-                            rk = "上級器" & "破壊" & "："
-                            sl(i)(j) = Replace(sl(i)(j), rk, "")
-                        End If
-                        If jkf_h = True Then
-                            rk = "上級砲" & "破壊" & "："
-                            sl(i)(j) = Replace(sl(i)(j), rk, "")
-                        End If
-                        If hik_f = True Then
-                            rk = "秘境兵" & "破壊" & "："
-                            sl(i)(j) = Replace(sl(i)(j), rk, "")
-                        End If
-
-                        If erck(j) <> "" Or sl(i)(j) = "%上昇" Then 'データなし
-                            dp(j) = 0
-                            erck(j) = "D無"
-                        Else
-                            sl(i)(j) = Replace(sl(i)(j), "上昇", "")
-                        End If
-                        If InStr(sl(i)(j), "コスト") Then
-                            sl(i)(j) = Replace(sl(i)(j), "コスト", busho_cost)
-                        End If
-                        dp(j) = Decimal.Parse(文字列計算(sl(i)(j), False)) '同上
-                        If dp(j) = 0 Then '文字列計算をした結果、ゼロ
-                            erck(j) = "D異常"
-                        End If
-
-                        If InStr(sl(i)(j), "速") Then
-                            tk(j) = "速度＋破壊"
-                        Else
-                            tk(j) = "破壊"
-                        End If
-                    ElseIf InStr(sl(i)(j), "速") Then
-                        tk(j) = "速度"
+            End If
+            If InStr(sl(4)(j), "C") Then 'コスト依存スキル
+                sl(4)(j) = Replace(sl(4)(j), "C", busho_cost)
+                costd(j) = True
+                kp(j) = Decimal.Parse(文字列計算(sl(4)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                If kp(j) = 0 And dflg = False Then '文字列計算をした結果、ゼロ
+                    erck(j) = "D異常"
+                End If
+            Else
+                kp(j) = Decimal.Parse(sl(4)(j))
+            End If
+            '期待値計算
+            kitai(j) = hp(j) * kp(j)
+            If dflg Then '付与効果に破壊を含むスキル
+                If InStr(sl(6)(j), "C") Then 'コスト依存スキル
+                    sl(6)(j) = Replace(sl(6)(j), "C", busho_cost)
+                    costd(j) = True
+                    'costd(j) = True
+                    dp(j) = Decimal.Parse(文字列計算(sl(6)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                    If dp(j) = 0 Then '文字列計算をした結果、ゼロ
+                        erck(j) = "D異常"
                     End If
+                Else
+                    dp(j) = Decimal.Parse(文字列計算(sl(6)(j)))
                 End If
-                If de(j) = 1 Then '破壊が絡むスキルは破壊期待値を計算
-                    dkitai(j) = hp(j) * dp(j)
-                End If
-            Next
+                dkitai(j) = hp(j) * dp(j) '破壊が絡むスキルは破壊期待値を計算
+            End If
+            If sflg Then tk(j) = "速度"
+            If dflg Then tk(j) = "破壊"
+            If sflg And dflg Then tk(j) = "速度＋破壊"
         Next
         ReDim slid(sc) 'インデックス配列
         For i As Integer = 0 To sc
@@ -234,7 +198,7 @@
             Dim row As DataGridViewRow = New DataGridViewRow()
             Dim cp As Integer = CInt(slid(i))
             row.CreateCells(DataGridView1)
-            row.SetValues(New Object() {sl(0)(cp), sl(1)(cp), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
+            row.SetValues(New Object() {sl(0)(cp), sl(2)(cp), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
             DataGridView1.Rows.AddRange(row)
 
             Dim cell As DataGridViewCell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(4) 'コスト依存ならば色づけ

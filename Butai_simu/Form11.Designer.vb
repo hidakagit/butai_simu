@@ -132,6 +132,8 @@ Partial Class Form11
         '
         'ComboBox010
         '
+        Me.ComboBox010.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox010.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox010.FormattingEnabled = True
         Me.ComboBox010.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox010.Location = New System.Drawing.Point(7, 61)
@@ -141,6 +143,8 @@ Partial Class Form11
         '
         'ComboBox009
         '
+        Me.ComboBox009.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox009.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox009.FormattingEnabled = True
         Me.ComboBox009.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox009.Location = New System.Drawing.Point(7, 39)
@@ -193,6 +197,8 @@ Partial Class Form11
         '
         'ComboBox110
         '
+        Me.ComboBox110.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox110.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox110.FormattingEnabled = True
         Me.ComboBox110.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox110.Location = New System.Drawing.Point(7, 61)
@@ -202,6 +208,8 @@ Partial Class Form11
         '
         'ComboBox109
         '
+        Me.ComboBox109.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox109.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox109.FormattingEnabled = True
         Me.ComboBox109.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox109.Location = New System.Drawing.Point(7, 39)
@@ -254,6 +262,8 @@ Partial Class Form11
         '
         'ComboBox210
         '
+        Me.ComboBox210.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox210.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox210.FormattingEnabled = True
         Me.ComboBox210.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox210.Location = New System.Drawing.Point(7, 61)
@@ -263,6 +273,8 @@ Partial Class Form11
         '
         'ComboBox209
         '
+        Me.ComboBox209.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox209.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox209.FormattingEnabled = True
         Me.ComboBox209.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox209.Location = New System.Drawing.Point(7, 39)
@@ -336,6 +348,8 @@ Partial Class Form11
         '
         'ComboBox310
         '
+        Me.ComboBox310.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox310.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox310.FormattingEnabled = True
         Me.ComboBox310.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox310.Location = New System.Drawing.Point(7, 61)
@@ -345,6 +359,8 @@ Partial Class Form11
         '
         'ComboBox309
         '
+        Me.ComboBox309.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox309.FlatStyle = System.Windows.Forms.FlatStyle.Popup
         Me.ComboBox309.FormattingEnabled = True
         Me.ComboBox309.Items.AddRange(New Object() {"槍", "弓", "馬", "砲", "器", "複数", "全", "将", "速", "特殊"})
         Me.ComboBox309.Location = New System.Drawing.Point(7, 39)

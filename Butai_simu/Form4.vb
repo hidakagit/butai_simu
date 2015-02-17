@@ -3,9 +3,9 @@
 
     Private Sub Form4_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Form1.ToolStripComboBox1.Text = "攻撃" Then
-            ComboBox1.Text = "攻撃"
+            ComboBox1.SelectedIndex = 0
         Else
-            ComboBox1.Text = "防御"
+            ComboBox1.SelectedIndex = 1
         End If
         If bskill.flg = False Then CheckBox1.Checked = True
         If bskill.bsk Is Nothing Then Exit Sub

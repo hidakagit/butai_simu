@@ -248,13 +248,13 @@ Partial Class Form4
         '
         'ComboBox1
         '
+        Me.ComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox1.FormattingEnabled = True
         Me.ComboBox1.Items.AddRange(New Object() {"攻撃", "防御"})
         Me.ComboBox1.Location = New System.Drawing.Point(75, 15)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(73, 20)
         Me.ComboBox1.TabIndex = 71
-        Me.ComboBox1.Text = "攻撃"
         '
         'SplitContainer4
         '
