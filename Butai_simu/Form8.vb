@@ -127,7 +127,7 @@
         Dim sl()() As String = Nothing
         Dim slbl() As String = _
         {"Bid", "武将R", "武将名", "Cost", "指揮兵数", "槍統率", "弓統率", "馬統率", "器統率", "初期攻撃", "初期防御", "初期兵法", "攻成長", "防成長", "兵成長", "初期スキル名", "職"}
-        Dim sqlstr As String = "SELECT * FROM BData WHERE ( NOT 武将R IN('祝', '雅', '化')) AND Bunf = 'F' ORDER BY id ASC"
+        Dim sqlstr As String = "SELECT * FROM BData WHERE ( NOT 武将R IN('祝', '雅', '化')) AND Bunf = 'F' ORDER BY Bid ASC"
         sl = DB_DirectOUT3(sqlstr, slbl)
         Dim sc As Integer = sl.GetLength(0) - 1 '合致したデータ個数
         For i As Integer = 0 To sc

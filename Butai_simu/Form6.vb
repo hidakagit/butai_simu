@@ -58,7 +58,7 @@
         Dim cc As ComboBox = ComboBox(Me, CStr(武将取得(sender)) & "02")
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
         Dim p As DataSet = _
-        DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY id ASC", "BData")
+        DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY Bid ASC", "BData")
         cc.DisplayMember = "武将名"
         cc.ValueMember = "id"
         cc.DataSource = p.Tables("BData")

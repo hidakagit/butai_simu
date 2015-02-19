@@ -25,14 +25,23 @@ Partial Class Form7
         Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle9 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form7))
         Dim DataGridViewCellStyle2 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle4 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle6 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle7 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form7))
         Me.DataGridView1 = New System.Windows.Forms.DataGridView()
+        Me.Column1 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column3 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column5 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column2 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column4 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column6 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column9 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column7 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Column8 = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
         Me.ToolStripLabel1 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripComboBox1 = New System.Windows.Forms.ToolStripComboBox()
@@ -54,15 +63,6 @@ Partial Class Form7
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel4 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripTextBox1 = New System.Windows.Forms.ToolStripTextBox()
-        Me.Column1 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column3 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column5 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column2 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column4 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column6 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column9 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column7 = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Column8 = New System.Windows.Forms.DataGridViewTextBoxColumn()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ToolStrip1.SuspendLayout()
         Me.ToolStrip2.SuspendLayout()
@@ -105,6 +105,74 @@ Partial Class Form7
         Me.DataGridView1.RowTemplate.Height = 21
         Me.DataGridView1.Size = New System.Drawing.Size(524, 305)
         Me.DataGridView1.TabIndex = 0
+        '
+        'Column1
+        '
+        Me.Column1.HeaderText = "スキル名"
+        Me.Column1.Name = "Column1"
+        '
+        'Column3
+        '
+        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        Me.Column3.DefaultCellStyle = DataGridViewCellStyle2
+        Me.Column3.HeaderText = "兵科"
+        Me.Column3.Name = "Column3"
+        Me.Column3.Width = 50
+        '
+        'Column5
+        '
+        DataGridViewCellStyle3.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column5.DefaultCellStyle = DataGridViewCellStyle3
+        Me.Column5.HeaderText = "期待値"
+        Me.Column5.Name = "Column5"
+        Me.Column5.Width = 70
+        '
+        'Column2
+        '
+        DataGridViewCellStyle4.Font = New System.Drawing.Font("Consolas", 9.0!)
+        Me.Column2.DefaultCellStyle = DataGridViewCellStyle4
+        Me.Column2.HeaderText = "発動率"
+        Me.Column2.Name = "Column2"
+        Me.Column2.Width = 70
+        '
+        'Column4
+        '
+        DataGridViewCellStyle5.Font = New System.Drawing.Font("Consolas", 9.0!)
+        Me.Column4.DefaultCellStyle = DataGridViewCellStyle5
+        Me.Column4.HeaderText = "上昇率"
+        Me.Column4.Name = "Column4"
+        Me.Column4.ToolTipText = "ピンク：コスト依存"
+        Me.Column4.Width = 70
+        '
+        'Column6
+        '
+        Me.Column6.HeaderText = "付加効果"
+        Me.Column6.Name = "Column6"
+        Me.Column6.Width = 60
+        '
+        'Column9
+        '
+        DataGridViewCellStyle6.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column9.DefaultCellStyle = DataGridViewCellStyle6
+        Me.Column9.HeaderText = "破壊上昇"
+        Me.Column9.Name = "Column9"
+        Me.Column9.Visible = False
+        Me.Column9.Width = 70
+        '
+        'Column7
+        '
+        DataGridViewCellStyle7.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column7.DefaultCellStyle = DataGridViewCellStyle7
+        Me.Column7.HeaderText = "破壊期待"
+        Me.Column7.Name = "Column7"
+        Me.Column7.Visible = False
+        Me.Column7.Width = 70
+        '
+        'Column8
+        '
+        Me.Column8.HeaderText = ""
+        Me.Column8.Name = "Column8"
+        Me.Column8.Width = 40
         '
         'ToolStrip1
         '
@@ -240,74 +308,6 @@ Partial Class Form7
         Me.ToolStripTextBox1.Name = "ToolStripTextBox1"
         Me.ToolStripTextBox1.Size = New System.Drawing.Size(80, 26)
         Me.ToolStripTextBox1.Text = "6"
-        '
-        'Column1
-        '
-        Me.Column1.HeaderText = "スキル名"
-        Me.Column1.Name = "Column1"
-        '
-        'Column3
-        '
-        DataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        Me.Column3.DefaultCellStyle = DataGridViewCellStyle2
-        Me.Column3.HeaderText = "兵科"
-        Me.Column3.Name = "Column3"
-        Me.Column3.Width = 50
-        '
-        'Column5
-        '
-        DataGridViewCellStyle3.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column5.DefaultCellStyle = DataGridViewCellStyle3
-        Me.Column5.HeaderText = "期待値"
-        Me.Column5.Name = "Column5"
-        Me.Column5.Width = 70
-        '
-        'Column2
-        '
-        DataGridViewCellStyle4.Font = New System.Drawing.Font("Consolas", 9.0!)
-        Me.Column2.DefaultCellStyle = DataGridViewCellStyle4
-        Me.Column2.HeaderText = "発動率"
-        Me.Column2.Name = "Column2"
-        Me.Column2.Width = 70
-        '
-        'Column4
-        '
-        DataGridViewCellStyle5.Font = New System.Drawing.Font("Consolas", 9.0!)
-        Me.Column4.DefaultCellStyle = DataGridViewCellStyle5
-        Me.Column4.HeaderText = "上昇率"
-        Me.Column4.Name = "Column4"
-        Me.Column4.ToolTipText = "ピンク：コスト依存"
-        Me.Column4.Width = 70
-        '
-        'Column6
-        '
-        Me.Column6.HeaderText = "付加効果"
-        Me.Column6.Name = "Column6"
-        Me.Column6.Width = 60
-        '
-        'Column9
-        '
-        DataGridViewCellStyle6.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column9.DefaultCellStyle = DataGridViewCellStyle6
-        Me.Column9.HeaderText = "破壊上昇"
-        Me.Column9.Name = "Column9"
-        Me.Column9.Visible = False
-        Me.Column9.Width = 70
-        '
-        'Column7
-        '
-        DataGridViewCellStyle7.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column7.DefaultCellStyle = DataGridViewCellStyle7
-        Me.Column7.HeaderText = "破壊期待"
-        Me.Column7.Name = "Column7"
-        Me.Column7.Visible = False
-        Me.Column7.Width = 70
-        '
-        'Column8
-        '
-        Me.Column8.HeaderText = ""
-        Me.Column8.Name = "Column8"
-        Me.Column8.Width = 40
         '
         'Form7
         '

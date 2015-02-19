@@ -170,7 +170,7 @@ Public Class Form1
 
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
         Dim p As DataSet
-        p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " AND Bunf = 'F' ORDER BY id ASC", "BData")
+        p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " AND Bunf = 'F' ORDER BY Bid ASC", "BData")
         cc.DisplayMember = "武将名"
         cc.ValueMember = "id"
         cc.DataSource = p.Tables("BData")

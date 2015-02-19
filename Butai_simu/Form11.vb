@@ -83,7 +83,7 @@
         If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
             sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
         End If
-        p = DB_TableOUT("SELECT Sw, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY Sw", "SName")
+        p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         With c
             .ValueMember = "Sw"
             .DisplayMember = "スキル名"

@@ -120,7 +120,7 @@ Public Structure Busho : Implements System.ICloneable
             exp_kouka = 0
             exp_kouka_b = 0
             up_kouka_p = 0
-            speed = 0
+            'speed = 0
             'heika = Nothing
             'kanren = Nothing
             'koubou = Nothing
@@ -180,7 +180,12 @@ Public Structure Busho : Implements System.ICloneable
                     .kouka_p = Decimal.Parse(tmp(0))
                     Select Case (.kanren)
                         '特殊スキル
-                        Case "特殊", "条件" ', "童"
+                        Case "特殊"
+                            .tokusyu = 9
+                            .kouka_p = 0
+                            .kouka_f = 0
+                            Continue For
+                        Case "条件" ', "童"
                             .tokusyu = 9
                             .kouka_f = Val(tmp(4))
                             .t_flg = フラグ付きスキル参照(skill(i)) '条件付きスキルの場合

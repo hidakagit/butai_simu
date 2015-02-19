@@ -51,7 +51,7 @@ Public Class Form10
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
 
         Dim p As DataSet
-        p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY id ASC", "BData")
+        p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY Bid ASC", "BData")
         cc.DisplayMember = "武将名"
         cc.ValueMember = "id"
         cc.DataSource = p.Tables("BData")
@@ -417,7 +417,7 @@ Public Class Form10
         End If
         Dim tmp() As String = Skill_ref(skillname, simu_lv)
         With add_skl(sno)
-            If tmp(7) Is Nothing Then Exit Sub
+            If tmp(7) Is Nothing Then tmp(7) = "U"
             .name = skillname
             .lv = simu_lv
             .kanren = tmp(1)
@@ -431,14 +431,22 @@ Public Class Form10
                 .tokusyu = 5
                 .kouka_p = 0
                 .kouka_f = 0
+                .kanren = 0
                 Exit Sub
             End If
             .kouka_p = Decimal.Parse(tmp(0))
             Select Case (.kanren)
                 '特殊スキル
-                Case "特殊", "条件" ', "童"
+                Case "特殊"
                     .tokusyu = 9
-                    '.t_flg = フラグ付きスキル参照(add_skl(sno)) '条件付きスキルの場合
+                    .kouka_p = 0
+                    .kouka_f = 0
+                    .kanren = 0
+                    Exit Sub
+                Case "条件" ', "童"
+                    .tokusyu = 9
+                    .t_flg = フラグ付きスキル参照(add_skl(sno)) '条件付きスキルの場合
+                    .kanren = .kouka_f
                 Case Else
                     Select Case (.koubou)
                         Case "速" '速度オンリー
@@ -451,7 +459,7 @@ Public Class Form10
                             'If InStr(tmp(4), "C") Then tmp(4) = 文字列計算(Replace(tmp(4), "C", CStr(cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
                             '.kouka_f = Decimal.Parse(tmp(4))
                             .kanren = tmp(4)
-                            If Not InStr(tmp(4), "C") Then .kouka_f = Decimal.Parse(tmp(4))
+                            If InStr(tmp(4), "C") = 0 Then .kouka_f = Decimal.Parse(tmp(4))
                             If tmp(5) = "速" Then .speed = Decimal.Parse(tmp(6)) '付与効果に速度がある
                     End Select
             End Select
@@ -474,6 +482,7 @@ Public Class Form10
                 .tokusyu = 5
                 .kouka_p = 0
                 .kouka_f = 0
+                .kanren = 0
                 Exit Sub
             End If
             .kanren = zero_skl(zero_no)(2)
@@ -487,14 +496,22 @@ Public Class Form10
                 .tokusyu = 5
                 .kouka_p = 0
                 .kouka_f = 0
+                .kanren = 0
                 Exit Sub
             End If
             .kouka_p = Decimal.Parse(zero_skl(zero_no)(1))
             Select Case (.kanren)
                 '特殊スキル
-                Case "特殊", "条件" ', "童"
+                Case "特殊"
                     .tokusyu = 9
-                    '.t_flg = フラグ付きスキル参照(simu_bs(3).skill(0)) '条件付きスキルの場合
+                    .kouka_p = 0
+                    .kouka_f = 0
+                    .kanren = 0
+                    Exit Sub
+                Case "条件" ', "童"
+                    .tokusyu = 9
+                    .t_flg = フラグ付きスキル参照(simu_bs(3).skill(0)) '条件付きスキルの場合
+                    .kanren = .kouka_f
                 Case Else
                     Select Case (.koubou)
                         Case "速" '速度オンリー

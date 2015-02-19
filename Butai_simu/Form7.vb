@@ -45,7 +45,7 @@
             flg = False
         Else
             butai_heiho = Val(ToolStripTextBox1.Text)
-            If butai_heiho = 0 Then
+            If butai_heiho < 0 Then
                 MsgBox("部隊兵法値の設定が不正です")
                 flg = False
             End If
@@ -58,6 +58,9 @@
         If jf = False Then '条件に不備があれば
             Exit Sub
         End If
+
+        Call フラグ付きスキル読み込み() '読込（更新）
+
         DataGridView1.Rows.Clear() '表をクリア
         DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
         Dim sl()() As String = Nothing
@@ -65,7 +68,7 @@
         Dim costd() As Boolean
         Dim slid() As Decimal
         Dim tk(), erck() As String
-        Dim slbl() As String = {"スキル名", "攻防", "対象", "発動率", "上昇率", "付与効果", "付与率", "Sunf"}
+        Dim slbl() As String = {"スキル名", "分類", "攻防", "対象", "発動率", "上昇率", "付与効果", "付与率", "Sunf"}
         Dim target_u() As String = {"武士", "弓騎馬", "赤備え", "騎馬鉄砲", "鉄砲足軽", "焙烙火矢", "大筒兵", "破城鎚", "攻城櫓"}
         Dim target_h() As String = {"武士", "弓騎馬", "赤備え", "騎馬鉄砲", "鉄砲足軽", "焙烙火矢", "大筒兵", "雑賀衆"}
         Dim target_hi() As String = {"国人衆", "雑賀衆", "海賊衆", "母衣衆"}
@@ -107,10 +110,10 @@
             If syo_skill Then '将スキルの場合は全スキルを除く
                 'sqlstr = "SELECT * FROM Skill WHERE 基本効果 LIKE """ & "%" & kobo & "%" & """ AND NOT 分類 =""" & "特殊""" & " AND LV =" & skill_lv & " AND ( 対象 LIKE """ & "%" & h(0) & "%" & """ )"
                 sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
-                    & " AND NOT 分類 =" & ダブルクオート("特殊") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%")
+                    & " AND NOT 分類 = " & ダブルクオート("特殊") & " AND NOT 分類 = " & ダブルクオート("不可") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%")
             Else
                 sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
-                    & " AND NOT 分類 =" & ダブルクオート("特殊") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%") & " OR 対象 = " & ダブルクオート("全")
+                    & " AND NOT 分類 = " & ダブルクオート("特殊") & " AND NOT 分類 = " & ダブルクオート("不可") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%") & " OR 対象 = " & ダブルクオート("全")
             End If
             If jkf_u Then
                 sqlstr = sqlstr & " OR 対象 = " & ダブルクオート("上級器")
@@ -131,56 +134,75 @@
             Dim dflg As Boolean = False
             Dim sflg As Boolean = False
             costd(j) = False
-            If sl(7)(j) = "U" Then 'データなし
+            If sl(8)(j) = "U" Then 'データなし
                 erck(j) = "D無"
                 hp(j) = 0
                 kp(j) = 0
                 dp(j) = 0
                 Continue For
             End If
-            If Val(sl(3)(j)) + (butai_heiho / 100) < 1 Then '発動率
-                hp(j) = Val(sl(3)(j)) + butai_heiho / 100
+            hp(j) = Val(sl(4)(j)) '発動率
+            '特殊スキル
+            If sl(1)(j) = "条件" Then
+                Dim tmpskl As Busho.skl = Nothing
+                With tmpskl
+                    .name = sl(0)(j)
+                    .lv = skill_lv
+                    .kouka_f = Val(sl(5)(j))
+                    フラグ付きスキル参照(tmpskl) '条件付きスキルの場合
+                    If InStr(.heika, "槍弓馬砲器") Then
+                        .heika = "全"
+                    End If
+                    sl(3)(j) = .heika
+                    sl(4)(j) = .kouka_p
+                    sl(5)(j) = .kouka_f
+                End With
+            End If
+            Select Case (sl(2)(j))
+                Case "速" '速度オンリー
+                    sflg = True
+                    sl(7)(j) = sl(5)(j) '速度のみのスキル。付加効果にコピー
+                    sl(5)(j) = 0
+                Case "破壊" '破壊オンリー
+                    dflg = True
+                    sl(7)(j) = sl(5)(j) '破壊のみのスキル。付加効果にコピー
+                    sl(5)(j) = 0
+                Case Else '通常スキルの場合
+                    If sl(6)(j) = "速" Then '速度を含むスキル
+                        sflg = True
+                    End If
+                    If sl(6)(j) = "破壊" Then '破壊を含むスキル
+                        dflg = True
+                    End If
+                    If InStr(sl(5)(j), "C") Then 'コスト依存スキル
+                        sl(5)(j) = Replace(sl(5)(j), "C", busho_cost)
+                        costd(j) = True
+                        kp(j) = Decimal.Parse(文字列計算(sl(5)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                        If kp(j) = 0 And dflg = False Then '文字列計算をした結果、ゼロ
+                            erck(j) = "D異常"
+                        End If
+                    Else
+                        kp(j) = Decimal.Parse(sl(5)(j))
+                    End If
+            End Select
+            If Val(sl(4)(j)) + (butai_heiho / 100) < 1 Then '発動率
+                hp(j) = Val(sl(4)(j)) + butai_heiho / 100
             Else
                 hp(j) = 1
-            End If
-            '上昇率
-            If sl(5)(j) = "破壊" Then '破壊を含むスキル
-                dflg = True
-                If sl(1)(j) = "破壊" Then
-                    sl(6)(j) = sl(4)(j) '破壊のみのスキル。付加効果にコピー
-                    sl(4)(j) = 0
-                End If
-            End If
-            If sl(5)(j) = "速" Then '速度を含むスキル
-                sflg = True
-                If sl(1)(j) = "速" Then
-                    sl(6)(j) = sl(4)(j) '速度のみのスキル。付加効果にコピー
-                    sl(4)(j) = 0
-                End If
-            End If
-            If InStr(sl(4)(j), "C") Then 'コスト依存スキル
-                sl(4)(j) = Replace(sl(4)(j), "C", busho_cost)
-                costd(j) = True
-                kp(j) = Decimal.Parse(文字列計算(sl(4)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
-                If kp(j) = 0 And dflg = False Then '文字列計算をした結果、ゼロ
-                    erck(j) = "D異常"
-                End If
-            Else
-                kp(j) = Decimal.Parse(sl(4)(j))
             End If
             '期待値計算
             kitai(j) = hp(j) * kp(j)
             If dflg Then '付与効果に破壊を含むスキル
-                If InStr(sl(6)(j), "C") Then 'コスト依存スキル
-                    sl(6)(j) = Replace(sl(6)(j), "C", busho_cost)
+                If InStr(sl(7)(j), "C") Then 'コスト依存スキル
+                    sl(7)(j) = Replace(sl(7)(j), "C", busho_cost)
                     costd(j) = True
                     'costd(j) = True
-                    dp(j) = Decimal.Parse(文字列計算(sl(6)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                    dp(j) = Decimal.Parse(文字列計算(sl(7)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
                     If dp(j) = 0 Then '文字列計算をした結果、ゼロ
                         erck(j) = "D異常"
                     End If
                 Else
-                    dp(j) = Decimal.Parse(文字列計算(sl(6)(j)))
+                    dp(j) = Decimal.Parse(文字列計算(sl(7)(j)))
                 End If
                 dkitai(j) = hp(j) * dp(j) '破壊が絡むスキルは破壊期待値を計算
             End If
@@ -193,19 +215,21 @@
             slid(i) = i
         Next
         Array.Sort(kitai, slid) 'ソート
+        Dim rows As DataGridViewRow()
+        Dim rno As Integer = 0
+        ReDim rows(sc)
         'Datagridに追加
         For i As Integer = sc To 0 Step -1
             Dim row As DataGridViewRow = New DataGridViewRow()
             Dim cp As Integer = CInt(slid(i))
             row.CreateCells(DataGridView1)
-            row.SetValues(New Object() {sl(0)(cp), sl(2)(cp), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
-            DataGridView1.Rows.AddRange(row)
+            row.SetValues(New Object() {sl(0)(cp), sl(3)(cp), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
 
-            Dim cell As DataGridViewCell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(4) 'コスト依存ならば色づけ
+            Dim cell As DataGridViewCell = row.Cells(4) 'コスト依存ならば色づけ
             If costd(cp) Then 'コスト依存
                 cell.Style.ForeColor = Color.DeepPink
             End If
-            cell = DataGridView1.Rows(DataGridView1.Rows.Count - 2).Cells(5) '破壊等の色付けのため
+            cell = row.Cells(5) '破壊等の色付けのため
             If cell.Value = "破壊" Then
                 cell.Style.ForeColor = Color.DarkOliveGreen
             ElseIf cell.Value = "速度" Then
@@ -213,7 +237,10 @@
             ElseIf cell.Value = "速度＋破壊" Then
                 cell.Style.ForeColor = Color.Firebrick
             End If
+            rows(rno) = row
+            rno = rno + 1
         Next
+        DataGridView1.Rows.AddRange(rows)
         DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells
         DataGridView1.Columns(6).Visible = hakai_onoff '破壊期待値表示切替
         DataGridView1.Columns(7).Visible = hakai_onoff
