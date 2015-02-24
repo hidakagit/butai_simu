@@ -2694,7 +2694,6 @@ Partial Class Form1
         Me.ToolStripButton8.Name = "ToolStripButton8"
         Me.ToolStripButton8.Size = New System.Drawing.Size(116, 36)
         Me.ToolStripButton8.Text = "データベース"
-        Me.ToolStripButton8.Visible = False
         '
         'ContextMenuStrip1
         '
@@ -3052,7 +3051,7 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer3.05"
+        Me.Text = "部隊シミュレータVer3.07"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)

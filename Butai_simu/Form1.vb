@@ -377,7 +377,10 @@ Public Class Form1
         If sender.Text = "" Then
             Exit Sub
         End If
+        Dim cc As ComboBox = sender
+        'RemoveHandler cc.SelectedValueChanged, AddressOf Me.追加スキル追加 'これが無いと追加時と競合
         Call 追加スキル追加(sender, e)
+        'AddHandler cc.SelectedValueChanged, AddressOf Me.追加スキル追加
         Select Case CInt(Mid(CStr(sender.Name), 10, 2))
             Case 15 'スロ2消去
                 ToolTip1.SetToolTip(Label(Me, CStr(bc) & "004"), vbNullString)
@@ -1494,21 +1497,21 @@ Public Class Form1
                     .skill(j).name = GetINIValue("skill(" & j & ").name", bsho, bini)
                     .skill(j).lv = Val(GetINIValue("skill(" & j & ").lv", bsho, bini))
                     If Not j = 0 Then '初期スキルはスルー
-                        .skill(j).kanren = スキル関連推定(.skill(j).name)
+                        .skill(j).kanren = スキル関連推定(.skill(j).name, True)
                     End If
 
                     If Not .skill(j).kanren = "" And Not j = 0 Then '関連スキルが空ではない＝追加スキルがある
                         Select Case j
                             Case 1 'スロ2
                                 ComboBox(Me, CStr(i) & "09").Focus()
-                                ComboBox(Me, CStr(i) & "09").SelectedIndex = ComboBox(Me, CStr(i) & "09").FindString(.skill(j).kanren)
+                                ComboBox(Me, CStr(i) & "09").SelectedIndex = ComboBox(Me, CStr(i) & "09").FindString(スキル関連推定(.skill(j).name, True))
                                 ComboBox(Me, CStr(i) & "11").SelectedText = .skill(j).name
                                 スキル名入力(ComboBox(Me, CStr(i) & "11"), Nothing)
                                 ComboBox(Me, CStr(i) & "15").Text = .skill(j).lv
                                 追加スキル追加(ComboBox(Me, CStr(i) & "15"), Nothing)
                             Case 2 'スロ3
                                 ComboBox(Me, CStr(i) & "10").Focus()
-                                ComboBox(Me, CStr(i) & "10").SelectedIndex = ComboBox(Me, CStr(i) & "10").FindString(.skill(j).kanren)
+                                ComboBox(Me, CStr(i) & "10").SelectedIndex = ComboBox(Me, CStr(i) & "10").FindString(スキル関連推定(.skill(j).name, True))
                                 ComboBox(Me, CStr(i) & "12").SelectedText = .skill(j).name
                                 スキル名入力(ComboBox(Me, CStr(i) & "12"), Nothing)
                                 ComboBox(Me, CStr(i) & "16").Text = .skill(j).lv
@@ -1544,6 +1547,28 @@ Public Class Form1
                 bs(i).No = i '武将No付け替え必要
             End With
         Next
+        '部隊スキル読み込み
+        Dim bskillno As Integer
+        bskillno = Val(GetINIValue("bskill_no", "部隊スキル", bini))
+        If bskillno > 0 Then
+            For i As Integer = 0 To bskillno - 1
+                ' bskillを読み込んでいく
+                If i = 0 Then
+                    ReDim bskill.bsk(0)
+                Else
+                    ReDim Preserve bskill.bsk(i)
+                End If
+                With bskill.bsk(i)
+                    .koubou = GetINIValue("koubou(" & i & ")", "部隊スキル", bini)
+                    .type = GetINIValue("type(" & i & ")", "部隊スキル", bini)
+                    .kouka_p = Val(GetINIValue("kouka_p(" & i & ")", "部隊スキル", bini))
+                    .kouka_f = Val(GetINIValue("kouka_f(" & i & ")", "部隊スキル", bini))
+                    .speed = Val(GetINIValue("speed(" & i & ")", "部隊スキル", bini))
+                    .taisyo = GetINIValue("taisyo(" & i & ")", "部隊スキル", bini)
+                End With
+            Next
+            Form4.部隊スキルONOFF(True)
+        End If
         Cursor.Current = Cursors.Default
     End Sub
 
@@ -1618,6 +1643,22 @@ Public Class Form1
                     Next
                 End With
             Next
+            '部隊スキル
+            If bskill.flg Then
+                With bskill
+                    SetINIValue(.bsk.Length, "bskill_no", "部隊スキル", FILENAME_bs)
+                    For i As Integer = 0 To .bsk.Length - 1
+                        SetINIValue(.bsk(i).koubou, "koubou(" & i & ")", "部隊スキル", FILENAME_bs)
+                        SetINIValue(.bsk(i).type, "type(" & i & ")", "部隊スキル", FILENAME_bs)
+                        SetINIValue(.bsk(i).kouka_p, "kouka_p(" & i & ")", "部隊スキル", FILENAME_bs)
+                        SetINIValue(.bsk(i).kouka_f, "kouka_f(" & i & ")", "部隊スキル", FILENAME_bs)
+                        SetINIValue(.bsk(i).speed, "speed(" & i & ")", "部隊スキル", FILENAME_bs)
+                        SetINIValue(.bsk(i).taisyo, "taisyo(" & i & ")", "部隊スキル", FILENAME_bs)
+                    Next
+                End With
+            Else
+                SetINIValue(0, "bskill_no", "部隊スキル", FILENAME_bs)
+            End If
             MsgBox("登録完了")
         Catch ex As Exception
             MsgBox("登録内容に漏れがあります。次回復元時に正しく復元されない可能性があります。")
@@ -2173,5 +2214,9 @@ Public Class Form1
 
     Private Sub 開くボタン(sender As Object, e As EventArgs) Handles ToolStripSplitButton1.ButtonClick
         Call 保存部隊を開く(sender, e)
+    End Sub
+
+    Private Sub DB編集ツールを開く(sender As Object, e As EventArgs) Handles ToolStripButton8.Click
+        Form13.Show()
     End Sub
 End Class

@@ -236,7 +236,7 @@ Partial Class Form7
         '
         Me.ToolStripLabel6.Name = "ToolStripLabel6"
         Me.ToolStripLabel6.Size = New System.Drawing.Size(80, 23)
-        Me.ToolStripLabel6.Text = "※破壊期待値"
+        Me.ToolStripLabel6.Text = "◆破壊期待値"
         '
         'ToolStripComboBox5
         '

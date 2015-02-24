@@ -446,7 +446,7 @@ Public Class Form10
                 Case "条件" ', "童"
                     .tokusyu = 9
                     .t_flg = フラグ付きスキル参照(add_skl(sno)) '条件付きスキルの場合
-                    .kanren = .kouka_f
+                    .kanren = tmp(4)
                 Case Else
                     Select Case (.koubou)
                         Case "速" '速度オンリー
@@ -511,7 +511,7 @@ Public Class Form10
                 Case "条件" ', "童"
                     .tokusyu = 9
                     .t_flg = フラグ付きスキル参照(simu_bs(3).skill(0)) '条件付きスキルの場合
-                    .kanren = .kouka_f
+                    .kanren = zero_skl(zero_no)(5)
                 Case Else
                     Select Case (.koubou)
                         Case "速" '速度オンリー
@@ -523,6 +523,7 @@ Public Class Form10
                             .tokusyu = 0
                             'If InStr(tmp(4), "C") Then tmp(4) = 文字列計算(Replace(tmp(4), "C", CStr(cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
                             '.kouka_f = Decimal.Parse(tmp(4))
+                            .kanren = zero_skl(zero_no)(5)
                             If InStr(zero_skl(zero_no)(5), "C") Then zero_skl(zero_no)(5) = _
                                 文字列計算(Replace(zero_skl(zero_no)(5), "C", CStr(simu_bs(3).cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
                             .kouka_f = Decimal.Parse(zero_skl(zero_no)(5))
@@ -1316,24 +1317,24 @@ Public Class Form10
                         Case 0
                             cus_addskl(i)(j) = GetINIValue("add" & CStr(i) & CStr(j \ 2 + 1), "CSKILL", bini)
                         Case 1
-                            cus_addskl(i)(j) = スキル関連推定(GetINIValue("add" & CStr(i) & CStr(j \ 2 + 1), "CSKILL", bini))
+                            cus_addskl(i)(j) = スキル関連推定(GetINIValue("add" & CStr(i) & CStr(j \ 2 + 1), "CSKILL", bini), True)
                     End Select
                 Next
             Next
         Else 'スキル通常設定ならば
             ComboBox01.Focus()
-            ComboBox01.SelectedIndex = ComboBox01.FindString(スキル関連推定(GetINIValue("add1", "武将A", bini)))
+            ComboBox01.SelectedIndex = ComboBox01.FindString(スキル関連推定(GetINIValue("add1", "武将A", bini), True))
             ComboBox011.SelectedText = GetINIValue("add1", "武将A", bini)
             ComboBox02.Focus()
-            ComboBox02.SelectedIndex = ComboBox02.FindString(スキル関連推定(GetINIValue("add2", "武将A", bini)))
+            ComboBox02.SelectedIndex = ComboBox02.FindString(スキル関連推定(GetINIValue("add2", "武将A", bini), True))
             ComboBox012.SelectedText = GetINIValue("add2", "武将A", bini)
             If Not simu_skeqflg Then 'ランキング武将のスキルがオリジナル
                 CheckBox1.Checked = False
                 ComboBox41.Focus()
-                ComboBox41.SelectedIndex = ComboBox41.FindString(スキル関連推定(GetINIValue("add1", "ランキング武将", bini)))
+                ComboBox41.SelectedIndex = ComboBox41.FindString(スキル関連推定(GetINIValue("add1", "ランキング武将", bini), True))
                 ComboBox041.SelectedText = GetINIValue("add1", "ランキング武将", bini)
                 ComboBox42.Focus()
-                ComboBox42.SelectedIndex = ComboBox42.FindString(スキル関連推定(GetINIValue("add2", "ランキング武将", bini)))
+                ComboBox42.SelectedIndex = ComboBox42.FindString(スキル関連推定(GetINIValue("add2", "ランキング武将", bini), True))
                 ComboBox042.SelectedText = GetINIValue("add2", "ランキング武将", bini)
             End If
         End If

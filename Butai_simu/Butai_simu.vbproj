@@ -79,6 +79,27 @@
   <PropertyGroup>
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>Butai_simu.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>Butai_simu.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
       <HintPath>..\packages\EntityFramework.6.1.1\lib\net40\EntityFramework.dll</HintPath>
@@ -142,6 +163,12 @@
       <DependentUpon>Form12.vb</DependentUpon>
     </Compile>
     <Compile Include="Form12.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form13.Designer.vb">
+      <DependentUpon>Form13.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form13.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form2.Designer.vb">
@@ -223,6 +250,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form12.resx">
       <DependentUpon>Form12.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form13.resx">
+      <DependentUpon>Form13.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form2.resx">
       <DependentUpon>Form2.vb</DependentUpon>

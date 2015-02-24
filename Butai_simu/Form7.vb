@@ -64,7 +64,7 @@
         DataGridView1.Rows.Clear() '表をクリア
         DataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
         Dim sl()() As String = Nothing
-        Dim hp(), kp(), dp(), kitai(), dkitai() As Decimal
+        Dim hp(), kp(), dp(), sp(), kitai(), dkitai() As Decimal
         Dim costd() As Boolean
         Dim slid() As Decimal
         Dim tk(), erck() As String
@@ -128,7 +128,7 @@
             sl(i) = DB_DirectOUT2(sqlstr, slbl(i))
         Next
         Dim sc As Integer = sl(0).Length - 1 '合致したスキルの個数
-        ReDim hp(sc), kp(sc), dp(sc), kitai(sc), dkitai(sc), tk(sc), erck(sc), costd(sc)
+        ReDim hp(sc), kp(sc), dp(sc), kitai(sc), dkitai(sc), tk(sc), erck(sc), costd(sc), sp(sc)
 
         For j As Integer = 0 To sc '取得してきたデータを加工
             Dim dflg As Boolean = False
@@ -149,18 +149,21 @@
                     .name = sl(0)(j)
                     .lv = skill_lv
                     .kouka_f = Val(sl(5)(j))
-                    フラグ付きスキル参照(tmpskl) '条件付きスキルの場合
+                    .t_flg = フラグ付きスキル参照(tmpskl) '条件付きスキルの場合
                     If InStr(.heika, "槍弓馬砲器") Then
                         .heika = "全"
                     End If
-                    sl(3)(j) = .heika
-                    sl(4)(j) = .kouka_p
-                    sl(5)(j) = .kouka_f
+                    If .t_flg Then
+                        sl(3)(j) = .heika
+                        sl(4)(j) = .kouka_p
+                        sl(5)(j) = .kouka_f
+                    End If
                 End With
             End If
             Select Case (sl(2)(j))
                 Case "速" '速度オンリー
                     sflg = True
+                    sp(j) = Val(sl(5)(j))
                     sl(7)(j) = sl(5)(j) '速度のみのスキル。付加効果にコピー
                     sl(5)(j) = 0
                 Case "破壊" '破壊オンリー
@@ -170,6 +173,7 @@
                 Case Else '通常スキルの場合
                     If sl(6)(j) = "速" Then '速度を含むスキル
                         sflg = True
+                        sp(j) = Val(sl(7)(j))
                     End If
                     If sl(6)(j) = "破壊" Then '破壊を含むスキル
                         dflg = True
@@ -225,7 +229,9 @@
             row.CreateCells(DataGridView1)
             row.SetValues(New Object() {sl(0)(cp), sl(3)(cp), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
 
-            Dim cell As DataGridViewCell = row.Cells(4) 'コスト依存ならば色づけ
+            Dim cell As DataGridViewCell = row.Cells(0) '条件付きスキルならば色づけ
+            If sl(1)(cp) = "条件" Then cell.Style.BackColor = Color.LightGoldenrodYellow
+            cell = row.Cells(4) 'コスト依存ならば色づけ
             If costd(cp) Then 'コスト依存
                 cell.Style.ForeColor = Color.DeepPink
             End If
@@ -233,9 +239,17 @@
             If cell.Value = "破壊" Then
                 cell.Style.ForeColor = Color.DarkOliveGreen
             ElseIf cell.Value = "速度" Then
-                cell.Style.ForeColor = Color.DodgerBlue
+                If sp(cp) > 0 Then
+                    cell.Style.ForeColor = Color.DodgerBlue
+                Else
+                    cell.Style.ForeColor = Color.IndianRed
+                End If
             ElseIf cell.Value = "速度＋破壊" Then
-                cell.Style.ForeColor = Color.Firebrick
+                If sp(cp) > 0 Then
+                    cell.Style.ForeColor = Color.Firebrick
+                Else
+                    cell.Style.ForeColor = Color.Maroon
+                End If
             End If
             rows(rno) = row
             rno = rno + 1

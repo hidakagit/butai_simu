@@ -126,7 +126,7 @@
         End If
     End Sub
 
-    Private Sub 部隊スキルONOFF(ByVal onoff As Boolean)
+    Public Sub 部隊スキルONOFF(ByVal onoff As Boolean)
         With Form1.ToolStripButton4
             If onoff = True Then
                 bskill.flg = True '部隊スキルボタンの画像を変更

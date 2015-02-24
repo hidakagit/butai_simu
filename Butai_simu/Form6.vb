@@ -675,7 +675,7 @@
         ComboBox(Me, CStr(bf) & "12").Text = slv(0) '初期スキルのLV
         For i As Integer = 1 To sname.Length - 1
             ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").Focus()
-            ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").SelectedIndex = ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").FindString(スキル関連推定(sname(i)))
+            ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").SelectedIndex = ComboBox(Me, CStr(bf) & CStr(i + 1) & "0").FindString(スキル関連推定(sname(i), True))
             ComboBox(Me, CStr(bf) & CStr(i + 1) & "1").Text = sname(i)
             Call 追加スキル入力(ComboBox(Me, CStr(bf) & CStr(i + 1) & "1"), Nothing)
             ComboBox(Me, CStr(bf) & CStr(i + 1) & "2").Text = slv(i)

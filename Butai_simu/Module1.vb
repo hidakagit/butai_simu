@@ -120,10 +120,17 @@ Public Structure Busho : Implements System.ICloneable
             exp_kouka = 0
             exp_kouka_b = 0
             up_kouka_p = 0
-            'speed = 0
-            'heika = Nothing
-            'kanren = Nothing
-            'koubou = Nothing
+        End Sub
+
+        Public Sub スキル初期化() 'スキル取得、上書きの際の初期化
+            kanren = Nothing
+            koubou = Nothing
+            kouka_p = 0
+            kouka_f = 0
+            heika = Nothing
+            speed = 0
+            tokusyu = Nothing
+            t_flg = False
         End Sub
     End Structure
 
@@ -154,6 +161,7 @@ Public Structure Busho : Implements System.ICloneable
                     End If
                 End If
                 With skill(i)
+                    .スキル初期化()
                     .name = sname
                     .lv = slv
                     tmp = Skill_ref(.name, .lv)
@@ -1050,9 +1058,10 @@ Module Module1
     End Function
 
     'スキル関連推定
-    Public Function スキル関連推定(ByVal skill_name As String) As String
+    'cflg = Trueならば、combobox関連からの呼び出しとして条件付きスキルを特殊として返す
+    Public Function スキル関連推定(ByVal skill_name As String, Optional ByVal cflg As Boolean = False) As String
         Dim stmp() As String = DB_DirectOUT("SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE SData.スキル名 = " & ダブルクオート(skill_name) & " AND スキルLV = 1", {"分類"})
-        If stmp(0) = "条件" Then stmp(0) = "特殊" '条件付きスキルは特殊カテゴリーに含む
+        If cflg And stmp(0) = "条件" Then stmp(0) = "特殊" '条件付きスキルは特殊カテゴリーに含む
         スキル関連推定 = stmp(0)
     End Function
 
@@ -1127,6 +1136,11 @@ Module Module1
                 Case "穢土の礎"
                     '穢土の礎
                     '姫武将にのみスキル効果を適用。
+                    '効果自体は変動しないため、ここではflgをONにするだけ
+                    Return True
+                Case "堅国の絆"
+                    '堅国の絆
+                    '自本領に滞在する全部隊に効果を適用。
                     '効果自体は変動しないため、ここではflgをONにするだけ
                     Return True
             End Select

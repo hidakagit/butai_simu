@@ -229,20 +229,20 @@
                 .skill(j).name = bd.skill_name(j)
                 .skill(j).lv = bd.skill_lv(j)
                 If Not j = 0 Then '初期スキルはスルー
-                    .skill(j).kanren = スキル関連推定(bd.skill_name(j))
+                    .skill(j).kanren = スキル関連推定(bd.skill_name(j), True)
                 End If
                 If Not .skill(j).kanren = "" And Not j = 0 Then '関連スキルが空ではない＝追加スキルがある
                     Select Case j
                         Case 1 'スロ2
                             ComboBox(Form1, CStr(selectbs) & "09").Focus()
-                            ComboBox(Form1, CStr(selectbs) & "09").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "09").FindString(.skill(j).kanren)
+                            ComboBox(Form1, CStr(selectbs) & "09").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "09").FindString(スキル関連推定(bd.skill_name(j), True))
                             ComboBox(Form1, CStr(selectbs) & "11").SelectedText = .skill(j).name
                             Form1.スキル名入力(ComboBox(Form1, CStr(selectbs) & "11"), Nothing)
                             ComboBox(Form1, CStr(selectbs) & "15").Text = .skill(j).lv
                             Form1.追加スキル追加(ComboBox(Form1, CStr(selectbs) & "15"), Nothing)
                         Case 2 'スロ3
                             ComboBox(Form1, CStr(selectbs) & "10").Focus()
-                            ComboBox(Form1, CStr(selectbs) & "10").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "10").FindString(.skill(j).kanren)
+                            ComboBox(Form1, CStr(selectbs) & "10").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "10").FindString(スキル関連推定(bd.skill_name(j), True))
                             ComboBox(Form1, CStr(selectbs) & "12").SelectedText = .skill(j).name
                             Form1.スキル名入力(ComboBox(Form1, CStr(selectbs) & "12"), Nothing)
                             ComboBox(Form1, CStr(selectbs) & "16").Text = .skill(j).lv
