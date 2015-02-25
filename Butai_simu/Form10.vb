@@ -126,29 +126,6 @@ Public Class Form10
         End With
     End Sub
 
-    'Private Sub 追加スキル表示(ByVal sender As Object, ByVal e As System.EventArgs) _
-    '    Handles ComboBox011.GotFocus, ComboBox012.GotFocus, _
-    '            ComboBox041.GotFocus, ComboBox042.GotFocus
-    '    Dim p As DataSet
-    '    Dim bunrui As String = vbString
-    '    Select Case (String_onlyNumber(sender.name))
-    '        Case "011"
-    '            bunrui = ComboBox01.Text
-    '        Case "012"
-    '            bunrui = ComboBox02.Text
-    '        Case "041"
-    '            bunrui = ComboBox41.Text
-    '        Case "042"
-    '            bunrui = ComboBox42.Text
-    '    End Select
-    '    p = DB_TableOUT(con, cmd, "SELECT Index,分類,名前,LV FROM Skill WHERE 分類 = """ & bunrui & """ AND LV = 1 ORDER BY Index", "Skill")
-    '    With sender
-    '        .ValueMember = "Index"
-    '        .DisplayMember = "名前"
-    '        .DataSource = p.Tables("Skill")
-    '        .SelectedIndex = -1
-    '    End With
-    'End Sub
     Private Sub スキル設定EQUAL(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
         If CheckBox1.Checked = True Then 'ON
             simu_skeqflg = True

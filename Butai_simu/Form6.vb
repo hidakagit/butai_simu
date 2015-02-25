@@ -82,31 +82,36 @@
     End Sub
 
     Private Sub 追加スキル表示(ByVal sender As Object, ByVal e As System.EventArgs) _
-        Handles ComboBox021.GotFocus, ComboBox031.GotFocus, ComboBox121.GotFocus, ComboBox131.GotFocus, ComboBox111.GotFocus
+        Handles ComboBox020.SelectedIndexChanged, ComboBox030.SelectedIndexChanged, _
+                ComboBox120.SelectedIndexChanged, ComboBox130.SelectedIndexChanged, _
+                ComboBox222.SelectedIndexChanged
         Dim p As DataSet
-        Dim s As String 'スキル分類
-        If Equals(sender, ComboBox021) Then '武将1-スロ2
-            s = ComboBox020.Text
-        ElseIf Equals(sender, ComboBox031) Then '武将1-スロ3
-            s = ComboBox030.Text
-        ElseIf Equals(sender, ComboBox121) Then '武将2-スロ2
-            s = ComboBox120.Text
-        ElseIf Equals(sender, ComboBox131) Then '武将2-スロ3
-            s = ComboBox130.Text
+        Dim s As String = sender.Text 'スキル分類
+        Dim cc As ComboBox
+        If Equals(sender, ComboBox020) Then '武将1-スロ2
+            cc = ComboBox021
+        ElseIf Equals(sender, ComboBox030) Then '武将1-スロ3
+            cc = ComboBox031
+        ElseIf Equals(sender, ComboBox120) Then '武将2-スロ2
+            cc = ComboBox121
+        ElseIf Equals(sender, ComboBox130) Then '武将2-スロ3
+            cc = ComboBox131
         Else '逆引き
-            s = ComboBox222.Text
+            cc = ComboBox111
         End If
         Dim sqlwhere As String = ダブルクオート(s)
         If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
             sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
-        With sender
+        RemoveHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
+        With cc
             .ValueMember = "id"
             .DisplayMember = "スキル名"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
+        AddHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
     End Sub
 
     Private Sub 追加スキル入力(ByVal sender As Object, ByVal e As System.EventArgs) _

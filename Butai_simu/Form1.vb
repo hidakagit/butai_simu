@@ -272,16 +272,16 @@ Public Class Form1
     End Sub
 
     Private Sub 追加スキル表示(ByVal sender As Object, ByVal e As System.EventArgs) _
-        Handles ComboBox011.GotFocus, ComboBox012.GotFocus, _
-                ComboBox111.GotFocus, ComboBox112.GotFocus, _
-                ComboBox211.GotFocus, ComboBox212.GotFocus, _
-                ComboBox311.GotFocus, ComboBox312.GotFocus
+        Handles ComboBox009.SelectedIndexChanged, ComboBox010.SelectedIndexChanged, _
+                ComboBox109.SelectedIndexChanged, ComboBox110.SelectedIndexChanged, _
+                ComboBox209.SelectedIndexChanged, ComboBox210.SelectedIndexChanged, _
+                ComboBox309.SelectedIndexChanged, ComboBox310.SelectedIndexChanged
         Dim p As DataSet
         Dim cc As ComboBox
         Dim s As String = sender.Name
         bc = 武将取得(sender)
         Dim v As String = s.Where(Function(C) C Like "[.0-9]").ToArray()
-        If InStr(v, CStr(bc) & "11") Then 'スロ2
+        If InStr(v, CStr(bc) & "09") Then 'スロ2
             s = ComboBox(Me, CStr(bc) & "09").Text
             cc = ComboBox(Me, CStr(bc) & "11")
         Else 'スロ3
@@ -293,12 +293,14 @@ Public Class Form1
             sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
-        With sender
+        RemoveHandler cc.SelectedValueChanged, AddressOf Me.スキル名入力 'これが無いとスキル名を選べなくなる
+        With cc
             .ValueMember = "id"
             .DisplayMember = "スキル名"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
         End With
+        AddHandler cc.SelectedValueChanged, AddressOf Me.スキル名入力
     End Sub
 
     Public Sub 追加スキル追加(ByVal sender As Object, ByVal e As System.EventArgs) _
@@ -377,7 +379,7 @@ Public Class Form1
         If sender.Text = "" Then
             Exit Sub
         End If
-        Dim cc As ComboBox = sender
+        'Dim cc As ComboBox = sender
         'RemoveHandler cc.SelectedValueChanged, AddressOf Me.追加スキル追加 'これが無いと追加時と競合
         Call 追加スキル追加(sender, e)
         'AddHandler cc.SelectedValueChanged, AddressOf Me.追加スキル追加
@@ -739,6 +741,26 @@ Public Class Form1
         End With
     End Sub
 
+    Public Sub スキル名削除(ByVal sender As System.Object, ByVal e As System.EventArgs) _
+        Handles ComboBox011.TextChanged, ComboBox012.TextChanged, _
+                ComboBox111.TextChanged, ComboBox112.TextChanged, _
+                ComboBox211.TextChanged, ComboBox212.TextChanged, _
+                ComboBox311.TextChanged, ComboBox312.TextChanged
+        bc = 武将取得(sender)
+        If ComboBox(Me, CStr(bc) & "02").Text = "" Then '武将指定していない場合はそちらを先に
+            Exit Sub
+        End If
+        If sender.Text = "" Then
+            If CInt(Mid(CStr(sender.Name), 10, 2)) = 11 Then
+                ComboBox(Me, CStr(bc) & "15").Enabled = False
+                ComboBox(Me, CStr(bc) & "15").Text = ""
+            Else
+                ComboBox(Me, CStr(bc) & "16").Enabled = False
+                ComboBox(Me, CStr(bc) & "16").Text = ""
+            End If
+        End If
+    End Sub
+
     Public Sub スキル名入力(ByVal sender As System.Object, ByVal e As System.EventArgs) _
         Handles ComboBox011.SelectedIndexChanged, ComboBox012.SelectedIndexChanged, _
                 ComboBox111.SelectedIndexChanged, ComboBox112.SelectedIndexChanged, _
@@ -749,29 +771,21 @@ Public Class Form1
             Exit Sub
         End If
 
-        If Not sender.Text = "" Then
-            If CInt(Mid(CStr(sender.Name), 10, 2)) = 11 Then
-                ComboBox(Me, CStr(bc) & "15").Enabled = True
-                '他スキルの登録が済んでいない場合そちらを先に
-                If ComboBox(Me, CStr(bc) & "16").Enabled = True And ComboBox(Me, CStr(bc) & "16").Text = "" Then
-                    ComboBox(Me, CStr(bc) & "16").SelectedText = 1
-                    追加スキル追加(ComboBox(Me, CStr(bc) & "16"), Nothing)
-                End If
-            Else
-                ComboBox(Me, CStr(bc) & "16").Enabled = True
-                If ComboBox(Me, CStr(bc) & "15").Enabled = True And ComboBox(Me, CStr(bc) & "15").Text = "" Then
-                    ComboBox(Me, CStr(bc) & "15").SelectedText = 1
-                    追加スキル追加(ComboBox(Me, CStr(bc) & "15"), Nothing)
-                End If
+        If CInt(Mid(CStr(sender.Name), 10, 2)) = 11 Then
+            ComboBox(Me, CStr(bc) & "15").Enabled = True
+            '他スキルの登録が済んでいない場合そちらを先に
+            If ComboBox(Me, CStr(bc) & "16").Enabled = True And ComboBox(Me, CStr(bc) & "16").Text = "" Then
+                ComboBox(Me, CStr(bc) & "16").SelectedIndex = 1
+                '追加スキル追加(ComboBox(Me, CStr(bc) & "16"), Nothing)
             End If
+            追加スキル追加(ComboBox(Me, CStr(bc) & "15"), Nothing)
         Else
-            If CInt(Mid(CStr(sender.Name), 10, 2)) = 11 Then
-                ComboBox(Me, CStr(bc) & "15").Enabled = False
-                ComboBox(Me, CStr(bc) & "15").Text = ""
-            Else
-                ComboBox(Me, CStr(bc) & "16").Enabled = False
-                ComboBox(Me, CStr(bc) & "16").Text = ""
+            ComboBox(Me, CStr(bc) & "16").Enabled = True
+            If ComboBox(Me, CStr(bc) & "15").Enabled = True And ComboBox(Me, CStr(bc) & "15").Text = "" Then
+                ComboBox(Me, CStr(bc) & "15").SelectedIndex = 1
+                '追加スキル追加(ComboBox(Me, CStr(bc) & "15"), Nothing)
             End If
+            追加スキル追加(ComboBox(Me, CStr(bc) & "16"), Nothing)
         End If
     End Sub
 
@@ -1760,7 +1774,7 @@ Public Class Form1
             kasoku(i) = Int(3600 / (bs(i).heisyu.spd * (1 + ksk(i))))
             it(i) = i
         Next
-       
+
         Array.Sort(kasoku, it)
         If Not bskill.speed = 0 Then
             butai_spd = Int(3600 / (bs(Int(it(bsc - 1))).heisyu.spd * (1 + bskill.speed) * (1 + ksk(Int(it(bsc - 1))))))
