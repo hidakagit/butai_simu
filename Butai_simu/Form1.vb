@@ -171,10 +171,14 @@ Public Class Form1
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択 'これが無いと武将名を選べなくなる
         Dim p As DataSet
         p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " AND Bunf = 'F' ORDER BY Bid ASC", "BData")
-        cc.DisplayMember = "武将名"
-        cc.ValueMember = "id"
-        cc.DataSource = p.Tables("BData")
-        cc.SelectedIndex = -1
+        With cc
+            .BeginUpdate()
+            .DisplayMember = "武将名"
+            .ValueMember = "id"
+            .DataSource = p.Tables("BData")
+            .SelectedIndex = -1
+            .EndUpdate()
+        End With
         AddHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
     End Sub
 
@@ -294,12 +298,16 @@ Public Class Form1
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.スキル名入力 'これが無いとスキル名を選べなくなる
+        RemoveHandler cc.TextChanged, AddressOf Me.スキル名削除
         With cc
+            .BeginUpdate()
             .ValueMember = "id"
             .DisplayMember = "スキル名"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
+            .EndUpdate()
         End With
+        AddHandler cc.TextChanged, AddressOf Me.スキル名削除
         AddHandler cc.SelectedValueChanged, AddressOf Me.スキル名入力
     End Sub
 
@@ -307,12 +315,12 @@ Public Class Form1
         Handles ComboBox014.SelectedValueChanged, ComboBox015.SelectedValueChanged, ComboBox016.SelectedValueChanged, _
                 ComboBox114.SelectedValueChanged, ComboBox115.SelectedValueChanged, ComboBox116.SelectedValueChanged, _
                 ComboBox214.SelectedValueChanged, ComboBox215.SelectedValueChanged, ComboBox216.SelectedValueChanged, _
-                ComboBox314.SelectedValueChanged, ComboBox315.SelectedValueChanged, ComboBox316.SelectedValueChanged, ComboBox316.MouseUp, ComboBox315.MouseUp, ComboBox314.MouseUp, ComboBox216.MouseUp, ComboBox215.MouseUp, ComboBox214.MouseUp, ComboBox116.MouseUp, ComboBox115.MouseUp, ComboBox114.MouseUp, ComboBox016.MouseUp, ComboBox015.MouseUp, ComboBox014.MouseUp
+                ComboBox314.SelectedValueChanged, ComboBox315.SelectedValueChanged, ComboBox316.SelectedValueChanged, _
+                ComboBox316.MouseUp, ComboBox315.MouseUp, ComboBox314.MouseUp, ComboBox216.MouseUp, ComboBox215.MouseUp, ComboBox214.MouseUp, ComboBox116.MouseUp, ComboBox115.MouseUp, ComboBox114.MouseUp, ComboBox016.MouseUp, ComboBox015.MouseUp, ComboBox014.MouseUp
         bc = 武将取得(sender)
         If ComboBox(Me, CStr(bc) & "02").Text = "" Then '武将指定していない場合はそちらを先に
             Exit Sub
         End If
-
         'スキル数を数える
         If ComboBox(Me, CStr(bc) & "15").Enabled = False Or ComboBox(Me, CStr(bc) & "11").Text = Nothing Then
             If ComboBox(Me, CStr(bc) & "16").Enabled = False Or ComboBox(Me, CStr(bc) & "12").Text = Nothing Then
@@ -379,10 +387,7 @@ Public Class Form1
         If sender.Text = "" Then
             Exit Sub
         End If
-        'Dim cc As ComboBox = sender
-        'RemoveHandler cc.SelectedValueChanged, AddressOf Me.追加スキル追加 'これが無いと追加時と競合
         Call 追加スキル追加(sender, e)
-        'AddHandler cc.SelectedValueChanged, AddressOf Me.追加スキル追加
         Select Case CInt(Mid(CStr(sender.Name), 10, 2))
             Case 15 'スロ2消去
                 ToolTip1.SetToolTip(Label(Me, CStr(bc) & "004"), vbNullString)
@@ -770,22 +775,26 @@ Public Class Form1
         If ComboBox(Me, CStr(bc) & "02").Text = "" Then '武将指定していない場合はそちらを先に
             Exit Sub
         End If
-
+        If sender.Text = "" Then Exit Sub
+        Dim sellv1 As ComboBox = ComboBox(Me, CStr(bc) & "15")
+        Dim sellv2 As ComboBox = ComboBox(Me, CStr(bc) & "16")
         If CInt(Mid(CStr(sender.Name), 10, 2)) = 11 Then
-            ComboBox(Me, CStr(bc) & "15").Enabled = True
+            sellv1.Enabled = True
             '他スキルの登録が済んでいない場合そちらを先に
-            If ComboBox(Me, CStr(bc) & "16").Enabled = True And ComboBox(Me, CStr(bc) & "16").Text = "" Then
-                ComboBox(Me, CStr(bc) & "16").SelectedIndex = 1
-                '追加スキル追加(ComboBox(Me, CStr(bc) & "16"), Nothing)
+            If sellv2.Enabled = True And sellv2.Text = "" Then
+                sellv2.SelectedIndex = 0
+                追加スキル追加(sellv2, Nothing)
             End If
-            追加スキル追加(ComboBox(Me, CStr(bc) & "15"), Nothing)
+            sellv1.SelectedIndex = 0
+            追加スキル追加(sellv1, Nothing)
         Else
-            ComboBox(Me, CStr(bc) & "16").Enabled = True
-            If ComboBox(Me, CStr(bc) & "15").Enabled = True And ComboBox(Me, CStr(bc) & "15").Text = "" Then
-                ComboBox(Me, CStr(bc) & "15").SelectedIndex = 1
-                '追加スキル追加(ComboBox(Me, CStr(bc) & "15"), Nothing)
+            sellv2.Enabled = True
+            If sellv1.Enabled = True And sellv1.Text = "" Then
+                sellv1.SelectedIndex = 0
+                追加スキル追加(sellv1, Nothing)
             End If
-            追加スキル追加(ComboBox(Me, CStr(bc) & "16"), Nothing)
+            If sellv2.Text = "" Then sellv2.SelectedIndex = 0
+            追加スキル追加(sellv2, Nothing)
         End If
     End Sub
 
@@ -1451,38 +1460,38 @@ Public Class Form1
     Public Sub INIファイルから読み込み(ByVal bini As String)
         Cursor.Current = Cursors.WaitCursor
         'まず、武将数のみ取得してデータクリア
-        Dim b_c As Integer = Val(GetINIValue("busho_counter", "部隊長", bini))
+        Dim bs0ini As Hashtable = GetINISection("部隊長", bini)
+        Dim bsini As Hashtable()
+        ReDim bsini(bs0ini("busho_counter") - 1)
+        Dim b_c As Integer = bs0ini(0)(1) 'Val(GetINIValue("busho_counter", "部隊長", bini))
         ToolStripComboBox2.Text = b_c 'Form1の武将数を更新
         Call 武将数スイッチ(ToolStripComboBox2, Nothing)
         Call データクリア(vbNull, Nothing)
-
         For i As Integer = 0 To b_c - 1
-            Dim bsho As String = Nothing
             Call 武将データ手入力用(i, False, True)
             Select Case i
                 Case 0
-                    bsho = "部隊長"
+                    bsini(i) = bs0ini
                 Case 1
-                    bsho = "小隊長A"
+                    bsini(i) = GetINISection("小隊長A", bini)
                 Case 2
-                    bsho = "小隊長B"
+                    bsini(i) = GetINISection("小隊長B", bini)
                 Case 3
-                    bsho = "小隊長C"
+                    bsini(i) = GetINISection("小隊長C", bini)
             End Select
             ReDim Preserve bs(i)
             With bs(i)
                 '--- 武将データをINIファイルから読み込み ---
-                .rare = GetINIValue("rare", bsho, bini)
-                .name = GetINIValue("name", bsho, bini)
-
+                .rare = bsini(i)("rare")
+                .name = bsini(i)("name")
                 ComboBox(Me, CStr(i) & "01").SelectedIndex = ComboBox(Me, CStr(i) & "01").FindString(.rare) '（強制的に）R選択
                 'R選択(ComboBox(Me, CStr(i) & "01"), Nothing)
                 ComboBox(Me, CStr(i) & "02").SelectedText = .name '（強制的に）武将名選択
                 武将名選択(ComboBox(Me, CStr(i) & "02"), Nothing)
 
-                .heisyu.name = GetINIValue("heisyu.name", bsho, bini)
-                .hei_sum = Val(GetINIValue("hei_sum", bsho, bini))
-                .rank = Val(GetINIValue("rank", bsho, bini))
+                .heisyu.name = bsini(i)("heisyu.name")
+                .hei_sum = Val(bsini(i)("hei_sum"))
+                .rank = Val(bsini(i)("rank"))
                 If .rank = 6 Then '限界突破時
                     CheckBox(Me, CStr(i) & "1").Checked = True
                 End If
@@ -1493,46 +1502,53 @@ Public Class Form1
                         .hei_max = .hei_max_d + .rank * 100 'ランクアップで兵数一律+100
                     End If
                 End If
-                .level = Val(GetINIValue("level", bsho, bini))
-                .skill_no = Val(GetINIValue("skill_no", bsho, bini))
+                .level = Val(bsini(i)("level"))
+                .skill_no = Val(bsini(i)("skill_no"))
 
                 For j As Integer = 0 To 2
-                    .st(j) = Val(GetINIValue("st(" & j & ")", bsho, bini))
+                    .st(j) = Val(bsini(i)("st(" & j & ")"))
                 Next
                 For j As Integer = 0 To 3
-                    .tou_a(j) = GetINIValue("tou_a(" & j & ")", bsho, bini)
+                    .tou_a(j) = bsini(i)("tou_a(" & j & ")")
                 Next
 
                 'この2つは面倒なので入力→更新する
                 Dim tmpskill_no As Integer = .skill_no '変わっていく値なので一旦移し替え
+                Dim tmpskill() As Busho.skl
+                ReDim tmpskill(tmpskill_no - 1)
+                For j As Integer = 0 To tmpskill_no - 1
+                    tmpskill(j).name = bsini(i)("skill(" & j & ").name")
+                    tmpskill(j).lv = Val(bsini(i)("skill(" & j & ").lv"))
+                    If Not j = 0 Then tmpskill(j).kanren = スキル関連推定(tmpskill(j).name, True)
+                Next
                 '----------
                 For j As Integer = 0 To tmpskill_no - 1
                     ReDim Preserve .skill(tmpskill_no - 1) '途中、追加スキル追加の部分で空白部分を削られてしまうので逐一Redimする必要がある
-                    .skill(j).name = GetINIValue("skill(" & j & ").name", bsho, bini)
-                    .skill(j).lv = Val(GetINIValue("skill(" & j & ").lv", bsho, bini))
+                    .skill(j).name = tmpskill(j).name
+                    .skill(j).lv = tmpskill(j).lv
                     If Not j = 0 Then '初期スキルはスルー
-                        .skill(j).kanren = スキル関連推定(.skill(j).name, True)
+                        .skill(j).kanren = tmpskill(j).kanren
                     End If
 
                     If Not .skill(j).kanren = "" And Not j = 0 Then '関連スキルが空ではない＝追加スキルがある
                         Select Case j
                             Case 1 'スロ2
-                                ComboBox(Me, CStr(i) & "09").Focus()
-                                ComboBox(Me, CStr(i) & "09").SelectedIndex = ComboBox(Me, CStr(i) & "09").FindString(スキル関連推定(.skill(j).name, True))
-                                ComboBox(Me, CStr(i) & "11").SelectedText = .skill(j).name
+                                'ComboBox(Me, CStr(i) & "09").Focus()
+                                ComboBox(Me, CStr(i) & "09").SelectedIndex = ComboBox(Me, CStr(i) & "09").FindString(tmpskill(j).kanren)
+                                ComboBox(Me, CStr(i) & "11").SelectedText = tmpskill(j).name
                                 スキル名入力(ComboBox(Me, CStr(i) & "11"), Nothing)
-                                ComboBox(Me, CStr(i) & "15").Text = .skill(j).lv
+                                ComboBox(Me, CStr(i) & "15").Text = tmpskill(j).lv
                                 追加スキル追加(ComboBox(Me, CStr(i) & "15"), Nothing)
                             Case 2 'スロ3
-                                ComboBox(Me, CStr(i) & "10").Focus()
-                                ComboBox(Me, CStr(i) & "10").SelectedIndex = ComboBox(Me, CStr(i) & "10").FindString(スキル関連推定(.skill(j).name, True))
-                                ComboBox(Me, CStr(i) & "12").SelectedText = .skill(j).name
+                                'ComboBox(Me, CStr(i) & "10").Focus()
+                                ComboBox(Me, CStr(i) & "10").SelectedIndex = ComboBox(Me, CStr(i) & "10").FindString(tmpskill(j).kanren)
+                                ComboBox(Me, CStr(i) & "12").SelectedText = tmpskill(j).name
                                 スキル名入力(ComboBox(Me, CStr(i) & "12"), Nothing)
-                                ComboBox(Me, CStr(i) & "16").Text = .skill(j).lv
+                                ComboBox(Me, CStr(i) & "16").Text = tmpskill(j).lv
                                 追加スキル追加(ComboBox(Me, CStr(i) & "16"), Nothing)
                         End Select
                     ElseIf j = 0 Then '初期スキルの場合は
-                        ComboBox(Me, CStr(i) & "14").Text = .skill(0).lv
+                        ComboBox(Me, CStr(i) & "14").Text = tmpskill(j).lv
                         追加スキル追加(ComboBox(Me, CStr(i) & "14"), Nothing)
                     End If
                 Next
@@ -1562,8 +1578,9 @@ Public Class Form1
             End With
         Next
         '部隊スキル読み込み
+        Dim bskini As Hashtable = GetINISection("部隊スキル", bini)
         Dim bskillno As Integer
-        bskillno = Val(GetINIValue("bskill_no", "部隊スキル", bini))
+        bskillno = Val(bskini("bskill_no"))
         If bskillno > 0 Then
             For i As Integer = 0 To bskillno - 1
                 ' bskillを読み込んでいく
@@ -1573,12 +1590,12 @@ Public Class Form1
                     ReDim Preserve bskill.bsk(i)
                 End If
                 With bskill.bsk(i)
-                    .koubou = GetINIValue("koubou(" & i & ")", "部隊スキル", bini)
-                    .type = GetINIValue("type(" & i & ")", "部隊スキル", bini)
-                    .kouka_p = Val(GetINIValue("kouka_p(" & i & ")", "部隊スキル", bini))
-                    .kouka_f = Val(GetINIValue("kouka_f(" & i & ")", "部隊スキル", bini))
-                    .speed = Val(GetINIValue("speed(" & i & ")", "部隊スキル", bini))
-                    .taisyo = GetINIValue("taisyo(" & i & ")", "部隊スキル", bini)
+                    .koubou = bskini("koubou(" & i & ")")
+                    .type = bskini("type(" & i & ")")
+                    .kouka_p = Val(bskini("kouka_p(" & i & ")"))
+                    .kouka_f = Val(bskini("kouka_f(" & i & ")"))
+                    .speed = Val(bskini("speed(" & i & ")"))
+                    .taisyo = bskini("taisyo(" & i & ")")
                 End With
             Next
             Form4.部隊スキルONOFF(True)
@@ -1920,11 +1937,13 @@ Public Class Form1
         Dim p As DataSet = _
             DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         With ToolStripComboBox7.ComboBox
+            .BeginUpdate()
             .BindingContext = Me.BindingContext
             .DisplayMember = "スキル名"
             .ValueMember = "id"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
+            .EndUpdate()
         End With
     End Sub
 

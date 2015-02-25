@@ -72,23 +72,25 @@
                ComboBox209.SelectedIndexChanged, ComboBox210.SelectedIndexChanged, _
                ComboBox309.SelectedIndexChanged, ComboBox310.SelectedIndexChanged
         Dim p As DataSet
-        Dim c As ComboBox = Nothing
+        Dim cc As ComboBox = Nothing
         Select Case (String_onlyNumber(sender.name).Remove(0, 1))
             Case "09"
-                c = ComboBox(Me, String_onlyNumber(sender.name).Substring(0, 1) & "11")
+                cc = ComboBox(Me, String_onlyNumber(sender.name).Substring(0, 1) & "11")
             Case "10"
-                c = ComboBox(Me, String_onlyNumber(sender.name).Substring(0, 1) & "12")
+                cc = ComboBox(Me, String_onlyNumber(sender.name).Substring(0, 1) & "12")
         End Select
         Dim sqlwhere As String = ダブルクオート(sender.text)
         If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
             sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
-        With c
+        With cc
+            .BeginUpdate()
             .ValueMember = "Sw"
             .DisplayMember = "スキル名"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
+            .EndUpdate()
         End With
     End Sub
 

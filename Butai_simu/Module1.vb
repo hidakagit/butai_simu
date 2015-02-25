@@ -723,7 +723,7 @@ End Structure
 
 Module Module1
     'INIファイル編集のためにWindows-API使用
-    <DllImport("KERNEL32.DLL")> _
+    <DllImport("KERNEL32.DLL", CharSet:=CharSet.Auto)> _
     Public Function WritePrivateProfileString( _
         ByVal lpAppName As String, _
         ByVal lpKeyName As String, _
@@ -735,6 +735,13 @@ Module Module1
         ByVal lpAppName As String, _
         ByVal lpKeyName As String, _
         ByVal lpDefault As String, _
+        ByVal lpReturnedString As String, _
+        ByVal nSize As Integer, _
+        ByVal lpFileName As String) As Integer
+    End Function
+    <DllImport("KERNEL32.DLL", CharSet:=CharSet.Auto)> _
+    Public Function GetPrivateProfileSection( _
+        ByVal lpAppName As String, _
         ByVal lpReturnedString As String, _
         ByVal nSize As Integer, _
         ByVal lpFileName As String) As Integer
@@ -1700,6 +1707,18 @@ Module Module1
         Call GetPrivateProfileString(Section, KEY, "－", _
                                  strResult, Len(strResult), INIFILE)
         GetINIValue = Left(strResult, InStr(strResult, Chr(0)) - 1)
+    End Function
+    Public Function GetINISection(ByVal Section As String, ByVal INIFILE As String) As Hashtable
+        Dim strResult As String = Space(1023)
+        Call GetPrivateProfileSection(Section, strResult, Len(strResult), INIFILE)
+        Dim strVal As String = Left(strResult, InStr(1, strResult, vbNullChar & vbNullChar) - 1)
+        Dim splVal As String() = Split(strVal, vbNullChar)
+        Dim retval As Hashtable = Nothing
+        For i As Integer = 0 To splVal.Length - 1
+            Dim stmp As String() = Split(splVal(i), "=")
+            retval(stmp(0)) = stmp(1)
+        Next
+        Return retval
     End Function
     'SETの場合はINIFILEにはフルパス指定
     Public Function SetINIValue(ByVal Value As String, ByVal KEY As String, ByVal Section As String, ByVal INIFILE As String) As Boolean

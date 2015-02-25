@@ -135,10 +135,12 @@
         Dim p As DataSet
         p = DB_TableOUT("SELECT 土地ランク, パネル配置 FROM LName WHERE 土地ランク = " & ダブルクオート("☆" & akiti.rank) & "", "LName")
         With ComboBox3
+            .BeginUpdate()
             .DataSource = p.Tables("LName")
             .DisplayMember = "パネル配置"
             '.ValueMember = "Index"
             .SelectedIndex = -1
+            .EndUpdate()
         End With
         AddHandler ComboBox3.SelectedIndexChanged, AddressOf Me.空き地変更
     End Sub

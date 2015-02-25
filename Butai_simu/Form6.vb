@@ -59,10 +59,14 @@
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
         Dim p As DataSet = _
         DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY Bid ASC", "BData")
-        cc.DisplayMember = "武将名"
-        cc.ValueMember = "id"
-        cc.DataSource = p.Tables("BData")
-        cc.SelectedIndex = -1
+        With cc
+            .BeginUpdate()
+            .DisplayMember = "武将名"
+            .ValueMember = "id"
+            .DataSource = p.Tables("BData")
+            .SelectedIndex = -1
+            .EndUpdate()
+        End With
         AddHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
     End Sub
 
@@ -106,10 +110,12 @@
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         RemoveHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
         With cc
+            .BeginUpdate()
             .ValueMember = "id"
             .DisplayMember = "スキル名"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
+            .EndUpdate()
         End With
         AddHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
     End Sub

@@ -52,10 +52,14 @@ Public Class Form10
 
         Dim p As DataSet
         p = DB_TableOUT("SELECT id, 武将R, 武将名 FROM BData WHERE 武将R = " & ダブルクオート(sender.SelectedItem) & " ORDER BY Bid ASC", "BData")
-        cc.DisplayMember = "武将名"
-        cc.ValueMember = "id"
-        cc.DataSource = p.Tables("BData")
-        cc.SelectedIndex = -1
+        With cc
+            .BeginUpdate()
+            .DisplayMember = "武将名"
+            .ValueMember = "id"
+            .DataSource = p.Tables("BData")
+            .SelectedIndex = -1
+            .EndUpdate()
+        End With
         AddHandler cc.SelectedValueChanged, AddressOf Me.武将名選択
     End Sub
     Public Sub 武将名選択(ByVal sender As System.Object, ByVal e As System.EventArgs) _
@@ -102,27 +106,29 @@ Public Class Form10
         Handles ComboBox01.SelectedIndexChanged, ComboBox02.SelectedIndexChanged, _
                 ComboBox41.SelectedIndexChanged, ComboBox42.SelectedIndexChanged
         Dim p As DataSet
-        Dim c As ComboBox = Nothing
+        Dim cc As ComboBox = Nothing
         Select Case (String_onlyNumber(sender.name))
             Case "01"
-                c = ComboBox011
+                cc = ComboBox011
             Case "02"
-                c = ComboBox012
+                cc = ComboBox012
             Case "41"
-                c = ComboBox041
+                cc = ComboBox041
             Case "42"
-                c = ComboBox042
+                cc = ComboBox042
         End Select
         Dim sqlwhere As String = ダブルクオート(sender.text)
         If sqlwhere = ダブルクオート("特殊") Then '特殊項目には、条件付きスキルも含む
             sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
-        With c
+        With cc
+            .BeginUpdate()
             .ValueMember = "id"
             .DisplayMember = "スキル名"
             .DataSource = p.Tables("SName")
             .SelectedIndex = -1
+            .EndUpdate()
         End With
     End Sub
 
