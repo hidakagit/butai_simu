@@ -3051,7 +3051,7 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer3.07"
+        Me.Text = "部隊シミュレータVer3.08"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
