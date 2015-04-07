@@ -674,7 +674,7 @@ Public Class Form10
             End With
         Next
         '海野六郎のようなスキル（他武将のスキル条件に影響を与えるスキル）がある。その部分を補正
-        '※今は発動率（kouka_p)のみ
+        '発動率補正(up_kouka_p)
         For i As Integer = 0 To 3
             For j As Integer = 0 To simu_bs(i).skill.Length - 1
                 With simu_bs(i).skill(j)
@@ -684,6 +684,15 @@ Public Class Form10
                         .kouka_p_b = .kouka_p_b + .up_kouka_p
                     End If
                     .exp_kouka_b = .kouka_p_b * .kouka_f
+                End With
+            Next
+        Next
+        '上昇率補正(up_kouka_f)
+        For i As Integer = 0 To 3
+            For j As Integer = 0 To simu_bs(i).skill.Length - 1
+                With simu_bs(i).skill(j)
+                    .kouka_f_b = .kouka_f_b + .up_kouka_f
+                    .exp_kouka_b = .kouka_p_b * .kouka_f_b
                 End With
             Next
         Next

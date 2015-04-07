@@ -27,7 +27,7 @@ Public Class Form13
                                      "武将の将防成長値。", _
                                      "武将の兵法成長値。", _
                                      "武将の初期スキル名。(SNameのスキル名に従属)", _
-                                     "武将の職。設定可能な値は『将, 剣, 姫, 忍, 童, 覇, 文』", _
+                                     "武将の職。設定可能な値は『将, 剣, 姫, 忍, 童, 覇, 文, 医』", _
                                      "未完成の項目がある場合は『U』、全項目が埋まっている場合は『F』"}
     Public BData_reds As Integer() = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 15, 16, 17}
 
@@ -64,16 +64,11 @@ Public Class Form13
     Public ViewTable As String
 
     Public viewunflg As Boolean = True
+    Public sw As System.IO.StreamWriter
 
     Private Sub Form13_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-        ''接続文字列を設定
-        'Connection.ConnectionString = "Version=3;Data Source=ixadb.db3;New=False;Compress=True;" 'Read Only=True;"
-        ''オープン
-        'Connection.Open()
-        ' ''パスワードを変更
-        ''Connection.ChangePassword("password")
-        ''コマンド作成
-        'Command = Connection.CreateCommand
+        'ログファイルオープン
+        sw = New System.IO.StreamWriter(dlpath, True, System.Text.Encoding.GetEncoding("shift_jis"))
 
         'Combobox初期値を設定
         ToolStripComboBox1.SelectedIndex = 1
@@ -289,6 +284,7 @@ Public Class Form13
     Private Sub データベース更新実行(sender As Object, e As EventArgs) Handles ToolStripButton2.Click
         Dim SqlString As String = ""
         Dim retcount As Integer = -1
+        Dim queryresultstr As String = ""
         Select Case (SelectedMode)
             Case "Insert"
                 SqlString = Insert文生成()
@@ -300,8 +296,14 @@ Public Class Form13
         RichTextBox3.Clear()
         RichTextBox3.Text = SqlString
         Command.CommandText = SqlString
-        retcount = Command.ExecuteNonQuery()
-        RichTextBox3.Text = RichTextBox3.Text & vbCrLf & "( " & retcount & " data affected )"
+        Try
+            retcount = Command.ExecuteNonQuery()
+            queryresultstr = SqlString & vbCrLf & "( " & retcount & " data affected )"
+        Catch ex As Exception
+            queryresultstr = ex.Message
+        End Try
+        RichTextBox3.Text = queryresultstr
+        sw.WriteLine(queryresultstr)
     End Sub
 
     Private Function Insert文生成() As String
@@ -388,6 +390,8 @@ Public Class Form13
     End Sub
 
     Private Sub Form13_Closing(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.FormClosing
+        'ログファイルを閉じる
+        sw.Close()
         Form1.Show()
     End Sub
 End Class

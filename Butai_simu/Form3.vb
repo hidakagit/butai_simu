@@ -223,33 +223,40 @@
             Next
             'この2つは面倒なので入力→更新する
             Dim tmpskill_no As Integer = bd.skill_no '変わっていく値なので一旦移し替え
+            Dim tmpskill() As Busho.skl
+            ReDim tmpskill(tmpskill_no - 1)
+            For j As Integer = 0 To tmpskill_no - 1
+                tmpskill(j).name = bd.skill_name(j)
+                tmpskill(j).lv = Val(bd.skill_lv(j))
+                If Not j = 0 Then tmpskill(j).kanren = スキル関連推定(tmpskill(j).name, True)
+            Next
             '----------
             For j As Integer = 0 To tmpskill_no - 1
                 ReDim Preserve .skill(tmpskill_no - 1) '途中、追加スキル追加の部分で空白部分を削られてしまうので逐一Redimする必要がある
-                .skill(j).name = bd.skill_name(j)
-                .skill(j).lv = bd.skill_lv(j)
+                .skill(j).name = tmpskill(j).name
+                .skill(j).lv = tmpskill(j).lv
                 If Not j = 0 Then '初期スキルはスルー
-                    .skill(j).kanren = スキル関連推定(bd.skill_name(j), True)
+                    .skill(j).kanren = tmpskill(j).kanren
                 End If
                 If Not .skill(j).kanren = "" And Not j = 0 Then '関連スキルが空ではない＝追加スキルがある
                     Select Case j
                         Case 1 'スロ2
-                            ComboBox(Form1, CStr(selectbs) & "09").Focus()
-                            ComboBox(Form1, CStr(selectbs) & "09").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "09").FindString(スキル関連推定(bd.skill_name(j), True))
-                            ComboBox(Form1, CStr(selectbs) & "11").SelectedText = .skill(j).name
+                            'ComboBox(Form1, CStr(selectbs) & "09").Focus()
+                            ComboBox(Form1, CStr(selectbs) & "09").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "09").FindString(tmpskill(j).kanren)
+                            ComboBox(Form1, CStr(selectbs) & "11").SelectedText = tmpskill(j).name
                             Form1.スキル名入力(ComboBox(Form1, CStr(selectbs) & "11"), Nothing)
-                            ComboBox(Form1, CStr(selectbs) & "15").Text = .skill(j).lv
+                            ComboBox(Form1, CStr(selectbs) & "15").Text = tmpskill(j).lv
                             Form1.追加スキル追加(ComboBox(Form1, CStr(selectbs) & "15"), Nothing)
                         Case 2 'スロ3
-                            ComboBox(Form1, CStr(selectbs) & "10").Focus()
-                            ComboBox(Form1, CStr(selectbs) & "10").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "10").FindString(スキル関連推定(bd.skill_name(j), True))
-                            ComboBox(Form1, CStr(selectbs) & "12").SelectedText = .skill(j).name
+                            'ComboBox(Form1, CStr(selectbs) & "10").Focus()
+                            ComboBox(Form1, CStr(selectbs) & "10").SelectedIndex = ComboBox(Form1, CStr(selectbs) & "10").FindString(tmpskill(j).kanren)
+                            ComboBox(Form1, CStr(selectbs) & "12").SelectedText = tmpskill(j).name
                             Form1.スキル名入力(ComboBox(Form1, CStr(selectbs) & "12"), Nothing)
-                            ComboBox(Form1, CStr(selectbs) & "16").Text = .skill(j).lv
+                            ComboBox(Form1, CStr(selectbs) & "16").Text = tmpskill(j).lv
                             Form1.追加スキル追加(ComboBox(Form1, CStr(selectbs) & "16"), Nothing)
                     End Select
                 ElseIf j = 0 Then '初期スキルの場合は
-                    ComboBox(Form1, CStr(selectbs) & "14").Text = .skill(0).lv
+                    ComboBox(Form1, CStr(selectbs) & "14").Text = tmpskill(0).lv
                     Form1.追加スキル追加(ComboBox(Form1, CStr(selectbs) & "14"), Nothing)
                 End If
             Next

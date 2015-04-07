@@ -298,7 +298,7 @@ Public Class Form1
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
         RemoveHandler cc.SelectedValueChanged, AddressOf Me.スキル名入力 'これが無いとスキル名を選べなくなる
-        RemoveHandler cc.TextChanged, AddressOf Me.スキル名削除
+        'RemoveHandler cc.TextChanged, AddressOf Me.スキル名削除
         With cc
             .BeginUpdate()
             .ValueMember = "id"
@@ -307,7 +307,7 @@ Public Class Form1
             .SelectedIndex = -1
             .EndUpdate()
         End With
-        AddHandler cc.TextChanged, AddressOf Me.スキル名削除
+        'AddHandler cc.TextChanged, AddressOf Me.スキル名削除
         AddHandler cc.SelectedValueChanged, AddressOf Me.スキル名入力
     End Sub
 
@@ -641,7 +641,7 @@ Public Class Form1
             bs(i).スキル期待値計算()
         Next
         '海野六郎のようなスキル（他武将のスキル条件に影響を与えるスキル）がある。その部分を補正
-        '※今は発動率（kouka_p)のみ
+        '発動率補正(up_kouka_p)
         For i As Integer = 0 To busho_counter - 1
             For j As Integer = 0 To bs(i).skill_no - 1
                 With bs(i).skill(j)
@@ -651,6 +651,15 @@ Public Class Form1
                         .kouka_p_b = .kouka_p_b + .up_kouka_p
                     End If
                     .exp_kouka_b = .kouka_p_b * .kouka_f
+                End With
+            Next
+        Next
+        '上昇率補正(up_kouka_f)
+        For i As Integer = 0 To busho_counter - 1
+            For j As Integer = 0 To bs(i).skill_no - 1
+                With bs(i).skill(j)
+                    .kouka_f_b = .kouka_f_b + .up_kouka_f
+                    .exp_kouka_b = .kouka_p_b * .kouka_f_b
                 End With
             Next
         Next
@@ -781,15 +790,15 @@ Public Class Form1
         If CInt(Mid(CStr(sender.Name), 10, 2)) = 11 Then
             sellv1.Enabled = True
             '他スキルの登録が済んでいない場合そちらを先に
-            If sellv2.Enabled = True And sellv2.Text = "" Then
+            If sellv2.Enabled And sellv2.Text = "" Then
                 sellv2.SelectedIndex = 0
                 追加スキル追加(sellv2, Nothing)
             End If
-            sellv1.SelectedIndex = 0
+            If sellv1.Text = "" Then sellv1.SelectedIndex = 0
             追加スキル追加(sellv1, Nothing)
         Else
             sellv2.Enabled = True
-            If sellv1.Enabled = True And sellv1.Text = "" Then
+            If sellv1.Enabled And sellv1.Text = "" Then
                 sellv1.SelectedIndex = 0
                 追加スキル追加(sellv1, Nothing)
             End If
@@ -973,21 +982,21 @@ Public Class Form1
                 If (InStr(.heika, refbs(i).heisyu.bunrui) Or InStr(.heika, "将")) And 条件付スキル適用チェック(refbs(i), sk) Then '兵科が合致するか＋条件付チェック
                     '（攻防一致、特殊スキル排除、通常スキル確認は発動スキル候補決定の段階で除外
                     If InStr(.heika, "将") Then '将スキルかどうか
-                        tmpatk(i, 0) = .kouka_f
+                        tmpatk(i, 0) = .kouka_f_b
                     Else
-                        tmpatk(i, 1) = .kouka_f
+                        tmpatk(i, 1) = .kouka_f_b
                     End If
                 ElseIf InStr(kb, "攻") And InStr(.koubou, "上級器") Then '上級器スキルならば
                     If refbs(i).heisyu.jyk_utuwa Then '上級器に含まれる兵科を積んでいれば（今は『上級器攻』のみ）
-                        tmpatk(i, 1) = .kouka_f
+                        tmpatk(i, 1) = .kouka_f_b
                     End If
                 ElseIf InStr(kb, "防") And InStr(.koubou, "上級砲") Then '上級砲スキルならば
                     If refbs(i).heisyu.jyk_hou Then '上級砲に含まれる兵科を積んでいれば（今は『上級砲防』のみ）
-                        tmpatk(i, 1) = .kouka_f
+                        tmpatk(i, 1) = .kouka_f_b
                     End If
                 ElseIf InStr(kb, "攻") And InStr(.koubou, "秘境兵") Then '秘境兵スキルならば
                     If refbs(i).heisyu.tok_hikyo Then '秘境兵に含まれる兵科を積んでいれば（今は『秘境兵攻』のみ）
-                        tmpatk(i, 1) = .kouka_f
+                        tmpatk(i, 1) = .kouka_f_b
                     End If
                 End If
             Next
@@ -1124,6 +1133,7 @@ Public Class Form1
                         .koubou = "攻"
                     End If
                     .kouka_p_b = 0
+                    .kouka_f_b = 0
                 End With
             End If
             '***** DUMMY *****
@@ -1422,6 +1432,9 @@ Public Class Form1
                             If .up_kouka_p > 0 Then
                                 tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & " [発動率上昇中 +" & Format(.up_kouka_p * 100, "#0.00") & "%]"
                             End If
+                            If .up_kouka_f > 0 Then
+                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & " [威力上昇中 +" & Format(.up_kouka_f * 100, "#0.00") & "%]"
+                            End If
                             If .t_flg Then
                                 tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & "★☆特殊条件スキル☆★"
                             End If
@@ -1463,7 +1476,7 @@ Public Class Form1
         Dim bs0ini As Hashtable = GetINISection("部隊長", bini)
         Dim bsini As Hashtable()
         ReDim bsini(bs0ini("busho_counter") - 1)
-        Dim b_c As Integer = bs0ini(0)(1) 'Val(GetINIValue("busho_counter", "部隊長", bini))
+        Dim b_c As Integer = bs0ini("busho_counter") 'Val(GetINIValue("busho_counter", "部隊長", bini))
         ToolStripComboBox2.Text = b_c 'Form1の武将数を更新
         Call 武将数スイッチ(ToolStripComboBox2, Nothing)
         Call データクリア(vbNull, Nothing)
@@ -1579,26 +1592,28 @@ Public Class Form1
         Next
         '部隊スキル読み込み
         Dim bskini As Hashtable = GetINISection("部隊スキル", bini)
-        Dim bskillno As Integer
-        bskillno = Val(bskini("bskill_no"))
-        If bskillno > 0 Then
-            For i As Integer = 0 To bskillno - 1
-                ' bskillを読み込んでいく
-                If i = 0 Then
-                    ReDim bskill.bsk(0)
-                Else
-                    ReDim Preserve bskill.bsk(i)
-                End If
-                With bskill.bsk(i)
-                    .koubou = bskini("koubou(" & i & ")")
-                    .type = bskini("type(" & i & ")")
-                    .kouka_p = Val(bskini("kouka_p(" & i & ")"))
-                    .kouka_f = Val(bskini("kouka_f(" & i & ")"))
-                    .speed = Val(bskini("speed(" & i & ")"))
-                    .taisyo = bskini("taisyo(" & i & ")")
-                End With
-            Next
-            Form4.部隊スキルONOFF(True)
+        If Not bskini Is Nothing Then
+            Dim bskillno As Integer
+            bskillno = Val(bskini("bskill_no"))
+            If bskillno > 0 Then
+                For i As Integer = 0 To bskillno - 1
+                    ' bskillを読み込んでいく
+                    If i = 0 Then
+                        ReDim bskill.bsk(0)
+                    Else
+                        ReDim Preserve bskill.bsk(i)
+                    End If
+                    With bskill.bsk(i)
+                        .koubou = bskini("koubou(" & i & ")")
+                        .type = bskini("type(" & i & ")")
+                        .kouka_p = Val(bskini("kouka_p(" & i & ")"))
+                        .kouka_f = Val(bskini("kouka_f(" & i & ")"))
+                        .speed = Val(bskini("speed(" & i & ")"))
+                        .taisyo = bskini("taisyo(" & i & ")")
+                    End With
+                Next
+                Form4.部隊スキルONOFF(True)
+            End If
         End If
         Cursor.Current = Cursors.Default
     End Sub
@@ -2236,10 +2251,6 @@ Public Class Form1
     Private Sub 武将ランキング起動(sender As Object, e As EventArgs) Handles 武将ランキングToolStripMenuItem.Click
         Form10.Show()
     End Sub
-
-    'Private Sub 条件設定起動(sender As Object, e As EventArgs) Handles 条件設定ToolStripMenuItem.Click
-
-    'End Sub
 
     Private Sub 条件付スキルオプション表示(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
         Form12.Show()

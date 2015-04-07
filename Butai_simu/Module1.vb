@@ -105,11 +105,13 @@ Public Structure Busho : Implements System.ICloneable
         Public kouka_p As Decimal '発動率
         Public kouka_p_b As Decimal '部隊兵法補正後の発動率
         Public kouka_f As Decimal '上昇率
+        Public kouka_f_b As Decimal '補正後の上昇率
         Public heika As String '兵科
         Public speed As Decimal '速度上昇率
         Public tokusyu As Integer '特殊スキル判定(0:通常, 1:速度のみ, 2:破壊のみ, 5:データ不足, 9:その他)
         Public t_flg As Boolean '総コストorフラグ存在依存
         Public up_kouka_p As Decimal '部隊内での所定条件を満たしたことで発動率UP
+        Public up_kouka_f As Decimal '部隊内での所定条件を満たしたことで上昇率UP
         Public exp_kouka As Decimal '期待値
         Public exp_kouka_b As Decimal '部隊兵法補正後の期待値
         Public Function Clone() As Object Implements System.ICloneable.Clone
@@ -117,9 +119,11 @@ Public Structure Busho : Implements System.ICloneable
         End Function
         Public Sub スキル計算状態初期化() 'スキルそのもののデータではなく計算に生じて変化する部分を初期化
             kouka_p_b = 0
+            kouka_f_b = 0
             exp_kouka = 0
             exp_kouka_b = 0
             up_kouka_p = 0
+            up_kouka_f = 0
         End Sub
 
         Public Sub スキル初期化() 'スキル取得、上書きの際の初期化
@@ -476,8 +480,9 @@ Public Structure Busho : Implements System.ICloneable
                     Else
                         .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
                     End If
+                    .kouka_f_b = .kouka_f
                     .exp_kouka = .kouka_p * .kouka_f
-                    .exp_kouka_b = .kouka_p_b * .kouka_f '期待値
+                    .exp_kouka_b = .kouka_p_b * .kouka_f_b '期待値
                 Else
                     If .tokusyu = 9 Then '特殊スキルの場合は・・・
                         .t_flg = 条件依存スキル・フラグスキル判定(skill(j), cost_sum_) '怪しいスキルを疑う
@@ -488,8 +493,9 @@ Public Structure Busho : Implements System.ICloneable
                             Else
                                 .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
                             End If
+                            .kouka_f_b = .kouka_f
                             .exp_kouka = .kouka_p * .kouka_f
-                            .exp_kouka_b = .kouka_p_b * .kouka_f '期待値
+                            .exp_kouka_b = .kouka_p_b * .kouka_f_b '期待値
                         Else
                             .exp_kouka = 0
                             .exp_kouka_b = 0
@@ -811,6 +817,7 @@ Module Module1
     'Public espath As String = Application.StartupPath & "\ERRORSKILL.txt" '特殊スキルリストの場所
     Public fdpath As String = Application.StartupPath & "\optionskill.csv" 'フラグ付きスキルリストの場所
     Public fspath As String = Application.StartupPath & "\defoption.csv" 'フラグ付きスキル設定ファイルの場所
+    Public dlpath As String = Application.StartupPath & "\DBEXEC_LOG.txt" 'データベース上で実行されたSQL履歴
     'Public error_skill() As String '特殊スキルリスト
     Public fskill_data() As flgskl 'フラグ付きスキルデータリスト
     Public simu_execno As Integer 'どこから計算しているのかを格納 0:シミュレータ本体, 1:ランキングモード
@@ -821,8 +828,8 @@ Module Module1
     Public FILENAME_csv As String
 
     'Public Sub DB_Open(ByVal con As OleDbConnection, ByVal cmd As OleDbCommand, ByVal dbpath As String) '開始時にDBを開く設定
-    Public Sub DB_Open() '開始時にDBを開く設定
-        Connection.ConnectionString = "Version=3;Data Source=ixadb.db3;New=False;Compress=True;" 'Read Only=True;"
+    Public Sub DB_Open() '開始時にDBを開く設定(外部キー制約ON)
+        Connection.ConnectionString = "Version=3;Data Source=ixadb.db3;New=False;Compress=True;foreign keys=True" 'Read Only=True;"
         Connection.Open()
         Command = Connection.CreateCommand
         'Command_sklref = Connection.CreateCommand
@@ -1149,6 +1156,45 @@ Module Module1
                     '堅国の絆
                     '自本領に滞在する全部隊に効果を適用。
                     '効果自体は変動しないため、ここではflgをONにするだけ
+                    Return True
+                Case "天正筆才"
+                    '天正筆才
+                    '部隊内に「織田信長」という名称の武将が居れば、そのスキル発動率を操作
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim nobu_x() As Decimal = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 1.0} '倍率
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    For i As Integer = 0 To refbs.Length - 1
+                        If InStr(refbs(i).name, "織田信長") Then
+                            For j As Integer = 0 To refbs(i).skill.Length - 1
+                                refbs(i).skill(j).up_kouka_p = refbs(i).skill(j).kouka_p * nobu_x(.lv - 1) 'LVの分だけ発動率上昇
+                            Next
+                        End If
+                    Next
+                    Return False '天正筆才自体は他に何も影響しない
+                Case "権勢専横"
+                    '権勢専横
+                    '部隊内の「権勢専横」スキルの個数によって効果が変動
+                    'Dim ken_x() As Decimal = {0.055, 0.06, 0.065, 0.07, 0.075, 0.08, 0.085, 0.09, 0.1, 0.11}
+                    Dim ken_no As Integer = 0
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    For i As Integer = 0 To refbs.Length - 1
+                        For j As Integer = 0 To refbs(i).skill.Length - 1
+                            If refbs(i).skill(j).name = "権勢専横" Then
+                                ken_no = ken_no + 1
+                            End If
+                        Next
+                    Next
+                    .up_kouka_f = .kouka_f * (ken_no - 1)
                     Return True
             End Select
             Return False
@@ -1710,13 +1756,14 @@ Module Module1
     End Function
     Public Function GetINISection(ByVal Section As String, ByVal INIFILE As String) As Hashtable
         Dim strResult As String = Space(1023)
-        Call GetPrivateProfileSection(Section, strResult, Len(strResult), INIFILE)
+        Dim setcount As Integer = GetPrivateProfileSection(Section, strResult, Len(strResult), INIFILE)
+        If setcount <= 0 Then Return Nothing
         Dim strVal As String = Left(strResult, InStr(1, strResult, vbNullChar & vbNullChar) - 1)
         Dim splVal As String() = Split(strVal, vbNullChar)
-        Dim retval As Hashtable = Nothing
+        Dim retval As Hashtable = New Hashtable
         For i As Integer = 0 To splVal.Length - 1
             Dim stmp As String() = Split(splVal(i), "=")
-            retval(stmp(0)) = stmp(1)
+            retval.Add(stmp(0), stmp(1))
         Next
         Return retval
     End Function

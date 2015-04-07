@@ -108,7 +108,7 @@
             sqlwhere = sqlwhere & " OR 分類 = " & ダブルクオート("条件")
         End If
         p = DB_TableOUT("SELECT id, 分類, スキル名 FROM SName WHERE 分類 = " & sqlwhere & " ORDER BY id", "SName")
-        RemoveHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
+        If Not cc Is ComboBox111 Then RemoveHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
         With cc
             .BeginUpdate()
             .ValueMember = "id"
@@ -117,7 +117,7 @@
             .SelectedIndex = -1
             .EndUpdate()
         End With
-        AddHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
+        If Not cc Is ComboBox111 Then AddHandler cc.SelectedIndexChanged, AddressOf 追加スキル入力
     End Sub
 
     Private Sub 追加スキル入力(ByVal sender As Object, ByVal e As System.EventArgs) _

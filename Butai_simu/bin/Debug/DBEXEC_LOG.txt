@@ -1,0 +1,20 @@
+UPDATE SData SET 発動率 = "0.1", 上昇率 = "0.45", Sunf = "F" WHERE スキル名 = "聖母の祈り" AND スキルLV = "10"
+( 1 data affected )
+UPDATE SData SET 発動率 = "0.1", 上昇率 = "0.45", Sunf = "F" WHERE スキル名 = "聖母の祈り" AND スキルLV = "10"
+( 1 data affected )
+UPDATE SData SET 発動率 = "0.1", 上昇率 = "0.45", Sunf = "F" WHERE スキル名 = "聖母の祈り" AND スキルLV = "10"
+( 1 data affected )
+INSERT INTO BData (武将R, 武将名, Bid, Cost, 指揮兵数, 槍統率, 弓統率, 馬統率, 器統率, 初期攻撃, 初期防御, 初期兵法, 攻成長, 防成長, 兵成長, 初期スキル名, 職, Bunf) values ("テスト", "テスト", "9999", "999", "99999", "A", "A", "A", "A", "999", "999", "999", "9", "9", "9", "テスト", "将", "F")
+( 1 data affected )
+INSERT INTO BData (武将R, 武将名, Bid, Cost, 指揮兵数, 槍統率, 弓統率, 馬統率, 器統率, 初期攻撃, 初期防御, 初期兵法, 攻成長, 防成長, 兵成長, 初期スキル名, 職, Bunf) values ("テスト", "テスト", "9999", "999", "99999", "A", "A", "A", "A", "999", "999", "999", "9", "9", "9", "テスト", "将", "F")
+( 1 data affected )
+DELETE FROM BData WHERE 武将R = "テスト"
+( 2 data affected )
+constraint failed
+NOT NULL constraint failed: BData.武将名
+constraint failed
+FOREIGN KEY constraint failed
+INSERT INTO BData (武将R, 武将名, Bid, Cost, 指揮兵数, 槍統率, 弓統率, 馬統率, 器統率, 初期攻撃, 初期防御, 初期兵法, 攻成長, 防成長, 兵成長, 初期スキル名, 職, Bunf) values ("テスト", "テスト", "9999", "999", "99999", "A", "A", "A", "A", "999", "999", "999", "9", "9", "9", "槍隊剛撃", "将", "F")
+( 1 data affected )
+DELETE FROM BData WHERE 武将R = "テスト"
+( 1 data affected )

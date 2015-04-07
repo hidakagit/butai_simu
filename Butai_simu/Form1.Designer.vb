@@ -2910,7 +2910,7 @@ Partial Class Form1
         Me.ToolStripSplitButton2.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripSplitButton2.Name = "ToolStripSplitButton2"
         Me.ToolStripSplitButton2.Size = New System.Drawing.Size(32, 23)
-        Me.ToolStripSplitButton2.Text = "ToolStripSplitButton2"
+        Me.ToolStripSplitButton2.Text = "追加スキル設定"
         '
         'スロ2設定ToolStripMenuItem
         '
@@ -3051,7 +3051,7 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer3.08"
+        Me.Text = "部隊シミュレータVer3.11"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
