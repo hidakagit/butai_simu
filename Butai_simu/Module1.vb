@@ -1111,6 +1111,13 @@ Module Module1
                     End If
                     .heika = "槍弓馬砲器"
                     Return True
+                Case "妙見の矜持"
+                    '妙見の矜持
+                    '部隊総コストが0.5増える毎に、威力-2%
+                    Dim bh_f() As Decimal = {57, 58, 59, 60, 61, 62, 63, 64, 65, 67}
+                    Dim minus_f As Decimal = ((sumcost - 0.5) / 0.5) * 0.02
+                    .kouka_f = 0.01 * bh_f(.lv - 1) - minus_f
+                    Return True
                 Case "遁世影武者"
                     '遁世影武者
                     '部隊長の初期スキルbs(0).skill(0)もしくはForm10.simu_bs(0).skill(0)と同等に

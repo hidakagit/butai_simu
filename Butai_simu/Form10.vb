@@ -736,7 +736,7 @@ Public Class Form10
         For i As Integer = 0 To 3
             With simu_bs(i)
                 For j As Integer = 0 To .skill_no - 1 '攻防一致、特殊スキル排除
-                    If InStr(kobo, .skill(j).koubou) Then
+                    If InStr(kobo, .skill(j).koubou) Or .skill(j).koubou = "攻防" Then
                         If .skill(j).tokusyu = 9 Then
                             .skill(j).t_flg = 条件依存スキル・フラグスキル判定(.skill(j), butaicostsum) '怪しいスキルを疑う
                             .skill(j).t_flg = フラグ付きスキル参照(.skill(j))
@@ -1009,7 +1009,7 @@ Public Class Form10
 
             Dim syflg As Boolean = False
             '初期スキルが兵科対応しているかどうか
-            If InStr(kobo, .skill(0).koubou) Then
+            If InStr(kobo, .skill(0).koubou) Or .skill(0).koubou = "攻防" Then
                 If InStr(.skill(0).heika, .heisyu.bunrui) Then
                     syflg = True
                 ElseIf InStr(.skill(0).heika, "将") Then

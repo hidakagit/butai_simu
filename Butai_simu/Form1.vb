@@ -934,7 +934,7 @@ Public Class Form1
         '全有効スキル数カウント
         For i As Integer = 0 To busho_counter - 1
             For j As Integer = 0 To bs(i).skill_no - 1 '攻防一致、特殊スキル排除
-                If InStr(kb, bs(i).skill(j).koubou) Then
+                If InStr(kb, bs(i).skill(j).koubou) Or bs(i).skill(j).koubou = "攻防" Then
                     If bs(i).skill(j).tokusyu = 0 Or bs(i).skill(j).t_flg Then '通常スキルもしくは総コスト・フラグ依存スキル
                         ReDim Preserve can_skill(c)
                         can_skill(c) = bs(i).skill(j).Clone

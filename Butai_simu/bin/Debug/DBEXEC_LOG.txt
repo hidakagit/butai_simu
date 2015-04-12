@@ -18,3 +18,47 @@ INSERT INTO BData (•«R, •«–¼, Bid, Cost, wŠö•º”, ‘„“—¦, ‹|“—¦, ”n“—¦, Š
 ( 1 data affected )
 DELETE FROM BData WHERE •«R = "ƒeƒXƒg"
 ( 1 data affected )
+constraint failed
+UNIQUE constraint failed: SData.ƒXƒLƒ‹–¼, SData.ƒXƒLƒ‹LV
+UPDATE SData SET ”­“®—¦ = "0.175", ã¸—¦ = "0.22", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•œîŒŠÛ" AND ƒXƒLƒ‹LV = "6"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.08", ã¸—¦ = "0.35", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "¹•ê‚Ì‹F‚è" AND ƒXƒLƒ‹LV = "7"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.085", ã¸—¦ = "0.37", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "¹•ê‚Ì‹F‚è" AND ƒXƒLƒ‹LV = "8"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.09", ã¸—¦ = "0.41", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "¹•ê‚Ì‹F‚è" AND ƒXƒLƒ‹LV = "9"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.21", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "1"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.24", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "2"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.27", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "3"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.30", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "4"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.33", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "5"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.5", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "10"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.13", ã¸—¦ = "0.23", •t—^—¦ = "0.15", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "”’‹â—³‹R•º" AND ƒXƒLƒ‹LV = "2"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.15", ã¸—¦ = "0.25", •t—^—¦ = "0.17", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "”’‹â—³‹R•º" AND ƒXƒLƒ‹LV = "4"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.17", ã¸—¦ = "0.27", •t—^—¦ = "0.19", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "”’‹â—³‹R•º" AND ƒXƒLƒ‹LV = "6"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.18", ã¸—¦ = "0.29", •t—^—¦ = "0.2", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "”’‹â—³‹R•º" AND ƒXƒLƒ‹LV = "7"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.2", ã¸—¦ = "0.31", •t—^—¦ = "0.21", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "”’‹â—³‹R•º" AND ƒXƒLƒ‹LV = "8"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.22", ã¸—¦ = "0.33", •t—^—¦ = "0.23", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "”’‹â—³‹R•º" AND ƒXƒLƒ‹LV = "9"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.36", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "6"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.39", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "7"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.42", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "8"
+( 1 data affected )
+UPDATE SData SET ”­“®—¦ = "0.45", ã¸—¦ = "0.01", Sunf = "F" WHERE ƒXƒLƒ‹–¼ = "•‚q‚Ì–d" AND ƒXƒLƒ‹LV = "9"
+( 1 data affected )
+UPDATE SData SET ã¸—¦ = "0.29", •t—^—¦ = "F" WHERE ƒXƒLƒ‹–¼ = "ŒÃ¡“`ö" AND ƒXƒLƒ‹LV = "5"
+( 1 data affected )
