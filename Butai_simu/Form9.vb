@@ -1,5 +1,6 @@
 ﻿Public Class Form9
-    Public syou_ki As String = "6-6"
+    Public syou As Integer = 10 '章設定
+    Public ki As Integer = 10 '期設定
     Public d As Decimal '距離補正率
     Public dist As Decimal = Nothing '距離
     Public d_kakin As Boolean = False '距離補正課金の有無
@@ -145,15 +146,17 @@
         AddHandler ComboBox3.SelectedIndexChanged, AddressOf Me.空き地変更
     End Sub
 
-    '現在は6章以降のみ対応
+    '現在は10章以降のみ対応
     Private Sub 章期変更(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
         If sender.Text = "" Then
             Exit Sub
         End If
-        Dim syou, ki As String
-        syou = Mid(sender.text, 1, 1)
-        ki = Mid(sender.text, 5, 1)
-        syou_ki = syou & "-" & ki
+        syou = 10 '10章固定
+        ki = Val(sender.text)
+        '章期設定が変われば一旦クリア
+        ComboBox2.Text = Nothing
+        ComboBox3.Text = Nothing
+        RichTextBox1.Text = Nothing
     End Sub
 
     Private Sub 空き地変更(sender As Object, e As EventArgs) Handles ComboBox3.SelectedIndexChanged
@@ -165,8 +168,8 @@
         'NPC兵を取得・表示   兵種名, 土地ランク, パネル配置, NPC兵数
         RichTextBox1.Clear()
         Dim sqlstr As String, heika()() As String
-        sqlstr = "SELECT * FROM HData INNER JOIN (LData INNER JOIN LName ON LData.id = LName.id) ON HData.兵種名 = LData.兵種名 WHERE 土地ランク = " & _
-        ダブルクオート("☆" & akiti.rank) & " AND パネル配置 = " & ダブルクオート(akiti.toti) & ""
+        sqlstr = "SELECT * FROM HData INNER JOIN (LData INNER JOIN LName ON LData.id = LName.id) ON HData.兵種名 = LData.兵種名 " & _
+            "WHERE 期数 = " & ki & " AND 土地ランク = " & ダブルクオート("☆" & akiti.rank) & " AND パネル配置 = " & ダブルクオート(akiti.toti) & ""
         heika = DB_DirectOUT3(sqlstr, {"兵科", "兵種名", "防御値", "経験値", "NPC兵数"})
         For i As Integer = 0 To heika.Length - 1
             ReDim Preserve akiti.npc_hei(i)

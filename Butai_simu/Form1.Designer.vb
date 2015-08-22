@@ -303,6 +303,7 @@ Partial Class Form1
         Me.ToolStripSeparator11 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripSeparator12 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripButton9 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator13 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
         Me.GroupBox1.SuspendLayout()
@@ -2977,7 +2978,7 @@ Partial Class Form1
         'ToolStrip3
         '
         Me.ToolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip3.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton6, Me.ToolStripLabel5, Me.ToolStripLabel6, Me.ToolStripSeparator11, Me.ToolStripSeparator12, Me.ToolStripButton7, Me.ToolStripSeparator13, Me.ToolStripLabel3})
+        Me.ToolStrip3.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton6, Me.ToolStripLabel5, Me.ToolStripLabel6, Me.ToolStripSeparator11, Me.ToolStripSeparator12, Me.ToolStripButton7, Me.ToolStripButton9, Me.ToolStripSeparator13, Me.ToolStripLabel3})
         Me.ToolStrip3.Location = New System.Drawing.Point(0, 39)
         Me.ToolStrip3.Name = "ToolStrip3"
         Me.ToolStrip3.Size = New System.Drawing.Size(884, 25)
@@ -3025,6 +3026,14 @@ Partial Class Form1
         Me.ToolStripButton7.Text = "特殊オプション"
         Me.ToolStripButton7.ToolTipText = "防衛オプションの選択へ"
         '
+        'ToolStripButton9
+        '
+        Me.ToolStripButton9.Image = CType(resources.GetObject("ToolStripButton9.Image"), System.Drawing.Image)
+        Me.ToolStripButton9.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton9.Name = "ToolStripButton9"
+        Me.ToolStripButton9.Size = New System.Drawing.Size(76, 22)
+        Me.ToolStripButton9.Text = "条件設定"
+        '
         'ToolStripSeparator13
         '
         Me.ToolStripSeparator13.Name = "ToolStripSeparator13"
@@ -3051,7 +3060,7 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer3.12"
+        Me.Text = "部隊シミュレータVer3.18"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
@@ -3376,4 +3385,5 @@ Partial Class Form1
     Friend WithEvents ToolStripSeparator14 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripButton8 As System.Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripLabel3 As System.Windows.Forms.ToolStripLabel
+    Friend WithEvents ToolStripButton9 As System.Windows.Forms.ToolStripButton
 End Class

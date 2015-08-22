@@ -23,18 +23,18 @@ Partial Class Form10
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form10))
-        Dim DataGridViewCellStyle25 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle26 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle27 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle28 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle29 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle30 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle31 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle32 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle33 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle34 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle35 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
-        Dim DataGridViewCellStyle36 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle13 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle14 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle15 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle16 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle17 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle18 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle19 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle20 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle21 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle22 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle23 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle24 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
         Me.ToolStripLabel1 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripComboBox1 = New System.Windows.Forms.ToolStripComboBox()
@@ -114,6 +114,8 @@ Partial Class Form10
         Me.Column12 = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Column10 = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Column13 = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Button2 = New System.Windows.Forms.Button()
+        Me.Label15 = New System.Windows.Forms.Label()
         Me.ToolStrip1.SuspendLayout()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox5.SuspendLayout()
@@ -323,6 +325,8 @@ Partial Class Form10
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.Label15)
+        Me.GroupBox1.Controls.Add(Me.Button2)
         Me.GroupBox1.Controls.Add(Me.CheckBox005)
         Me.GroupBox1.Controls.Add(Me.CheckBox004)
         Me.GroupBox1.Controls.Add(Me.CheckBox003)
@@ -419,7 +423,7 @@ Partial Class Form10
         Me.ComboBox10.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems
         Me.ComboBox10.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox10.FormattingEnabled = True
-        Me.ComboBox10.Items.AddRange(New Object() {"兵法振4 + 攻/防振0", "兵法振3 + 攻/防振1", "兵法振2 + 攻/防振2", "兵法振1 + 攻/防振3", "兵法振0 + 攻/防振4"})
+        Me.ComboBox10.Items.AddRange(New Object() {"兵法振4 + 攻/防振0", "兵法振3 + 攻/防振1", "兵法振2 + 攻/防振2", "兵法振1 + 攻/防振3", "兵法振0 + 攻/防振4", "お好み設定"})
         Me.ComboBox10.Location = New System.Drawing.Point(66, 360)
         Me.ComboBox10.Name = "ComboBox10"
         Me.ComboBox10.Size = New System.Drawing.Size(146, 20)
@@ -766,8 +770,8 @@ Partial Class Form10
         '
         'Column1
         '
-        DataGridViewCellStyle25.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column1.DefaultCellStyle = DataGridViewCellStyle25
+        DataGridViewCellStyle13.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column1.DefaultCellStyle = DataGridViewCellStyle13
         Me.Column1.HeaderText = "No."
         Me.Column1.Name = "Column1"
         Me.Column1.ToolTipText = "武将No."
@@ -782,16 +786,16 @@ Partial Class Form10
         '
         'Column3
         '
-        DataGridViewCellStyle26.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.Column3.DefaultCellStyle = DataGridViewCellStyle26
+        DataGridViewCellStyle14.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.Column3.DefaultCellStyle = DataGridViewCellStyle14
         Me.Column3.HeaderText = "名称"
         Me.Column3.Name = "Column3"
         Me.Column3.ToolTipText = "武将名"
         '
         'Column4
         '
-        DataGridViewCellStyle27.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column4.DefaultCellStyle = DataGridViewCellStyle27
+        DataGridViewCellStyle15.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column4.DefaultCellStyle = DataGridViewCellStyle15
         Me.Column4.HeaderText = "C"
         Me.Column4.Name = "Column4"
         Me.Column4.ToolTipText = "コスト"
@@ -799,9 +803,9 @@ Partial Class Form10
         '
         'Column5
         '
-        DataGridViewCellStyle28.BackColor = System.Drawing.Color.LightCyan
-        DataGridViewCellStyle28.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column5.DefaultCellStyle = DataGridViewCellStyle28
+        DataGridViewCellStyle16.BackColor = System.Drawing.Color.LightCyan
+        DataGridViewCellStyle16.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column5.DefaultCellStyle = DataGridViewCellStyle16
         Me.Column5.HeaderText = "兵数"
         Me.Column5.Name = "Column5"
         Me.Column5.ToolTipText = "指揮兵数(ランクアップ対応)"
@@ -809,9 +813,9 @@ Partial Class Form10
         '
         'Column6
         '
-        DataGridViewCellStyle29.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(192, Byte), Integer))
-        DataGridViewCellStyle29.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column6.DefaultCellStyle = DataGridViewCellStyle29
+        DataGridViewCellStyle17.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(192, Byte), Integer))
+        DataGridViewCellStyle17.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column6.DefaultCellStyle = DataGridViewCellStyle17
         Me.Column6.HeaderText = "統率"
         Me.Column6.Name = "Column6"
         Me.Column6.ToolTipText = "兵科の統率適正。BもしくはBBを1とする"
@@ -819,8 +823,8 @@ Partial Class Form10
         '
         'Column7
         '
-        DataGridViewCellStyle30.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column7.DefaultCellStyle = DataGridViewCellStyle30
+        DataGridViewCellStyle18.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column7.DefaultCellStyle = DataGridViewCellStyle18
         Me.Column7.HeaderText = "兵法"
         Me.Column7.Name = "Column7"
         Me.Column7.ToolTipText = "最大兵法値。紫色=3成長, 赤色=2.5成長"
@@ -828,8 +832,8 @@ Partial Class Form10
         '
         'Column8
         '
-        DataGridViewCellStyle31.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column8.DefaultCellStyle = DataGridViewCellStyle31
+        DataGridViewCellStyle19.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column8.DefaultCellStyle = DataGridViewCellStyle19
         Me.Column8.HeaderText = "将攻/防"
         Me.Column8.Name = "Column8"
         Me.Column8.ToolTipText = "最大将攻/将防値"
@@ -837,9 +841,9 @@ Partial Class Form10
         '
         'Column11
         '
-        DataGridViewCellStyle32.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer))
-        DataGridViewCellStyle32.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column11.DefaultCellStyle = DataGridViewCellStyle32
+        DataGridViewCellStyle20.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer))
+        DataGridViewCellStyle20.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column11.DefaultCellStyle = DataGridViewCellStyle20
         Me.Column11.HeaderText = "部隊期待値"
         Me.Column11.Name = "Column11"
         Me.Column11.ToolTipText = "部隊全体での期待値。緑色太字=初期スキル対応, 薄紅=Wikiデータ無"
@@ -847,9 +851,9 @@ Partial Class Form10
         '
         'Column9
         '
-        DataGridViewCellStyle33.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer))
-        DataGridViewCellStyle33.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column9.DefaultCellStyle = DataGridViewCellStyle33
+        DataGridViewCellStyle21.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer))
+        DataGridViewCellStyle21.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column9.DefaultCellStyle = DataGridViewCellStyle21
         Me.Column9.HeaderText = "上昇率"
         Me.Column9.Name = "Column9"
         Me.Column9.ToolTipText = "部隊期待値÷素×100 (%)"
@@ -857,8 +861,8 @@ Partial Class Form10
         '
         'Column12
         '
-        DataGridViewCellStyle34.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column12.DefaultCellStyle = DataGridViewCellStyle34
+        DataGridViewCellStyle22.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column12.DefaultCellStyle = DataGridViewCellStyle22
         Me.Column12.HeaderText = "単将期待値"
         Me.Column12.Name = "Column12"
         Me.Column12.ToolTipText = "ランキング武将個人の期待値"
@@ -866,8 +870,8 @@ Partial Class Form10
         '
         'Column10
         '
-        DataGridViewCellStyle35.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column10.DefaultCellStyle = DataGridViewCellStyle35
+        DataGridViewCellStyle23.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column10.DefaultCellStyle = DataGridViewCellStyle23
         Me.Column10.HeaderText = "C1期待値"
         Me.Column10.Name = "Column10"
         Me.Column10.ToolTipText = "部隊期待値÷部隊コスト"
@@ -875,12 +879,32 @@ Partial Class Form10
         '
         'Column13
         '
-        DataGridViewCellStyle36.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Column13.DefaultCellStyle = DataGridViewCellStyle36
+        DataGridViewCellStyle24.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Column13.DefaultCellStyle = DataGridViewCellStyle24
         Me.Column13.HeaderText = "MAX部隊値"
         Me.Column13.Name = "Column13"
         Me.Column13.ToolTipText = "全有効スキル発動時"
         Me.Column13.Width = 95
+        '
+        'Button2
+        '
+        Me.Button2.Font = New System.Drawing.Font("MS UI Gothic", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.Button2.Location = New System.Drawing.Point(117, 338)
+        Me.Button2.Name = "Button2"
+        Me.Button2.Size = New System.Drawing.Size(67, 17)
+        Me.Button2.TabIndex = 23
+        Me.Button2.Text = "ステ振詳細"
+        Me.Button2.UseVisualStyleBackColor = True
+        '
+        'Label15
+        '
+        Me.Label15.AutoSize = True
+        Me.Label15.ForeColor = System.Drawing.Color.Blue
+        Me.Label15.Location = New System.Drawing.Point(187, 340)
+        Me.Label15.Name = "Label15"
+        Me.Label15.Size = New System.Drawing.Size(27, 12)
+        Me.Label15.TabIndex = 24
+        Me.Label15.Text = "OFF"
         '
         'Form10
         '
@@ -990,4 +1014,6 @@ Partial Class Form10
     Friend WithEvents ToolStripSplitButton2 As System.Windows.Forms.ToolStripSplitButton
     Friend WithEvents お気に入り設定を開くToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents 設定保存ToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
+    Friend WithEvents Button2 As System.Windows.Forms.Button
+    Friend WithEvents Label15 As System.Windows.Forms.Label
 End Class

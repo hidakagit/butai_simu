@@ -267,7 +267,7 @@ Partial Class Form7
         Me.ToolStripComboBox4.Items.AddRange(New Object() {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"})
         Me.ToolStripComboBox4.Name = "ToolStripComboBox4"
         Me.ToolStripComboBox4.Size = New System.Drawing.Size(75, 26)
-        Me.ToolStripComboBox4.Text = "5"
+        Me.ToolStripComboBox4.Text = "10"
         '
         'ToolStripSeparator4
         '
@@ -290,7 +290,7 @@ Partial Class Form7
         Me.ToolStripComboBox3.Items.AddRange(New Object() {"1", "1.5", "2", "2.5", "3", "3.5", "4"})
         Me.ToolStripComboBox3.Name = "ToolStripComboBox3"
         Me.ToolStripComboBox3.Size = New System.Drawing.Size(75, 26)
-        Me.ToolStripComboBox3.Text = "3"
+        Me.ToolStripComboBox3.Text = "4"
         '
         'ToolStripSeparator3
         '
@@ -307,7 +307,7 @@ Partial Class Form7
         '
         Me.ToolStripTextBox1.Name = "ToolStripTextBox1"
         Me.ToolStripTextBox1.Size = New System.Drawing.Size(80, 26)
-        Me.ToolStripTextBox1.Text = "6"
+        Me.ToolStripTextBox1.Text = "25"
         '
         'Form7
         '

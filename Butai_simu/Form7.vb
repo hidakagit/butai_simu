@@ -181,7 +181,7 @@
                     If InStr(sl(5)(j), "C") Then 'コスト依存スキル
                         sl(5)(j) = Replace(sl(5)(j), "C", busho_cost)
                         costd(j) = True
-                        kp(j) = Decimal.Parse(文字列計算(sl(5)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                        kp(j) = 文字列計算(sl(5)(j), False) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
                         If kp(j) = 0 And dflg = False Then '文字列計算をした結果、ゼロ
                             erck(j) = "D異常"
                         End If
@@ -201,12 +201,12 @@
                     sl(7)(j) = Replace(sl(7)(j), "C", busho_cost)
                     costd(j) = True
                     'costd(j) = True
-                    dp(j) = Decimal.Parse(文字列計算(sl(7)(j), False)) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                    dp(j) = 文字列計算(sl(7)(j), False) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
                     If dp(j) = 0 Then '文字列計算をした結果、ゼロ
                         erck(j) = "D異常"
                     End If
                 Else
-                    dp(j) = Decimal.Parse(文字列計算(sl(7)(j)))
+                    dp(j) = 文字列計算(sl(7)(j), False)
                 End If
                 dkitai(j) = hp(j) * dp(j) '破壊が絡むスキルは破壊期待値を計算
             End If

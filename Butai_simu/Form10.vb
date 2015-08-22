@@ -23,7 +23,11 @@ Public Class Form10
     Public add_skl() As Busho.skl '追加スキルはキャッシュする
     Public zero_skl()() As String '初期スキル情報
     Public syosklflg As Boolean = False '追加スキル詳細設定フラグ
+    Public statusflg As Boolean = False 'ステ振り詳細設定フラウ
     Public cus_addskl(3)() As String '追加スキル詳細設定(第二要素:0,2->スキル名, 1,3->スキル関連)
+    Public cus_status(3) As Integer 'ステ振り詳細設定(0:攻, 1:防, 2:兵, 3:適正お任せ)
+    Public cus_status_kb As Decimal 'ステ振り詳細設定にて、攻防極閾値
+    Public cus_status_hei As Decimal 'ステ振り詳細設定にて、兵法極閾値
 
     Private Sub Form10_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         '武将設定初期化
@@ -132,7 +136,7 @@ Public Class Form10
         End With
     End Sub
 
-    Private Sub スキル設定EQUAL(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
+    Private Sub スキル設定EQUAL(sender As Object, e As EventArgs)
         If CheckBox1.Checked = True Then 'ON
             simu_skeqflg = True
             ComboBox41.Enabled = False
@@ -180,6 +184,13 @@ Public Class Form10
     End Sub
     Private Sub ステ振り設定(sender As Object, e As EventArgs) Handles ComboBox10.SelectedIndexChanged
         heicount = Val(Mid(sender.Text, 4, 1))
+        If sender.text = "お好み設定" Then
+            statusflg = True
+            Call Form15.ステ振り詳細設定関連ONOFF(False)
+        Else
+            statusflg = False
+            Call Form15.ステ振り詳細設定関連ONOFF(True)
+        End If
     End Sub
     Private Sub プログレスバー初期化()
         ToolStripProgressBar1.Value = 0
@@ -429,6 +440,11 @@ Public Class Form10
                 Case "条件" ', "童"
                     .tokusyu = 9
                     .t_flg = フラグ付きスキル参照(add_skl(sno)) '条件付きスキルの場合
+                    If .koubou = "速" Then
+                        .speed = Decimal.Parse(tmp(4)) '速度はコスト依存・・・しない・・・（現状
+                    ElseIf tmp(5) = "速" Then
+                        .speed = Decimal.Parse(tmp(6)) '付与効果に速度がある
+                    End If
                     .kanren = tmp(4)
                 Case Else
                     Select Case (.koubou)
@@ -494,6 +510,11 @@ Public Class Form10
                 Case "条件" ', "童"
                     .tokusyu = 9
                     .t_flg = フラグ付きスキル参照(simu_bs(3).skill(0)) '条件付きスキルの場合
+                    If .koubou = "速" Then
+                        .speed = Decimal.Parse(zero_skl(zero_no)(5)) '速度はコスト依存・・・しない・・・（現状
+                    ElseIf zero_skl(zero_no)(6) = "速" Then
+                        .speed = Decimal.Parse(zero_skl(zero_no)(7)) '付与効果に速度がある
+                    End If
                     .kanren = zero_skl(zero_no)(5)
                 Case Else
                     Select Case (.koubou)
@@ -508,7 +529,7 @@ Public Class Form10
                             '.kouka_f = Decimal.Parse(tmp(4))
                             .kanren = zero_skl(zero_no)(5)
                             If InStr(zero_skl(zero_no)(5), "C") Then zero_skl(zero_no)(5) = _
-                                文字列計算(Replace(zero_skl(zero_no)(5), "C", CStr(simu_bs(3).cost))) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
+                                文字列計算(Replace(zero_skl(zero_no)(5), "C", CStr(simu_bs(3).cost)), False) 'コスト依存スキルの扱い。「スキル所持武将の」コストで一括適用
                             .kouka_f = Decimal.Parse(zero_skl(zero_no)(5))
                             If zero_skl(zero_no)(6) = "速" Then .speed = Decimal.Parse(zero_skl(zero_no)(7)) '付与効果に速度がある
                     End Select
@@ -580,10 +601,10 @@ Public Class Form10
                     With simu_bs(3).skill(i)
                         If InStr(.kanren, "C") Then 'コスト依存スキルの扱い
                             .kanren = Replace(.kanren, "C", CStr(simu_bs(3).cost)) '変更。「スキル所持武将の」コストで一括適用
-                            .kanren = 文字列計算(.kanren)
+                            .kanren = 文字列計算(.kanren, False)
                             .kouka_f = Decimal.Parse(.kanren)
                         Else
-                            .kouka_f = Decimal.Parse(.kanren)
+                            .kouka_f = 文字列計算(.kanren, False)
                         End If
                         'If .kanren Then 'データが無いスキルの場合は計算しない
                         '    .kanren = 文字列計算(.kanren)
@@ -602,6 +623,10 @@ Public Class Form10
         Dim heiho(3) As Decimal
         Dim pwr(3) As Decimal
         Dim ret_int() As Integer
+        'ステ振り詳細設定がONの時
+        If statusflg Then
+            Return {-1}
+        End If
         '全員兵法じゃない時
         If heicount = 0 Then
             ReDim ret_int(0)
@@ -631,24 +656,76 @@ Public Class Form10
         For i As Integer = 0 To 3
             Dim heiflg As Boolean = False
             With simu_bs(i)
-                For j As Integer = 0 To heicount - 1
-                    If .No = heino(j) Then '兵法振りにする武将リストと合致
-                        heiflg = True
-                    End If
-                Next
-                If heiflg Then
-                    .st(0) = .st_d(0)
-                    .st(1) = .st_d(1)
-                    .st(2) = .st_d(2) + stpt * .sta_g(2)
+                If statusflg Then 'ステ振り詳細設定がONならば
+                    Select Case cus_status(i)
+                        Case 0 '攻極振
+                            .st(0) = .st_d(0) + stpt * .sta_g(0)
+                            .st(1) = .st_d(1)
+                            .st(2) = .st_d(2)
+                        Case 1 '防極振
+                            .st(0) = .st_d(0)
+                            .st(1) = .st_d(1) + stpt * .sta_g(1)
+                            .st(2) = .st_d(2)
+                        Case 2 '兵極振
+                            .st(0) = .st_d(0)
+                            .st(1) = .st_d(1)
+                            .st(2) = .st_d(2) + stpt * .sta_g(2)
+                        Case 3 '適正お任せ
+                            'まずは攻防成長値で決定
+                            If InStr(kobo, "攻") Then
+                                If .sta_g(0) >= cus_status_kb Then
+                                    .st(0) = .st_d(0) + stpt * .sta_g(0)
+                                    .st(1) = .st_d(1)
+                                    .st(2) = .st_d(2)
+                                Else
+                                    heiflg = True
+                                End If
+                            Else
+                                If .sta_g(1) >= cus_status_kb Then
+                                    .st(0) = .st_d(0)
+                                    .st(1) = .st_d(1) + stpt * .sta_g(1)
+                                    .st(2) = .st_d(2)
+                                Else
+                                    heiflg = True
+                                End If
+                            End If
+                            '次に兵法成長値で決定
+                            If heiflg Then
+                                If .sta_g(2) >= cus_status_hei Then
+                                    .st(0) = .st_d(0)
+                                    .st(1) = .st_d(1)
+                                    .st(2) = .st_d(2) + stpt * .sta_g(2)
+                                Else
+                                    If InStr(kobo, "攻") Then
+                                        .st(0) = .st_d(0) + stpt * .sta_g(0)
+                                        .st(1) = .st_d(1)
+                                    Else
+                                        .st(0) = .st_d(0)
+                                        .st(1) = .st_d(1) + stpt * .sta_g(1)
+                                    End If
+                                End If
+                            End If
+                    End Select
                 Else
-                    If InStr(kobo, "攻") Then
-                        .st(0) = .st_d(0) + stpt * .sta_g(0)
-                        .st(1) = .st_d(1)
-                    Else
+                    For j As Integer = 0 To heicount - 1
+                        If .No = heino(j) Then '兵法振りにする武将リストと合致
+                            heiflg = True
+                        End If
+                    Next
+                    If heiflg Then
                         .st(0) = .st_d(0)
-                        .st(1) = .st_d(1) + stpt * .sta_g(1)
+                        .st(1) = .st_d(1)
+                        .st(2) = .st_d(2) + stpt * .sta_g(2)
+                    Else
+                        If InStr(kobo, "攻") Then
+                            .st(0) = .st_d(0) + stpt * .sta_g(0)
+                            .st(1) = .st_d(1)
+                        Else
+                            .st(0) = .st_d(0)
+                            .st(1) = .st_d(1) + stpt * .sta_g(1)
+                        End If
+                        .st(2) = .st_d(2)
                     End If
-                    .st(2) = .st_d(2)
                 End If
             End With
         Next
@@ -738,7 +815,7 @@ Public Class Form10
                 For j As Integer = 0 To .skill_no - 1 '攻防一致、特殊スキル排除
                     If InStr(kobo, .skill(j).koubou) Or .skill(j).koubou = "攻防" Then
                         If .skill(j).tokusyu = 9 Then
-                            .skill(j).t_flg = 条件依存スキル・フラグスキル判定(.skill(j), butaicostsum) '怪しいスキルを疑う
+                            .skill(j).t_flg = 条件依存スキル・フラグスキル判定(.skill(j), butaicostsum, butairanksum) '怪しいスキルを疑う
                             .skill(j).t_flg = フラグ付きスキル参照(.skill(j))
                         End If
                         If .skill(j).tokusyu = 0 Or .skill(j).t_flg Then '通常スキル
@@ -1240,7 +1317,9 @@ Public Class Form10
         CheckBox2.Checked = True
         CheckBox2.Checked = False
         syosklflg = False
+        statusflg = False
         Call Form11.スキル詳細設定関連ONOFF(True)
+        Call Form15.ステ振り詳細設定関連ONOFF(True)
     End Sub
 
     Private Sub お気に入り設定を開く(sender As Object, e As EventArgs) Handles お気に入り設定を開くToolStripMenuItem.Click
@@ -1281,6 +1360,7 @@ Public Class Form10
         Next
         '各種フラグ
         syosklflg = GetINIValue("detail_skillflg", "設定", bini)
+        statusflg = GetINIValue("detail_statusflg", "設定", bini)
         simu_skeqflg = GetINIValue("rankbusho_skillflg", "設定", bini)
         '武将、スキル
         For i As Integer = 0 To 2
@@ -1330,6 +1410,24 @@ Public Class Form10
                 ComboBox042.SelectedText = GetINIValue("add2", "ランキング武将", bini)
             End If
         End If
+        If statusflg Then 'ステ振り詳細設定ONならば
+            For i As Integer = 0 To 3
+                Dim bsho As String = Nothing
+                Select Case i
+                    Case 0
+                        bsho = "武将A"
+                    Case 1
+                        bsho = "武将B"
+                    Case 2
+                        bsho = "武将C"
+                    Case 3
+                        bsho = "ランキング武将"
+                End Select
+                cus_status(i) = GetINIValue(bsho, "ステ振り設定", bini)
+            Next
+            cus_status_kb = Val(GetINIValue("攻防", "ステ振り設定", bini))
+            cus_status_hei = Val(GetINIValue("兵法", "ステ振り設定", bini))
+        End If
         Cursor.Current = Cursors.Default
     End Sub
 
@@ -1359,6 +1457,7 @@ Public Class Form10
             SetINIValue(ComboBox9.Text, "skilllv", "設定", FILENAME_ranking)
             SetINIValue(ComboBox10.SelectedIndex, "heicount", "設定", FILENAME_ranking)
             SetINIValue(syosklflg, "detail_skillflg", "設定", FILENAME_ranking)
+            SetINIValue(statusflg, "detail_statusflg", "設定", FILENAME_ranking)
             SetINIValue(simu_skeqflg, "rankbusho_skillflg", "設定", FILENAME_ranking)
             '対象武将設定
             Dim rarearr() = {"天", "極", "特", "上", "序"}
@@ -1397,6 +1496,10 @@ Public Class Form10
                         SetINIValue(.rare, "rare", bsho, FILENAME_ranking)
                     End If
                 End With
+                'ステ振り詳細設定
+                If statusflg Then
+                    SetINIValue(cus_status(i), bsho, "ステ振り設定", FILENAME_ranking)
+                End If
             Next
             'スキル詳細設定
             If syosklflg Then
@@ -1404,6 +1507,11 @@ Public Class Form10
                     SetINIValue(cus_addskl(i)(0), "add" & CStr(i) & "1", "CSKILL", FILENAME_ranking)
                     SetINIValue(cus_addskl(i)(2), "add" & CStr(i) & "2", "CSKILL", FILENAME_ranking)
                 Next
+            End If
+            'ステ振り詳細設定(お任せの時の設定)
+            If statusflg Then
+                SetINIValue(cus_status_kb, "攻防", "ステ振り設定", FILENAME_ranking)
+                SetINIValue(cus_status_hei, "兵法", "ステ振り設定", FILENAME_ranking)
             End If
             MsgBox("登録完了")
         Catch ex As Exception
@@ -1413,5 +1521,9 @@ Public Class Form10
 
     Private Sub 開くボタン(sender As Object, e As EventArgs) Handles ToolStripSplitButton2.ButtonClick
         Call お気に入り設定を開く(sender, e)
+    End Sub
+
+    Private Sub ステ振り詳細設定(sender As Object, e As EventArgs) Handles Button2.Click
+        Form15.Show()
     End Sub
 End Class

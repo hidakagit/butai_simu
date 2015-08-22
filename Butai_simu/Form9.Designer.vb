@@ -28,6 +28,9 @@ Partial Class Form9
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.ComboBox5 = New System.Windows.Forms.ComboBox()
+        Me.Label9 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.TextBox2 = New System.Windows.Forms.TextBox()
@@ -53,22 +56,23 @@ Partial Class Form9
         '
         'ComboBox1
         '
-        Me.ComboBox1.Enabled = False
+        Me.ComboBox1.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Location = New System.Drawing.Point(71, 21)
+        Me.ComboBox1.Items.AddRange(New Object() {"2", "10"})
+        Me.ComboBox1.Location = New System.Drawing.Point(130, 20)
         Me.ComboBox1.Name = "ComboBox1"
-        Me.ComboBox1.Size = New System.Drawing.Size(80, 20)
+        Me.ComboBox1.Size = New System.Drawing.Size(40, 22)
         Me.ComboBox1.TabIndex = 0
-        Me.ComboBox1.Text = "6章以降"
+        Me.ComboBox1.Text = "10"
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(6, 24)
+        Me.Label1.Location = New System.Drawing.Point(172, 24)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(59, 12)
+        Me.Label1.Size = New System.Drawing.Size(17, 12)
         Me.Label1.TabIndex = 1
-        Me.Label1.Text = "章・期選択"
+        Me.Label1.Text = "期"
         '
         'Label2
         '
@@ -83,11 +87,12 @@ Partial Class Form9
         '
         Me.ComboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.ComboBox2.FlatStyle = System.Windows.Forms.FlatStyle.Popup
+        Me.ComboBox2.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.ComboBox2.FormattingEnabled = True
         Me.ComboBox2.Items.AddRange(New Object() {"1", "2", "3", "4", "5", "6", "7", "8"})
-        Me.ComboBox2.Location = New System.Drawing.Point(97, 48)
+        Me.ComboBox2.Location = New System.Drawing.Point(98, 47)
         Me.ComboBox2.Name = "ComboBox2"
-        Me.ComboBox2.Size = New System.Drawing.Size(44, 20)
+        Me.ComboBox2.Size = New System.Drawing.Size(44, 22)
         Me.ComboBox2.TabIndex = 3
         '
         'Label3
@@ -101,6 +106,9 @@ Partial Class Form9
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.Label10)
+        Me.GroupBox1.Controls.Add(Me.ComboBox5)
+        Me.GroupBox1.Controls.Add(Me.Label9)
         Me.GroupBox1.Controls.Add(Me.Label7)
         Me.GroupBox1.Controls.Add(Me.CheckBox1)
         Me.GroupBox1.Controls.Add(Me.TextBox2)
@@ -116,6 +124,35 @@ Partial Class Form9
         Me.GroupBox1.TabIndex = 5
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "空き地設定"
+        '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(6, 24)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(53, 12)
+        Me.Label10.TabIndex = 40
+        Me.Label10.Text = "条件設定"
+        '
+        'ComboBox5
+        '
+        Me.ComboBox5.Enabled = False
+        Me.ComboBox5.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ComboBox5.FormattingEnabled = True
+        Me.ComboBox5.Location = New System.Drawing.Point(65, 20)
+        Me.ComboBox5.Name = "ComboBox5"
+        Me.ComboBox5.Size = New System.Drawing.Size(40, 22)
+        Me.ComboBox5.TabIndex = 40
+        Me.ComboBox5.Text = "10"
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Location = New System.Drawing.Point(108, 24)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(17, 12)
+        Me.Label9.TabIndex = 40
+        Me.Label9.Text = "章"
         '
         'Label7
         '
@@ -357,4 +394,7 @@ Partial Class Form9
     Friend WithEvents RichTextBox3 As System.Windows.Forms.RichTextBox
     Friend WithEvents Label8 As System.Windows.Forms.Label
     Friend WithEvents ComboBox4 As System.Windows.Forms.ComboBox
+    Friend WithEvents Label10 As System.Windows.Forms.Label
+    Friend WithEvents ComboBox5 As System.Windows.Forms.ComboBox
+    Friend WithEvents Label9 As System.Windows.Forms.Label
 End Class

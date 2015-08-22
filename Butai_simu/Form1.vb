@@ -34,6 +34,7 @@ Public Class Form1
         'sr.Close()
         'error_skill = Split(srbuff, vbCrLf)
         'フラグ付きスキル情報を読み込み
+        Call 置換パラメータ設定読み込み()
         Call フラグ付きスキル読み込み()
 
         'ApplicationExitイベントハンドラを追加
@@ -1338,6 +1339,14 @@ Public Class Form1
             Call 部隊兵法値計算・スキルデータ確定()
             Call スキル状態計算()
 
+            'デッキアウトするHPを計算する
+            Dim hei() As Decimal
+            ReDim zenmetuHp(busho_counter - 1), hei(busho_counter - 1)
+            For i As Integer = 0 To busho_counter - 1
+                hei(i) = bs(i).hei_sum
+            Next
+            zenmetuHp = デッキアウトHP計算(hei, skill_ex)
+
             Form2.RichTextBox1.Text = データテキスト出力(0) '全体情報
             'Call RTextBox_BOLD(Form2.RichTextBox1, boldtext(0))
             For i As Integer = 0 To busho_counter - 1
@@ -1402,7 +1411,7 @@ Public Class Form1
         Else
             bstr = Split("0", ",")
             With bs(bn - 1)
-                ReDim tmp(10)
+                ReDim tmp(12)
                 tmp(0) = "武将名: " & .name
                 tmp(1) = "レアリティ: " & .rare & " | " & "コスト: " & .cost
                 tmp(2) = "兵数: " & .hei_sum
@@ -1415,32 +1424,34 @@ Public Class Form1
                 tmp(5) = "統率: " & "槍" & .tou_a(0) & "/ " & "弓" & .tou_a(1) & "/ " & "馬" & .tou_a(2) & "/ " & "砲" & .tou_a(3)
                 tmp(6) = "積載兵科: " & .heisyu.name
                 tmp(7) = "素" & kb & "力: " & Int(.attack) & " (全体の" & Format((.attack / Atksum) * 100, "#0.00") & "%)"
-                tmp(8) = "----------"
+                tmp(8) = "単将期待値: " & Int(skill_ex(bn - 1)) & " (全体の" & Format((skill_ex(bn - 1) / skill_exk) * 100, "#0.00") & "%)"
+                tmp(9) = zenmetuHp(bn - 1)
+                tmp(10) = "----------"
                 Dim c As Integer = 0 'カウンター
                 For i As Integer = 0 To .skill_no - 1
                     With .skill(i)
-                        ReDim Preserve tmp(10 + 2 * i)
+                        ReDim Preserve tmp(12 + 2 * i)
                         If .tokusyu = 0 Or .t_flg Then '特殊スキル（総コスト依存スキルを除く）じゃなければ
                             Dim tmps As String = .heika
                             If InStr(.heika, "槍弓馬砲器") Then
                                 tmps = "全"
                             End If
-                            tmp(9 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & _
+                            tmp(11 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & _
                                 .name & "LV" & .lv & " /" & .koubou & " /" & tmps
-                            tmp(10 + 2 * i) = "発動率: " & .kouka_p & "/ " & "上昇率: " & .kouka_f & vbCrLf & _
+                            tmp(12 + 2 * i) = "発動率: " & .kouka_p & "/ " & "上昇率: " & .kouka_f & vbCrLf & _
                                 "→ ◆期待値 " & Math.Ceiling(.exp_kouka_b * 10000) / 10000
                             If .up_kouka_p > 0 Then
-                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & " [発動率上昇中 +" & Format(.up_kouka_p * 100, "#0.00") & "%]"
+                                tmp(12 + 2 * i) = tmp(12 + 2 * i) & vbCrLf & " [発動率上昇中 +" & Format(.up_kouka_p * 100, "#0.00") & "%]"
                             End If
                             If .up_kouka_f > 0 Then
-                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & " [威力上昇中 +" & Format(.up_kouka_f * 100, "#0.00") & "%]"
+                                tmp(12 + 2 * i) = tmp(12 + 2 * i) & vbCrLf & " [威力上昇中 +" & Format(.up_kouka_f * 100, "#0.00") & "%]"
                             End If
                             If .t_flg Then
-                                tmp(10 + 2 * i) = tmp(10 + 2 * i) & vbCrLf & "★☆特殊条件スキル☆★"
+                                tmp(12 + 2 * i) = tmp(12 + 2 * i) & vbCrLf & "★☆特殊条件スキル☆★"
                             End If
                         Else
-                            tmp(9 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & .name & "LV" & .lv
-                            tmp(10 + 2 * i) = "***********"
+                            tmp(11 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & .name & "LV" & .lv
+                            tmp(12 + 2 * i) = "***********"
                         End If
                     End With
                 Next
@@ -1455,6 +1466,8 @@ Public Class Form1
                 Dim btemp As String = tmp(CInt(bstr(i)))
                 boldtext(bn)(i) = Mid(btemp, InStr(btemp, ": ") + 2, btemp.Length - InStr(btemp, ": ") - 1)
             Next
+            ReDim Preserve boldtext(bn)(boldtext(bn).Length)
+            boldtext(bn)(boldtext(bn).Length - 1) = tmp(9)
         End If
     End Function
 
@@ -1799,7 +1812,12 @@ Public Class Form1
                 For j As Integer = 0 To speed_skl.Length - 1
                     If InStr(speed_skl(j).heika, bs(i).heisyu.bunrui) Or InStr(speed_skl(j).heika, "全") Or InStr(speed_skl(j).heika, "将") Then
                         speed_skl(j).t_flg = フラグ付きスキル参照(speed_skl(j))
-                        ksk(i) = ksk(i) + speed_skl(j).speed
+                        '特殊条件の速度スキルが増えてきたらアドホック対応では×・・・
+                        If bsc = 1 And speed_skl(j).name = "焔槍雷戟" Then '天前田利家のスキルのみは特例
+                            ksk(i) = ksk(i) + speed_skl(j).speed * speed_skl(j).lv
+                        Else
+                            ksk(i) = ksk(i) + speed_skl(j).speed
+                        End If
                     End If
                 Next
             End If
@@ -2262,5 +2280,9 @@ Public Class Form1
 
     Private Sub DB編集ツールを開く(sender As Object, e As EventArgs) Handles ToolStripButton8.Click
         Form13.Show()
+    End Sub
+
+    Private Sub 条件設定オプション表示(sender As Object, e As EventArgs) Handles ToolStripButton9.Click
+        Form14.Show()
     End Sub
 End Class

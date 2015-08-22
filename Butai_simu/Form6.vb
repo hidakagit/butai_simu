@@ -504,7 +504,7 @@
             If tmp(0) = Nothing Then 'レア度の情報が無い場合
                 st(i).pp = 0
             Else
-                st(i).pp = 文字列計算(Replace(Replace(tmp(0), "L", skilllv_sum), "%", ""))
+                st(i).pp = 文字列計算(Replace(Replace(tmp(0), "L", skilllv_sum), "%", ""), False)
             End If
         Next
     End Sub

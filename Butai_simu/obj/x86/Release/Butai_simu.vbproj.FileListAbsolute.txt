@@ -62,3 +62,5 @@ C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Release\EntityFramework.SqlServer.xml
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\bin\Release\System.Data.SQLite.xml
 C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Release\WindowsApplication1.Form13.resources
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Release\WindowsApplication1.Form14.resources
+C:\Users\Makoto\Documents\Visual Studio 2012\Projects\Butai_simu\Butai_simu\obj\x86\Release\WindowsApplication1.Form15.resources

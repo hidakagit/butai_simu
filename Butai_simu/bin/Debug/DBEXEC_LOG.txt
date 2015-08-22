@@ -62,3 +62,5 @@ UPDATE SData SET 発動率 = "0.45", 上昇率 = "0.01", Sunf = "F" WHERE スキル名 = "
 ( 1 data affected )
 UPDATE SData SET 上昇率 = "0.29", 付与率 = "F" WHERE スキル名 = "古今伝授" AND スキルLV = "5"
 ( 1 data affected )
+UPDATE BData SET 武将名 = "おまつ(弐)" WHERE Bid = "2144"
+( 1 data affected )
