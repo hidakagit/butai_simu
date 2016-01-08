@@ -100,8 +100,9 @@ Public Class Form10
             ReDim .sta_g(2)
             .sta_g = {s(11), s(12), s(13)}
             .skill(0).name = Replace(s(14), Mid(s(14), 1, InStr(s(14), "：")), "")
+            .skill(0).bno = selbsho
             .job = s(15)
-            .スキル取得(0, .skill(0).name, .skill(0).lv, {0})
+            .スキル取得(0, selbsho, .skill(0).name, .skill(0).lv, {0})
             Label(Form11, "00" & Val(selbsho + 1)).Text = .skill(0).name
         End With
     End Sub
@@ -136,7 +137,7 @@ Public Class Form10
         End With
     End Sub
 
-    Private Sub スキル設定EQUAL(sender As Object, e As EventArgs)
+    Private Sub スキル設定EQUAL(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
         If CheckBox1.Checked = True Then 'ON
             simu_skeqflg = True
             ComboBox41.Enabled = False
@@ -357,11 +358,11 @@ Public Class Form10
             For j As Integer = 0 To simu_ss(0).Length - 1
                 Select Case (simu_ss(0)(j))
                     Case 0
-                        simu_bs(i).スキル取得(j, simu_bs(i).skill(0).name, simu_lv, simu_ss(0))
+                        simu_bs(i).スキル取得(j, i, simu_bs(i).skill(0).name, simu_lv, simu_ss(0))
                     Case 1
-                        simu_bs(i).スキル取得(j, ComboBox011.Text, simu_lv, simu_ss(0))
+                        simu_bs(i).スキル取得(j, i, ComboBox011.Text, simu_lv, simu_ss(0))
                     Case 2
-                        simu_bs(i).スキル取得(j, ComboBox012.Text, simu_lv, simu_ss(0))
+                        simu_bs(i).スキル取得(j, i, ComboBox012.Text, simu_lv, simu_ss(0))
                 End Select
             Next
         Next
@@ -392,11 +393,11 @@ Public Class Form10
             For j As Integer = 0 To simu_ss(i).Length - 1
                 Select Case (simu_ss(i)(j))
                     Case 0
-                        simu_bs(i).スキル取得(j, simu_bs(i).skill(0).name, simu_lv, simu_ss(i))
+                        simu_bs(i).スキル取得(j, i, simu_bs(i).skill(0).name, simu_lv, simu_ss(i))
                     Case 1
-                        simu_bs(i).スキル取得(j, cus_addskl(i)(0), simu_lv, simu_ss(i))
+                        simu_bs(i).スキル取得(j, i, cus_addskl(i)(0), simu_lv, simu_ss(i))
                     Case 2
-                        simu_bs(i).スキル取得(j, cus_addskl(i)(2), simu_lv, simu_ss(i))
+                        simu_bs(i).スキル取得(j, i, cus_addskl(i)(2), simu_lv, simu_ss(i))
                 End Select
             Next
         Next
@@ -413,6 +414,7 @@ Public Class Form10
         With add_skl(sno)
             If tmp(7) Is Nothing Then tmp(7) = "U"
             .name = skillname
+            .bno = 3 '追加武将は4人目
             .lv = simu_lv
             .kanren = tmp(1)
             .heika = tmp(2)
@@ -476,6 +478,7 @@ Public Class Form10
         With simu_bs(3).skill(0)
             'If zero_skl(zero_no)(8) Is Nothing Then Exit Sub
             .name = skillname
+            .bno = 3
             .lv = simu_lv
             If zero_no = -1 Then '正常に登録されていない場合
                 .tokusyu = 5
@@ -751,25 +754,21 @@ Public Class Form10
             End With
         Next
         '海野六郎のようなスキル（他武将のスキル条件に影響を与えるスキル）がある。その部分を補正
-        '発動率補正(up_kouka_p)
         For i As Integer = 0 To 3
             For j As Integer = 0 To simu_bs(i).skill.Length - 1
                 With simu_bs(i).skill(j)
+                    '発動率補正(up_kouka_p)
                     If (.kouka_p_b + .up_kouka_p) > 1 Then '合計100%を超えるならば
                         .kouka_p_b = 1
                     Else
                         .kouka_p_b = .kouka_p_b + .up_kouka_p
                     End If
                     .exp_kouka_b = .kouka_p_b * .kouka_f
-                End With
-            Next
-        Next
-        '上昇率補正(up_kouka_f)
-        For i As Integer = 0 To 3
-            For j As Integer = 0 To simu_bs(i).skill.Length - 1
-                With simu_bs(i).skill(j)
+                    '上昇率補正(up_kouka_f)
                     .kouka_f_b = .kouka_f_b + .up_kouka_f
                     .exp_kouka_b = .kouka_p_b * .kouka_f_b
+                    '兵科追加補正(heika_add)
+                    .heika_b = .heika_b + .heika
                 End With
             Next
         Next
@@ -839,6 +838,26 @@ Public Class Form10
                 Next
             End With
         Next
+        '条件依存のある遅延スキル
+        For i As Integer = 0 To 3
+            With simu_bs(i)
+                For j As Integer = 0 To .skill_no - 1 '攻防一致、特殊スキル排除
+                    If InStr(kobo, .skill(j).koubou) Or .skill(j).koubou = "攻防" Then
+                        '上で引っかからなかった特殊スキルのみ
+                        If .skill(j).tokusyu = 9 And Not (.skill(j).t_flg) Then
+                            .skill(j).t_flg = 遅延条件依存スキル(.skill(j), butaicostsum, butairanksum) '怪しいスキルを疑う
+                            '.skill(j).t_flg = フラグ付きスキル参照(.skill(j))
+                            If .skill(j).t_flg Then '有効ならば
+                                ReDim Preserve c_skill(c)
+                                c_skill(c) = .skill(j).Clone
+                                c = c + 1
+                            End If
+                        End If
+                    End If
+                Next
+            End With
+        Next
+
         c = 2 ^ (c) '全スキル有効状態数
         ReDim c_skillp(c - 1)
         For i As Integer = 0 To c - 1

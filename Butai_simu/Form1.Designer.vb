@@ -306,6 +306,10 @@ Partial Class Form1
         Me.ToolStripButton9 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator13 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
+        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.CheckBox1 = New System.Windows.Forms.CheckBox()
+        Me.ComboBox1 = New System.Windows.Forms.ComboBox()
+        Me.ComboBox2 = New System.Windows.Forms.ComboBox()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox002.SuspendLayout()
@@ -326,6 +330,7 @@ Partial Class Form1
         Me.ToolStrip2.SuspendLayout()
         Me.ContextMenuStrip2.SuspendLayout()
         Me.ToolStrip3.SuspendLayout()
+        Me.GroupBox2.SuspendLayout()
         Me.SuspendLayout()
         '
         'ComboBox001
@@ -384,7 +389,7 @@ Partial Class Form1
         Me.GroupBox1.Controls.Add(Me.ComboBox003)
         Me.GroupBox1.Controls.Add(Me.Label5)
         Me.GroupBox1.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox1.Location = New System.Drawing.Point(8, 66)
+        Me.GroupBox1.Location = New System.Drawing.Point(8, 67)
         Me.GroupBox1.Name = "GroupBox1"
         Me.GroupBox1.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox1.TabIndex = 6
@@ -890,7 +895,7 @@ Partial Class Form1
         Me.GroupBox5.Controls.Add(Me.ComboBox103)
         Me.GroupBox5.Controls.Add(Me.Label43)
         Me.GroupBox5.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox5.Location = New System.Drawing.Point(227, 66)
+        Me.GroupBox5.Location = New System.Drawing.Point(227, 67)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox5.TabIndex = 15
@@ -1437,7 +1442,7 @@ Partial Class Form1
         Me.GroupBox9.Controls.Add(Me.ComboBox203)
         Me.GroupBox9.Controls.Add(Me.Label64)
         Me.GroupBox9.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox9.Location = New System.Drawing.Point(446, 66)
+        Me.GroupBox9.Location = New System.Drawing.Point(446, 67)
         Me.GroupBox9.Name = "GroupBox9"
         Me.GroupBox9.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox9.TabIndex = 16
@@ -1984,7 +1989,7 @@ Partial Class Form1
         Me.GroupBox13.Controls.Add(Me.ComboBox303)
         Me.GroupBox13.Controls.Add(Me.Label87)
         Me.GroupBox13.Font = New System.Drawing.Font("MS UI Gothic", 10.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.GroupBox13.Location = New System.Drawing.Point(665, 66)
+        Me.GroupBox13.Location = New System.Drawing.Point(665, 67)
         Me.GroupBox13.Name = "GroupBox13"
         Me.GroupBox13.Size = New System.Drawing.Size(213, 430)
         Me.GroupBox13.TabIndex = 17
@@ -2706,7 +2711,7 @@ Partial Class Form1
         Me.ToolStrip2.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.ToolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
         Me.ToolStrip2.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton5, Me.ToolStripSeparator5, Me.ToolStripSplitButton3, Me.ToolStripSeparator6, Me.ToolStripComboBox3, Me.ToolStripSeparator7, Me.ToolStripComboBox4, Me.ToolStripSeparator8, Me.ToolStripLabel8, Me.ToolStripComboBox5, Me.ToolStripSeparator9, Me.ToolStripLabel7, Me.ToolStripComboBox6, Me.ToolStripComboBox7, Me.ToolStripLabel4, Me.ToolStripComboBox8, Me.ToolStripSplitButton2, Me.ToolStripSeparator10, Me.ToolStripLabel9, Me.ToolStripLabel10})
-        Me.ToolStrip2.Location = New System.Drawing.Point(0, 496)
+        Me.ToolStrip2.Location = New System.Drawing.Point(0, 541)
         Me.ToolStrip2.Name = "ToolStrip2"
         Me.ToolStrip2.Size = New System.Drawing.Size(884, 26)
         Me.ToolStrip2.TabIndex = 26
@@ -3022,8 +3027,8 @@ Partial Class Form1
         Me.ToolStripButton7.Image = CType(resources.GetObject("ToolStripButton7.Image"), System.Drawing.Image)
         Me.ToolStripButton7.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripButton7.Name = "ToolStripButton7"
-        Me.ToolStripButton7.Size = New System.Drawing.Size(112, 22)
-        Me.ToolStripButton7.Text = "特殊オプション"
+        Me.ToolStripButton7.Size = New System.Drawing.Size(110, 22)
+        Me.ToolStripButton7.Text = "スキルON/OFF"
         Me.ToolStripButton7.ToolTipText = "防衛オプションの選択へ"
         '
         'ToolStripButton9
@@ -3031,8 +3036,8 @@ Partial Class Form1
         Me.ToolStripButton9.Image = CType(resources.GetObject("ToolStripButton9.Image"), System.Drawing.Image)
         Me.ToolStripButton9.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripButton9.Name = "ToolStripButton9"
-        Me.ToolStripButton9.Size = New System.Drawing.Size(76, 22)
-        Me.ToolStripButton9.Text = "条件設定"
+        Me.ToolStripButton9.Size = New System.Drawing.Size(112, 22)
+        Me.ToolStripButton9.Text = "スキル条件設定"
         '
         'ToolStripSeparator13
         '
@@ -3046,12 +3051,59 @@ Partial Class Form1
         Me.ToolStripLabel3.Size = New System.Drawing.Size(58, 22)
         Me.ToolStripLabel3.Text = "----------"
         '
+        'GroupBox2
+        '
+        Me.GroupBox2.BackColor = System.Drawing.Color.SeaShell
+        Me.GroupBox2.Controls.Add(Me.CheckBox1)
+        Me.GroupBox2.Controls.Add(Me.ComboBox1)
+        Me.GroupBox2.Controls.Add(Me.ComboBox2)
+        Me.GroupBox2.Location = New System.Drawing.Point(8, 498)
+        Me.GroupBox2.Name = "GroupBox2"
+        Me.GroupBox2.Size = New System.Drawing.Size(870, 38)
+        Me.GroupBox2.TabIndex = 28
+        Me.GroupBox2.TabStop = False
+        Me.GroupBox2.Text = "その他影響スキル"
+        '
+        'CheckBox1
+        '
+        Me.CheckBox1.AutoSize = True
+        Me.CheckBox1.Location = New System.Drawing.Point(38, 15)
+        Me.CheckBox1.Name = "CheckBox1"
+        Me.CheckBox1.Size = New System.Drawing.Size(40, 16)
+        Me.CheckBox1.TabIndex = 32
+        Me.CheckBox1.Text = "ON"
+        Me.CheckBox1.UseVisualStyleBackColor = True
+        '
+        'ComboBox1
+        '
+        Me.ComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.ComboBox1.Enabled = False
+        Me.ComboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Popup
+        Me.ComboBox1.FormattingEnabled = True
+        Me.ComboBox1.Items.AddRange(New Object() {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"})
+        Me.ComboBox1.Location = New System.Drawing.Point(172, 13)
+        Me.ComboBox1.Name = "ComboBox1"
+        Me.ComboBox1.Size = New System.Drawing.Size(35, 20)
+        Me.ComboBox1.TabIndex = 29
+        '
+        'ComboBox2
+        '
+        Me.ComboBox2.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend
+        Me.ComboBox2.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems
+        Me.ComboBox2.FormattingEnabled = True
+        Me.ComboBox2.Items.AddRange(New Object() {"万藝の才媛"})
+        Me.ComboBox2.Location = New System.Drawing.Point(84, 13)
+        Me.ComboBox2.Name = "ComboBox2"
+        Me.ComboBox2.Size = New System.Drawing.Size(85, 20)
+        Me.ComboBox2.TabIndex = 26
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoSize = True
-        Me.ClientSize = New System.Drawing.Size(884, 522)
+        Me.ClientSize = New System.Drawing.Size(884, 567)
+        Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.ToolStrip3)
         Me.Controls.Add(Me.ToolStrip2)
         Me.Controls.Add(Me.ToolStrip1)
@@ -3060,7 +3112,7 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox9)
         Me.Controls.Add(Me.GroupBox13)
         Me.Name = "Form1"
-        Me.Text = "部隊シミュレータVer3.18"
+        Me.Text = "部隊シミュレータVer3.27"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
@@ -3100,6 +3152,8 @@ Partial Class Form1
         Me.ContextMenuStrip2.ResumeLayout(False)
         Me.ToolStrip3.ResumeLayout(False)
         Me.ToolStrip3.PerformLayout()
+        Me.GroupBox2.ResumeLayout(False)
+        Me.GroupBox2.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -3386,4 +3440,8 @@ Partial Class Form1
     Friend WithEvents ToolStripButton8 As System.Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripLabel3 As System.Windows.Forms.ToolStripLabel
     Friend WithEvents ToolStripButton9 As System.Windows.Forms.ToolStripButton
+    Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
+    Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
+    Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
+    Friend WithEvents CheckBox1 As System.Windows.Forms.CheckBox
 End Class

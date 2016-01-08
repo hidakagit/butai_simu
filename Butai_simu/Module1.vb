@@ -99,6 +99,7 @@ Public Structure Busho : Implements System.ICloneable
 
     Public Structure skl : Implements System.ICloneable
         Public name As String 'スキル名
+        Public bno As Integer 'このスキルを所持している武将bs(i)のi
         Public lv As Integer 'スキルLV.
         Public kanren As String '関連
         Public koubou As String '攻撃or防御スキル
@@ -107,6 +108,7 @@ Public Structure Busho : Implements System.ICloneable
         Public kouka_f As Decimal '上昇率
         Public kouka_f_b As Decimal '補正後の上昇率
         Public heika As String '兵科
+        Public heika_b As String '部隊内での所定条件を満たしたことで対応兵科追加
         Public speed As Decimal '速度上昇率
         Public tokusyu As Integer '特殊スキル判定(0:通常, 1:速度のみ, 2:破壊のみ, 5:データ不足, 9:その他)
         Public t_flg As Boolean '総コストorフラグ存在依存
@@ -124,9 +126,11 @@ Public Structure Busho : Implements System.ICloneable
             exp_kouka_b = 0
             up_kouka_p = 0
             up_kouka_f = 0
+            heika_b = ""
         End Sub
 
         Public Sub スキル初期化() 'スキル取得、上書きの際の初期化
+            bno = Nothing
             kanren = Nothing
             koubou = Nothing
             kouka_p = 0
@@ -150,7 +154,7 @@ Public Structure Busho : Implements System.ICloneable
         skill(0).lv = 1
     End Sub
 
-    Sub スキル取得(ByVal sno As Integer, ByVal sname As String, ByVal slv As Integer, ByVal fss As Integer(), Optional ByRef outlog As String = Nothing)
+    Sub スキル取得(ByVal sno As Integer, ByVal bno As Integer, ByVal sname As String, ByVal slv As Integer, ByVal fss As Integer(), Optional ByRef outlog As String = Nothing)
         'fssはその武将のスキル登録状態
         For i As Integer = 0 To skill_no - 1
             If skill.Length - 1 < i Then 'skillの要素数がiよりも小さければ
@@ -167,6 +171,7 @@ Public Structure Busho : Implements System.ICloneable
                 With skill(i)
                     .スキル初期化()
                     .name = sname
+                    .bno = bno
                     .lv = slv
                     tmp = Skill_ref(.name, .lv)
                     If tmp(7) Is Nothing Then 'エントリ自体が存在しない
@@ -189,12 +194,16 @@ Public Structure Busho : Implements System.ICloneable
                         .kouka_f = 0
                         Continue For
                     End If
-                    .kouka_p = Decimal.Parse(tmp(0))
+                    If Not (tmp(0) = Nothing) Then
+                        .kouka_p = Decimal.Parse(tmp(0))
+                    Else
+                        .kouka_p = 0
+                    End If
+
                     Select Case (.kanren)
                         '特殊スキル
                         Case "特殊"
                             .tokusyu = 9
-                            .kouka_p = 0
                             .kouka_f = 0
                             Continue For
                         Case "条件" ', "童"
@@ -262,6 +271,7 @@ Public Structure Busho : Implements System.ICloneable
     Public Structure heisu : Implements System.ICloneable
         Public name As String '兵種名
         Public bunrui As String '兵種分類
+        Public sukumi As String '三すくみ分類
         Public tousotu As String '影響する統率
         Public ts As Decimal '実質統率値
         Public jyk_utuwa As Boolean '「上級」範囲判定
@@ -290,14 +300,15 @@ Public Structure Busho : Implements System.ICloneable
             kobo_ = kb
         End If
         Dim s() As String = _
-         DB_DirectOUT("SELECT 統率, 兵種名, 兵科, 攻撃値, 防御値, 移動値 FROM HData WHERE 兵種名=" & ダブルクオート(h) & "", {"兵科", "統率", "攻撃値", "防御値", "移動値"})
+         DB_DirectOUT("SELECT 統率, 兵種名, 兵科, 三すくみ, 攻撃値, 防御値, 移動値 FROM HData_11 WHERE 兵種名=" & ダブルクオート(h) & "", {"兵科", "統率", "三すくみ", "攻撃値", "防御値", "移動値"})
         With heisyu
             .name = h
             .bunrui = s(0)
             .tousotu = s(1)
-            .atk = Val(s(2))
-            .def = Val(s(3))
-            .spd = Val(s(4))
+            .sukumi = s(2)
+            .atk = Val(s(3))
+            .def = Val(s(4))
+            .spd = Val(s(5))
             .ts = 0 '初期化
             If InStr(kobo_, "攻撃") Then
                 .pwr = .atk
@@ -423,8 +434,8 @@ Public Structure Busho : Implements System.ICloneable
         For k As Integer = 3 To 5
             Label(Form1, CStr(bc) & "0" & CStr(k)).Text = "(+" & sta_g(k - 3).ToString & ")"
         Next
-        '職
-        GroupBox(Form1, "0" & CStr(bc) & "2").Text = "ステータス[ " & job & " ]"
+        Form1.コスト表示(True, bc, cost)
+        Form1.職表示(True, bc, job)
         'スキルレベルを埋める段階でremovehandlerしていないと二度埋めになる
         Dim cc As ComboBox = ComboBox(Form1, CStr(bc) & "14")
         RemoveHandler cc.SelectedValueChanged, AddressOf Form1.追加スキル追加
@@ -492,12 +503,12 @@ Public Structure Busho : Implements System.ICloneable
                     If .tokusyu = 9 Then '特殊スキルの場合は・・・
                         .t_flg = 条件依存スキル・フラグスキル判定(skill(j), cost_sum_, rank_sum_) '怪しいスキルを疑う
                         .t_flg = フラグ付きスキル参照(skill(j))
+                        If .kouka_p = 1 Then
+                            .kouka_p_b = 1
+                        Else
+                            .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
+                        End If
                         If Not .kouka_f = 0 Then 'ゼロならば単なる特殊スキル
-                            If .kouka_p = 1 Then
-                                .kouka_p_b = 1
-                            Else
-                                .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
-                            End If
                             .kouka_f_b = .kouka_f
                             .exp_kouka = .kouka_p * .kouka_f
                             .exp_kouka_b = .kouka_p_b * .kouka_f_b '期待値
@@ -505,6 +516,28 @@ Public Structure Busho : Implements System.ICloneable
                             .exp_kouka = 0
                             .exp_kouka_b = 0
                         End If
+                    End If
+                End If
+            End With
+        Next
+        '条件依存のある遅延スキル
+        For j As Integer = 0 To skill_no - 1
+            With skill(j)
+                If .tokusyu = 9 And Not (.t_flg) Then '特殊スキルの場合は・・・
+                    .t_flg = 遅延条件依存スキル(skill(j), cost_sum_, rank_sum_) '怪しいスキルを疑う
+                    '.t_flg = フラグ付きスキル参照(skill(j))
+                    If .kouka_p = 1 Then
+                        .kouka_p_b = 1
+                    Else
+                        .kouka_p_b = .kouka_p + 0.01 * (heihou_sum_ + rank_sum_)
+                    End If
+                    If Not .kouka_f = 0 Then 'ゼロならば単なる特殊スキル
+                        .kouka_f_b = .kouka_f
+                        .exp_kouka = .kouka_p * .kouka_f
+                        .exp_kouka_b = .kouka_p_b * .kouka_f_b '期待値
+                    Else
+                        .exp_kouka = 0
+                        .exp_kouka_b = 0
                     End If
                 End If
             End With
@@ -790,6 +823,7 @@ Module Module1
     Public kb As String '攻撃/防衛部隊どちらか
     Public busho_counter As Integer = 0 '武将数
     Public bs() As Busho '武将
+    Public specialskl As Busho.skl '合流参加武将や、自拠点防衛武将等の自部隊以外からの影響スキル
 
     Public Heisum As Long '総兵数
     Public heihou_sum As Decimal '兵法補正
@@ -810,6 +844,7 @@ Module Module1
     Public skill_yyk() As Decimal
     Public skill_syo(,) As Decimal '各スキル発動パターンにおける、将攻成分（部隊スキルの時に使う）
     Public skill_ex() As Decimal '確率変数x → 期待値E(x) k:k番目の武将の戦闘力の期待値
+    Public skill_emax() As Decimal '確率変数x → MAX値E(x)
     Public skill_exk As Decimal 'skill_exk = SUM{skill_ex(k)}
     Public skill_exx As Decimal = 0
     Public skill_ax As Decimal = 0 '確率変数x → 標準偏差σ(x)
@@ -967,12 +1002,15 @@ Module Module1
 
     'RichtextBoxにおいて、与えた文字列配列の最初に現れた文字を太字にする
     Public Sub RTextBox_BOLD(ByVal richtextbox As RichTextBox, ByVal str() As String)
+        Dim s As String = richtextbox.Text.Replace(vbCrLf, vbLf)
         Dim f As Integer = -1
         For i As Integer = 0 To str.Length - 1
             With richtextbox
-                f = InStr(.Text, str(i))
+                '太字化する始点部分は改行コードを除いて判定する
+                f = InStr(s, str(i))
+                'f = InStr(.Text, str(i))
                 If f <> 0 Then
-                    If Not Mid(.Text, f, str(i).Length) = str(i) Then
+                    If Not Mid(s, f, str(i).Length) = str(i) Then
                         Continue For
                     End If
                     .SelectionStart = f - 1
@@ -1111,6 +1149,113 @@ Module Module1
         スキル関連推定 = stmp(0)
     End Function
 
+    '自部隊には存在しないが、自部隊に影響を与えるスキルの扱い（アドホック対応※）
+    Public Sub 前提スキル読み込み()
+        '現在は試験的な実装。
+        '「万藝の才媛」のみ。
+        With specialskl
+            If Not .t_flg Then Exit Sub 'OFFならば適用しない
+            Select Case (.name)
+                Case "万藝の才媛"
+                    '万藝の才媛
+                    '合流攻撃時、参加全武将のスキル発動率を上昇。（重複不可）
+                    Dim refbs() As Busho = bs.Clone
+                    '重複するスキルが自部隊に存在する場合は効果を適用しない
+                    For i As Integer = 0 To refbs.Length - 1
+                        For j As Integer = 0 To refbs(i).skill.Length - 1
+                            If (refbs(i).skill(j).name = "万藝の才媛") Then
+                                Exit Sub
+                            End If
+                        Next
+                    Next
+                    '増分データはフラグ付きスキルとして読み込み　※フラグ付きスキル設定値に依存
+                    'ここで、.kouka_pを直接アクセスすると参照順番依存により初期化されていない（前回シミュレートに用いた）値を取得してしまう
+                    Dim bf As Decimal = フラグ付きスキル情報取得("万藝の才媛", .lv).kouka_p
+                    For i As Integer = 0 To refbs.Length - 1
+                        For j As Integer = 0 To refbs(i).skill.Length - 1
+                            refbs(i).skill(j).up_kouka_p = refbs(i).skill(j).up_kouka_p + bf 'LVの分だけ発動率上昇
+                        Next
+                    Next
+            End Select
+        End With
+    End Sub
+
+    '単純参照順序依存があるスキルリスト
+    '単純参照順序依存とは・・・該当スキルがその他の条件依存スキルよりも前に処理されると都合が悪いスキル、と定義。
+    '「総コスト」「姫武将」等の固定条件によって威力が固定値で定まらないスキル
+    '例）天信長に覇王征軍を付与している場合の計算（部隊内にシクレ特太田牛一がいるとする）
+    '覇王征軍→天正筆才→天哭傀儡
+    '適用順番が覇王⇔天正、覇王⇔天哭だと違った結果となってしまうため、遅延処理が必要となる・・・
+    'これは、天正
+    '遅延は一段階までとした暫定対応
+    'Public cursklist As String() = {"遁世影武者", "天正筆才", "天哭傀儡"}
+    Public Function 遅延条件依存スキル(ByRef sk As Busho.skl, ByVal sumcost As Decimal, ByVal sumrank As Decimal) As Boolean
+        With sk
+            Select Case (.name)
+                Case "遁世影武者"
+                    '遁世影武者
+                    '部隊長の初期スキルbs(0).skill(0)もしくはForm10.simu_bs(0).skill(0)と同等に
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    'sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
+                    Dim refskl As Busho.skl = Nothing
+                    If simu_execno = 0 Then
+                        refskl = bs(0).skill(0).Clone
+                    ElseIf simu_execno = 1 Then
+                        refskl = Form10.simu_bs(0).skill(0).Clone
+                    End If
+                    If refskl.name = "遁世影武者" Or _
+                       refskl.name = "天哭傀儡" Then '部隊長の初期スキルが自分自身なら無効 ＋ スキルに摸倣不可と明記されている「天哭傀儡」
+                        Return False
+                    End If
+                    .heika = refskl.heika
+                    .koubou = refskl.koubou
+                    .kouka_f = refskl.kouka_f
+                    Return True
+                Case "天正筆才"
+                    '天正筆才
+                    '部隊内に「織田信長」という名称の武将が居れば、そのスキル発動率を操作
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim nobu_x() As Decimal = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 1.0} '倍率
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    For i As Integer = 0 To refbs.Length - 1
+                        If InStr(refbs(i).name, "織田信長") Then
+                            For j As Integer = 0 To refbs(i).skill.Length - 1
+                                refbs(i).skill(j).up_kouka_p = refbs(i).skill(j).up_kouka_p + refbs(i).skill(j).kouka_p * nobu_x(.lv - 1) 'LVの分だけ発動率上昇
+                            Next
+                        End If
+                    Next
+                    Return False '天正筆才自体は他に何も影響しない
+                Case "天哭傀儡"
+                    '天哭傀儡
+                    '所持している武将の追加スキルの効果を操作
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim add_x() As Decimal = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 1.0} '倍率
+                    Dim refbs() As Busho = Nothing
+                    Dim refkb As String = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                        refkb = kb
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                        refkb = Form10.kobo
+                    End If
+                    If InStr(refkb, "攻") Then
+                        '追加スキルの効果を操作
+                        For i As Integer = 1 To refbs(sk.bno).skill.Length - 1
+                            refbs(sk.bno).skill(i).up_kouka_f = refbs(sk.bno).skill(i).up_kouka_f + refbs(sk.bno).skill(i).kouka_f * add_x(.lv - 1) 'LVの分だけ発動率上昇
+                        Next
+                    End If
+                    Return False '天哭傀儡自体は他に何も影響しない
+            End Select
+        End With
+        Return False
+    End Function
+
     '部隊条件に依存したスキルの扱い（アドホック対応※）
     'データベースから静的に参照するだけではどうしようもないスキルはココでデータ確定
     Public Function 条件依存スキル・フラグスキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal, ByVal sumrank As Decimal) As Boolean
@@ -1154,24 +1299,6 @@ Module Module1
                     .kouka_f = 0.01 * mh_f(.lv - 1) - minus_f
                     .heika = "槍弓馬砲器"
                     Return True
-                Case "遁世影武者"
-                    '遁世影武者
-                    '部隊長の初期スキルbs(0).skill(0)もしくはForm10.simu_bs(0).skill(0)と同等に
-                    '※参照順番依存があるので変更・デバッグは慎重に
-                    'sdata = Skill_ref(.name, .lv) '特殊スキルなのでここで改めて取得
-                    Dim refskl As Busho.skl = Nothing
-                    If simu_execno = 0 Then
-                        refskl = bs(0).skill(0).Clone
-                    ElseIf simu_execno = 1 Then
-                        refskl = Form10.simu_bs(0).skill(0).Clone
-                    End If
-                    If refskl.name = "遁世影武者" Then '部隊長の初期スキルが自分自身なら無効
-                        Return False
-                    End If
-                    .heika = refskl.heika
-                    .koubou = refskl.koubou
-                    .kouka_f = refskl.kouka_f
-                    Return True
                 Case "花魁心操術"
                     '花魁心操術
                     '自分以外の武将に姫がいる場合、そのスキル発動率を操作
@@ -1210,6 +1337,25 @@ Module Module1
                         End If
                     Next
                     Return False '仁将自体は他に何も影響しない
+                Case "万藝の才媛"
+                    '万藝の才媛
+                    '合流攻撃時、参加全武将のスキル発動率を上昇。
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    '増分データはフラグ付きスキルとして読み込み　※フラグ付きスキル設定値に依存
+                    'ここで、.kouka_pを直接アクセスすると参照順番依存により初期化されていない（前回シミュレートに用いた）値を取得してしまう
+                    Dim bf As Decimal = フラグ付きスキル情報取得("万藝の才媛", .lv).kouka_p
+                    For i As Integer = 0 To refbs.Length - 1
+                        For j As Integer = 0 To refbs(i).skill.Length - 1
+                            refbs(i).skill(j).up_kouka_p = refbs(i).skill(j).up_kouka_p + bf 'LVの分だけ発動率上昇
+                        Next
+                    Next
+                    Return False '万藝の才媛自体は他に何も影響しない
                 Case "穢土の礎"
                     '穢土の礎
                     '姫武将にのみスキル効果を適用。
@@ -1220,25 +1366,6 @@ Module Module1
                     '自本領に滞在する全部隊に効果を適用。
                     '効果自体は変動しないため、ここではflgをONにするだけ
                     Return True
-                Case "天正筆才"
-                    '天正筆才
-                    '部隊内に「織田信長」という名称の武将が居れば、そのスキル発動率を操作
-                    '※参照順番依存があるので変更・デバッグは慎重に
-                    Dim nobu_x() As Decimal = {0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 1.0} '倍率
-                    Dim refbs() As Busho = Nothing
-                    If simu_execno = 0 Then
-                        refbs = bs.Clone
-                    ElseIf simu_execno = 1 Then
-                        refbs = Form10.simu_bs.Clone
-                    End If
-                    For i As Integer = 0 To refbs.Length - 1
-                        If InStr(refbs(i).name, "織田信長") Then
-                            For j As Integer = 0 To refbs(i).skill.Length - 1
-                                refbs(i).skill(j).up_kouka_p = refbs(i).skill(j).up_kouka_p + refbs(i).skill(j).kouka_p * nobu_x(.lv - 1) 'LVの分だけ発動率上昇
-                            Next
-                        End If
-                    Next
-                    Return False '天正筆才自体は他に何も影響しない
                 Case "権勢専横"
                     '権勢専横
                     '部隊内の「権勢専横」スキルの個数によって効果が変動
@@ -1273,10 +1400,66 @@ Module Module1
                     .kouka_f = 0.01 * sumrank * dh_f(.lv - 1)
                     .heika = "槍弓馬砲器"
                     Return True
+                Case "士気鼓舞"
+                    '士気鼓舞
+                    '将武将のみに効果を適用
+                    '効果自体は変動しないため、ここではflgをONにするだけ
+                    Return True
+                Case "魔王ノ片鱗", "鬼夜叉", "神槍撃"
+                    '武将ランクに応じて効果上昇
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    Dim skill_f As Decimal = Skill_ref(.name, .lv)(4)
+                    'データベースの威力欄が空
+                    If skill_f = Nothing Then Return False
+                    '置換パラメータで置換される前の値に戻す
+                    skill_f = skill_f - 0.02 * Val(置換パラメータ値("武将ランク"))
+                    'ランク×2%の効果上昇
+                    .kouka_f = skill_f + 0.02 * refbs(sk.bno).rank
+                    Return True
+                Case "鉄砲商人"
+                    '鉄砲商人
+                    '兵科対象スキルのみを対象に初期スキル、もしくは全スキルに「砲」を対象に追加
+                    '※参照順番依存があるので変更・デバッグは慎重に
+                    Dim refbs() As Busho = Nothing
+                    If simu_execno = 0 Then
+                        refbs = bs.Clone
+                    ElseIf simu_execno = 1 Then
+                        refbs = Form10.simu_bs.Clone
+                    End If
+                    '兵科対象スキルを「槍、弓、馬、器」のうち、少なくとも1兵科を対象としているスキルとする
+                    Dim taisyostr() As String = {"槍", "弓", "馬", "器"}
+                    For i As Integer = 0 To refbs.Length - 1
+                        For j As Integer = 0 To refbs(i).skill.Length - 1
+                            'スキルLVが10ではない場合は、初期スキルのみ適用対象
+                            If Not (.lv = 10) And Not (j = 0) Then
+                                Continue For
+                            End If
+                            If 組み合わせ文字列(taisyostr, refbs(i).skill(j).heika) Then
+                                refbs(i).skill(j).heika_b = "砲"
+                            End If
+                        Next
+                    Next
+                    Return False '鉄砲商人自体は他に何も影響しない
             End Select
             Return False
         End With
         Return True
+    End Function
+
+    '置換パラメータで設定されている値を返す
+    Public Function 置換パラメータ値(ByVal param_name As String) As String
+        For i As Integer = 0 To cparam_data.Length - 1
+            If String.Equals(cparam_data(i).param_name, ダブルクオート(param_name)) Then
+                Return 正規表現マッチ("[0-9]+", cparam_data(i).param_value)(0)
+            End If
+        Next
+        Return ""
     End Function
 
     'Form1の速度計測関数を参考に
@@ -1306,6 +1489,7 @@ Module Module1
         For i As Integer = 0 To refbs.Length - 1 'スピードスキルのみ抽出
             With refbs(i)
                 For j As Integer = 0 To .skill.Length - 1
+                    .skill(j).t_flg = フラグ付きスキル参照(.skill(j))
                     If Not .skill(j).speed = 0 Or .skill(j).tokusyu = 1 Then '加速スキルがあれば
                         ReDim Preserve speed_skl(c)
                         speed_skl(c) = .skill(j).Clone
@@ -1333,7 +1517,6 @@ Module Module1
             If Not c = 0 Then '加速スキルが見つかった場合
                 For j As Integer = 0 To speed_skl.Length - 1
                     If InStr(speed_skl(j).heika, refbs(i).heisyu.bunrui) Or InStr(speed_skl(j).heika, "全") Or InStr(speed_skl(j).heika, "将") Then
-                        speed_skl(j).t_flg = フラグ付きスキル参照(speed_skl(j))
                         '特殊条件の速度スキルが増えてきたらアドホック対応では×・・・
                         If refbs.Length = 1 And speed_skl(j).name = "焔槍雷戟" Then '天前田利家のスキルのみは特例
                             ksk(i) = ksk(i) + speed_skl(j).speed * speed_skl(j).lv
@@ -1365,8 +1548,37 @@ Module Module1
         Select Case (s.name)
             Case "穢土の礎" '姫武将にのみ適用
                 If Not (b.job = "姫") Then Return False
+            Case "士気鼓舞" '将武将にのみ適用
+                If Not (b.job = "将") Then Return False
         End Select
         Return True
+    End Function
+
+    '引数に指定した文字配列elementを組み合わせると、文字列targetが生成できるかどうかを返す
+    Public Function 組み合わせ文字列(ByVal element() As String, ByVal target As String) As Boolean
+        Dim regtarget As String = target
+        For i As Integer = 0 To element.Length - 1
+            regtarget = Replace(regtarget, element(i), "")
+        Next
+        If regtarget = "" Then
+            Return True
+        Else
+            Return False
+        End If
+    End Function
+
+    '正規表現を使って文字列を抜き出す
+    Public Function 正規表現マッチ(ByVal pattern As String, ByVal target As String) As String()
+        Dim ret() As String = Nothing
+        Dim retcnt As Integer = 0
+        Dim ms As System.Text.RegularExpressions.MatchCollection = _
+            System.Text.RegularExpressions.Regex.Matches(target, pattern)
+        For Each m As System.Text.RegularExpressions.Match In ms
+            ReDim Preserve ret(retcnt)
+            ret(retcnt) = m.Value
+            retcnt = retcnt + 1
+        Next
+        Return ret
     End Function
 
     '全兵数と対象武将の積載兵数、全体の期待値と対象武将の期待値を引数にとり、
@@ -1409,7 +1621,8 @@ Module Module1
                 allhigai = 0.4 * (1 / i) * allhei
                 hp = Math.Ceiling(100 - (1 / i) * 58) '小数点以下切り上げ
             Else '敗北時
-                allhigai = (1 - 0.6 * i) * allhei
+                ' +1をしておかないと誤差が酷い
+                allhigai = (1 - 0.6 * i) * allhei + 1
                 hp = Math.Floor((i * 42) - 5) '小数点以下切り捨て
             End If
 
@@ -1637,6 +1850,29 @@ Module Module1
         End If
     End Function
 
+    'スキル名とスキルLVを引数にとり、フラグ付きスキルの情報を取得
+    Public Function フラグ付きスキル情報取得(ByVal skillname As String, ByVal skilllv As Integer) As Busho.skl
+        Dim count As Integer = 0
+        Dim ret As Busho.skl = Nothing
+        While (count < fskill_data.Length)
+            With ret
+                If (fskill_data(count).name = skillname) And (fskill_data(count).lv = skilllv) Then
+                    .koubou = fskill_data(count).koubou
+                    .heika = fskill_data(count).heika
+                    If InStr(.heika, "全") Then
+                        .heika = "槍弓馬砲器"
+                    End If
+                    .kouka_p = fskill_data(count).kouka_p
+                    .kouka_f = fskill_data(count).kouka_f
+                    .speed = fskill_data(count).speed
+                    Return ret
+                End If
+                count = count + 1
+            End With
+        End While
+        Return ret
+    End Function
+
     'csvからの文字列で童情報を抽出
     Public Sub 童ボーナス加算()
         Call warabe.warabe_clean()
@@ -1712,7 +1948,7 @@ Module Module1
         Return rbutaibonus
     End Function
 
-    '兵科1に対する兵科2の相性
+    '兵科1（防衛側）に対する兵科2（攻撃側）の相性
     Public Function 相性計算(ByVal heika1 As String, ByVal heika2 As String) As Decimal
         Select Case heika1
             Case "槍"
@@ -1722,7 +1958,10 @@ Module Module1
                     Return 1
                 ElseIf InStr(heika2, "馬") Then
                     Return 2
-                ElseIf InStr(heika2, "砲") Then
+                    '11章による変更
+                    'ElseIf InStr(heika2, "砲") Then
+                    'Return 0.8
+                ElseIf InStr(heika2, "兵器") Or InStr(heika2, "外") Then
                     Return 0.8
                 Else
                     Return 1
@@ -1734,8 +1973,11 @@ Module Module1
                     Return 1
                 ElseIf InStr(heika2, "槍") Then
                     Return 2
-                ElseIf InStr(heika2, "砲") Then
-                    Return 1.3
+                    '11章による変更
+                    'ElseIf InStr(heika2, "砲") Then
+                    'Return 1.3
+                ElseIf InStr(heika2, "兵器") Or InStr(heika2, "外") Then
+                    Return 0.8
                 Else
                     Return 1
                 End If
@@ -1746,24 +1988,114 @@ Module Module1
                     Return 1
                 ElseIf InStr(heika2, "弓") Then
                     Return 2
-                ElseIf InStr(heika2, "砲") Then
+                    '11章による変更
+                    'ElseIf InStr(heika2, "砲") Then
+                    'Return 0.8
+                ElseIf InStr(heika2, "兵器") Or InStr(heika2, "外") Then
                     Return 0.8
                 Else
                     Return 1
                 End If
+            Case "兵器"
+                '11章による変更
+                Return 2
         End Select
+        '対象外兵科（農民、鬼、天狗、雑賀衆）-> 外
         Return 1
+    End Function
+
+    '各将を引数にとって、三すくみ割合を出力する
+    Public Function すくみ割合(ByVal bsho As Busho(), ByVal ex As Decimal())
+        Dim ret As String = Nothing
+        If Not (bsho.Length = ex.Length) Then Return Nothing
+        Dim heika() As String = {"槍", "弓", "馬", "兵器", "外"}
+        Dim heikaval() As Decimal = {0, 0, 0, 0, 0}
+        For i As Integer = 0 To bsho.Length - 1
+            For j As Integer = 0 To heika.Length - 1
+                If InStr(bsho(i).heisyu.sukumi, heika(j)) Then
+                    heikaval(j) += ex(i)
+                End If
+            Next
+        Next
+        '出力形式：[槍: XX%/ 弓YY%・・・]
+        If Not (heikaval(0) = 0) Then ret += "槍:" & Format((heikaval(0) / ex.Sum()), "0.0%") & "/"
+        If Not (heikaval(1) = 0) Then ret += "弓:" & Format((heikaval(1) / ex.Sum()), "0.0%") & "/"
+        If Not (heikaval(2) = 0) Then ret += "馬:" & Format((heikaval(2) / ex.Sum()), "0.0%") & "/"
+        If Not (heikaval(3) = 0) Then ret += "器:" & Format((heikaval(3) / ex.Sum()), "0.0%") & "/"
+        If Not (heikaval(4) = 0) Then ret += "雑:" & Format((heikaval(4) / ex.Sum()), "0.0%") & "/"
+        ret = ret.Substring(0, ret.Length - 1)
+        Return ret
     End Function
 
     'DBから読み込んだ値に置換パラメータを適用
     Public Function パラメータ置換(ByVal target As String) As String
+        Dim ret As String = target
+        Dim repflg As Boolean = False
         For i As Integer = 0 To cparam_data.Length - 1
             Dim confstr As String = "%%" & StringRep(cparam_data(i).param_name, {""""}) & "%%"
             If InStr(target, confstr) Then '一致すれば置換
-                Return 文字列計算(Replace(target, confstr, CStr(StringRep(cparam_data(i).param_value, {""""}))))
+                repflg = True
+                ret = Replace(ret, confstr, cparam_data(i).param_value)
             End If
         Next
-        Return 0
+        If repflg Then
+            Return 文字列計算(CStr(StringRep(ret, {""""})))
+        Else
+            Return 0
+        End If
+    End Function
+
+    Public Function 複数文字を含む検索条件(ByVal words As String()) As String()
+        Dim ret_words As String()
+        '出力する検索条件語数で初期化
+        ReDim ret_words(N_EXC(words.Length) - 1)
+        Dim cnt As Integer = 0
+        For i As Integer = 0 To Math.Pow(words.Length, words.Length) - 1
+            Dim parastr As String = getNnum(words.Length, i)
+            '0で詰める（桁数合わせ）
+            While (parastr.Length < words.Length)
+                parastr = "0" & parastr
+            End While
+            If Not (重複文字存在判定(parastr)) Then
+                '成立パターンから検索文字列生成
+                ret_words(cnt) = "%"
+                For j As Integer = 0 To words.Length - 1
+                    ret_words(cnt) = ret_words(cnt) & words(Val(parastr.Substring(j, 1))) & "%"
+                Next
+                cnt += 1
+                If (cnt = ret_words.Length) Then Return ret_words
+            End If
+        Next
+        '正常に値がセットし切れなかった場合は、nullを返す
+        Return {vbNullString}
+    End Function
+
+    'N!を計算
+    Public Function N_EXC(ByVal num As Integer) As Integer
+        If (num > 1) Then
+            Return num * N_EXC(num - 1)
+        Else
+            Return num
+        End If
+    End Function
+
+    '10進数をN進数に変換
+    Public Function getNnum(ByVal N As Integer, ByVal num As Integer) As String
+        If num < N Then
+            Return num.ToString
+        End If
+        Return (getNnum(N, (num \ N)) & (num Mod N).ToString)
+    End Function
+
+    '重複している文字が含まれているか判定
+    Public Function 重複文字存在判定(ByVal target As String) As Boolean
+        For i As Integer = 0 To target.Length - 1
+            Dim s As String = target.Substring(i, 1)
+            If (target.Length - target.Replace(s, "").Length > 1) Then
+                Return True
+            End If
+        Next
+        Return False
     End Function
 
     '全てクリア(2つまで例外設定可)
@@ -2012,6 +2344,33 @@ Module Module1
     End Function
     Public Function Nx(ByVal x As Decimal, ByVal exp As Decimal, ByVal a As Decimal) As Decimal
         Nx = 1 / (Math.Sqrt(2 * Math.PI) * a) * Math.Exp((-1) * (x - exp) ^ 2 / (2 * a ^ 2))
+    End Function
+
+    '二次元配列から、lock列が等しい値の一次元配列にして、その各最大値を返す配列
+    Public Function getMaxAtk(ByVal tmp(,) As Decimal, ByVal lock As Integer) As Decimal()
+        Dim tmparray() As Decimal
+        Dim ret() As Decimal = Nothing
+        Select Case (lock)
+            Case 1
+                ReDim ret(UBound(tmp, 1))
+                For i As Integer = 0 To UBound(tmp, 1)
+                    ReDim tmparray(UBound(tmp, 2))
+                    For j As Integer = 0 To UBound(tmp, 2)
+                        tmparray(j) = tmp(i, j)
+                    Next
+                    ret(i) = tmparray.Max
+                Next
+            Case 2
+                ReDim ret(UBound(tmp, 2))
+                For i As Integer = 0 To UBound(tmp, 2)
+                    ReDim tmparray(UBound(tmp, 1))
+                    For j As Integer = 0 To UBound(tmp, 1)
+                        tmparray(j) = tmp(j, i)
+                    Next
+                    ret(i) = tmparray.Max
+                Next
+        End Select
+        Return ret
     End Function
 
     ' クイックソート昇順(各武将の戦闘力→その和の昇順ソート，生起確率)

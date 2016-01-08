@@ -97,8 +97,8 @@ Partial Class Form2
         Me.SplitContainer1.Panel2.Controls.Add(Me.ToolStrip2)
         Me.SplitContainer1.Panel2.Controls.Add(Me.ToolStrip1)
         Me.SplitContainer1.Panel2.Controls.Add(Me.Chart1)
-        Me.SplitContainer1.Size = New System.Drawing.Size(784, 362)
-        Me.SplitContainer1.SplitterDistance = 240
+        Me.SplitContainer1.Size = New System.Drawing.Size(804, 442)
+        Me.SplitContainer1.SplitterDistance = 242
         Me.SplitContainer1.TabIndex = 0
         '
         'Label1
@@ -121,7 +121,7 @@ Partial Class Form2
         Me.TabControl1.Location = New System.Drawing.Point(3, 27)
         Me.TabControl1.Name = "TabControl1"
         Me.TabControl1.SelectedIndex = 0
-        Me.TabControl1.Size = New System.Drawing.Size(234, 332)
+        Me.TabControl1.Size = New System.Drawing.Size(240, 415)
         Me.TabControl1.TabIndex = 0
         '
         'TabPage1
@@ -131,14 +131,14 @@ Partial Class Form2
         Me.TabPage1.Location = New System.Drawing.Point(4, 22)
         Me.TabPage1.Name = "TabPage1"
         Me.TabPage1.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage1.Size = New System.Drawing.Size(226, 306)
+        Me.TabPage1.Size = New System.Drawing.Size(232, 389)
         Me.TabPage1.TabIndex = 0
         Me.TabPage1.Text = "全体"
         Me.TabPage1.UseVisualStyleBackColor = True
         '
         'Button1
         '
-        Me.Button1.Location = New System.Drawing.Point(120, 277)
+        Me.Button1.Location = New System.Drawing.Point(120, 360)
         Me.Button1.Name = "Button1"
         Me.Button1.Size = New System.Drawing.Size(100, 23)
         Me.Button1.TabIndex = 1
@@ -150,7 +150,7 @@ Partial Class Form2
         Me.RichTextBox1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.RichTextBox1.Location = New System.Drawing.Point(3, 3)
         Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.Size = New System.Drawing.Size(220, 300)
+        Me.RichTextBox1.Size = New System.Drawing.Size(226, 383)
         Me.RichTextBox1.TabIndex = 0
         Me.RichTextBox1.Text = ""
         '
@@ -160,7 +160,7 @@ Partial Class Form2
         Me.TabPage2.Location = New System.Drawing.Point(4, 22)
         Me.TabPage2.Name = "TabPage2"
         Me.TabPage2.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage2.Size = New System.Drawing.Size(226, 306)
+        Me.TabPage2.Size = New System.Drawing.Size(232, 389)
         Me.TabPage2.TabIndex = 1
         Me.TabPage2.Text = "部隊長"
         Me.TabPage2.UseVisualStyleBackColor = True
@@ -170,7 +170,7 @@ Partial Class Form2
         Me.RichTextBox2.Dock = System.Windows.Forms.DockStyle.Fill
         Me.RichTextBox2.Location = New System.Drawing.Point(3, 3)
         Me.RichTextBox2.Name = "RichTextBox2"
-        Me.RichTextBox2.Size = New System.Drawing.Size(220, 300)
+        Me.RichTextBox2.Size = New System.Drawing.Size(226, 383)
         Me.RichTextBox2.TabIndex = 0
         Me.RichTextBox2.Text = ""
         '
@@ -180,7 +180,7 @@ Partial Class Form2
         Me.TabPage3.Location = New System.Drawing.Point(4, 22)
         Me.TabPage3.Name = "TabPage3"
         Me.TabPage3.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage3.Size = New System.Drawing.Size(226, 306)
+        Me.TabPage3.Size = New System.Drawing.Size(232, 389)
         Me.TabPage3.TabIndex = 2
         Me.TabPage3.Text = "小隊A"
         Me.TabPage3.UseVisualStyleBackColor = True
@@ -190,7 +190,7 @@ Partial Class Form2
         Me.RichTextBox3.Dock = System.Windows.Forms.DockStyle.Fill
         Me.RichTextBox3.Location = New System.Drawing.Point(3, 3)
         Me.RichTextBox3.Name = "RichTextBox3"
-        Me.RichTextBox3.Size = New System.Drawing.Size(220, 300)
+        Me.RichTextBox3.Size = New System.Drawing.Size(226, 383)
         Me.RichTextBox3.TabIndex = 0
         Me.RichTextBox3.Text = ""
         '
@@ -200,7 +200,7 @@ Partial Class Form2
         Me.TabPage4.Location = New System.Drawing.Point(4, 22)
         Me.TabPage4.Name = "TabPage4"
         Me.TabPage4.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage4.Size = New System.Drawing.Size(226, 306)
+        Me.TabPage4.Size = New System.Drawing.Size(232, 389)
         Me.TabPage4.TabIndex = 3
         Me.TabPage4.Text = "小隊B"
         Me.TabPage4.UseVisualStyleBackColor = True
@@ -210,7 +210,7 @@ Partial Class Form2
         Me.RichTextBox4.Dock = System.Windows.Forms.DockStyle.Fill
         Me.RichTextBox4.Location = New System.Drawing.Point(3, 3)
         Me.RichTextBox4.Name = "RichTextBox4"
-        Me.RichTextBox4.Size = New System.Drawing.Size(220, 300)
+        Me.RichTextBox4.Size = New System.Drawing.Size(226, 383)
         Me.RichTextBox4.TabIndex = 0
         Me.RichTextBox4.Text = ""
         '
@@ -220,7 +220,7 @@ Partial Class Form2
         Me.TabPage5.Location = New System.Drawing.Point(4, 22)
         Me.TabPage5.Name = "TabPage5"
         Me.TabPage5.Padding = New System.Windows.Forms.Padding(3)
-        Me.TabPage5.Size = New System.Drawing.Size(226, 306)
+        Me.TabPage5.Size = New System.Drawing.Size(232, 389)
         Me.TabPage5.TabIndex = 4
         Me.TabPage5.Text = "小隊C"
         Me.TabPage5.UseVisualStyleBackColor = True
@@ -230,7 +230,7 @@ Partial Class Form2
         Me.RichTextBox5.Dock = System.Windows.Forms.DockStyle.Fill
         Me.RichTextBox5.Location = New System.Drawing.Point(3, 3)
         Me.RichTextBox5.Name = "RichTextBox5"
-        Me.RichTextBox5.Size = New System.Drawing.Size(220, 300)
+        Me.RichTextBox5.Size = New System.Drawing.Size(226, 383)
         Me.RichTextBox5.TabIndex = 0
         Me.RichTextBox5.Text = ""
         '
@@ -241,7 +241,7 @@ Partial Class Form2
         Me.ToolStrip2.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip2.Name = "ToolStrip2"
         Me.ToolStrip2.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional
-        Me.ToolStrip2.Size = New System.Drawing.Size(540, 25)
+        Me.ToolStrip2.Size = New System.Drawing.Size(558, 25)
         Me.ToolStrip2.TabIndex = 3
         Me.ToolStrip2.Text = "ToolStrip2"
         '
@@ -335,10 +335,10 @@ Partial Class Form2
         Me.ToolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.ToolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
         Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripLabel8, Me.ToolStripLabel9, Me.ToolStripSeparator2, Me.ToolStripLabel1, Me.ToolStripComboBox1, Me.ToolStripSeparator1, Me.ToolStripLabel2, Me.ToolStripTextBox1, Me.ToolStripLabel3, Me.ToolStripTextBox2, Me.ToolStripButton1})
-        Me.ToolStrip1.Location = New System.Drawing.Point(0, 336)
+        Me.ToolStrip1.Location = New System.Drawing.Point(0, 416)
         Me.ToolStrip1.Name = "ToolStrip1"
         Me.ToolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional
-        Me.ToolStrip1.Size = New System.Drawing.Size(540, 26)
+        Me.ToolStrip1.Size = New System.Drawing.Size(558, 26)
         Me.ToolStrip1.TabIndex = 2
         Me.ToolStrip1.Text = "ToolStrip1"
         '
@@ -421,7 +421,7 @@ Partial Class Form2
         Me.Chart1.ChartAreas.Add(ChartArea1)
         Legend1.Name = "Legend1"
         Me.Chart1.Legends.Add(Legend1)
-        Me.Chart1.Location = New System.Drawing.Point(3, 27)
+        Me.Chart1.Location = New System.Drawing.Point(0, 27)
         Me.Chart1.Name = "Chart1"
         Series1.ChartArea = "ChartArea1"
         Series1.Legend = "Legend1"
@@ -429,7 +429,7 @@ Partial Class Form2
         Series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.[Double]
         Series1.YValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.[Double]
         Me.Chart1.Series.Add(Series1)
-        Me.Chart1.Size = New System.Drawing.Size(537, 306)
+        Me.Chart1.Size = New System.Drawing.Size(558, 386)
         Me.Chart1.TabIndex = 0
         Me.Chart1.Text = "Chart1"
         '
@@ -437,7 +437,7 @@ Partial Class Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(784, 362)
+        Me.ClientSize = New System.Drawing.Size(804, 442)
         Me.Controls.Add(Me.SplitContainer1)
         Me.Name = "Form2"
         Me.Text = "結果表示"

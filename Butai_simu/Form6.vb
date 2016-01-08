@@ -583,6 +583,8 @@
     Private Sub 武将DD(ByVal sender As Object, ByVal e As DragEventArgs) _
         Handles GroupBox1.DragDrop, GroupBox2.DragDrop
         Dim rare As String = Nothing, bname As String = Nothing
+        'ハンゲーム版であるかどうか
+        Dim hangameflg As Boolean = False
         Dim skillname() As String = Nothing
         Dim skilllv() As Integer = Nothing
         If sender Is GroupBox1 Then
@@ -591,65 +593,60 @@
             Call 武将クリア(Button4, Nothing)
         End If
         Try
-            Dim stmp() = Split(e.Data.GetData(GetType(String)), vbCrLf)
-            If stmp.Length <= 4 Then '取引
-                Dim ttmp() As String = Split(stmp(0), " ")
-                Select Case Val(Mid(ttmp(0), 1, 1)) 'レアリティ
-                    Case 1
-                        rare = "天"
-                    Case 2
-                        rare = "極"
-                    Case 3
-                        rare = "特"
-                    Case 4
-                        rare = "上"
-                    Case 5
-                        rare = "序"
-                End Select
-                bname = Replace(Replace(ttmp(1), "★", ""), "☆", "")
-                bname = Mid(bname, 1, bname.Length - 1) '最後の変な半角空白を消す
-                For i As Integer = 1 To stmp.Length - 1
-                    If InStr(stmp(i), "LV") = 0 Then Exit For
-                    ReDim Preserve skillname(i - 1), skilllv(i - 1)
-                    Dim tmp As String = Replace(Replace(stmp(i), "攻:", ""), "防:", "") '攻防を消す
-                    If i = 1 Then '初期スキル
-                        Dim tttmp() As String = Split(tmp, "	")
-                        tmp = Trim(tttmp(1))
-                    End If
-                    skillname(i - 1) = Mid(tmp, 1, InStr(tmp, "LV") - 1)
-                    skilllv(i - 1) = Val(Replace(tmp, skillname(i - 1) & "LV", ""))
+            Dim stmp As String = e.Data.GetData(GetType(String))
+            If Val(正規表現マッチ("^\s*\S", stmp)(0)) > 0 Then '取引
+                'レア
+                rare = 正規表現マッチ("\b[天極特上序]\b", stmp)(0)
+                bname = 正規表現マッチ("\S+", 正規表現マッチ(rare & " .*\b", stmp)(0).Replace(rare, ""))(0)
+                Dim slv() As String = 正規表現マッチ("LV[0-9]+", stmp)
+                ReDim Preserve skillname(slv.Length - 1), skilllv(slv.Length - 1)
+                For i As Integer = 0 To slv.Length - 1
+                    skillname(i) = 正規表現マッチ(":.*" & slv(i), stmp)(0).Replace(":", "").Replace(slv(i), "")
+                    skilllv(i) = Val(正規表現マッチ("[0-9]+", slv(i))(0))
+                    stmp = stmp.Replace(skillname(i) & slv(i), "")
                 Next
             Else
-                Dim tmp() As String = Nothing
-                Dim k As Integer = 0
-                For i As Integer = 0 To stmp.Length - 1
-                    If Not ((stmp(i) = vbNullString) Or (stmp(i) = "ステータス強化") Or (stmp(i) = "指揮力強化")) Then
-                        ReDim Preserve tmp(k)
-                        If InStr(stmp(i), "LV") = 0 Then 'スキル名の空白を消すとマズイ場合がある
-                            tmp(k) = Replace(stmp(i), " ", "")
-                        Else
-                            tmp(k) = stmp(i)
-                        End If
-                        k = k + 1
+                'ハンゲ版は、ステータス欄が「攻撃」「防御」「兵法」ではなく「攻」「防」「兵」となっている。
+                If 正規表現マッチ("\b攻撃\s*[0-9]+.[0-9]+", stmp) Is Nothing Then
+                    hangameflg = True
+                End If
+                bname = 正規表現マッチ("^\s*\S+", stmp)(0).Trim()
+                Dim slv() As String = 正規表現マッチ("LV[0-9]+", stmp)
+                ReDim Preserve skillname(slv.Length - 1), skilllv(slv.Length - 1)
+                If hangameflg Then
+                    'ハンゲームの処理
+                    If InStr(bname, "レア") Then
+                        '武将名は、ハンゲームの場合そのまま取れないことがある。
+                        bname = bname.Replace(正規表現マッチ("レア.*", bname)(0), "")
                     End If
-                Next
-                'レアリティと武将名
-                Dim rares() As String = {"天", "極", "特", "上", "序"}
-                bname = Replace(tmp(0), "名", "")
-                Dim rb, ra As Integer
-                For i = 0 To rares.Length - 1
-                    rb = bname.Length
-                    bname = Replace(bname, "レア" & rares(i), "")
-                    ra = bname.Length
-                    If Not rb = ra Then rare = rares(i)
-                Next
-                'スキル名
-                For j As Integer = 0 To tmp.Length - 11
-                    ReDim Preserve skillname(j), skilllv(j)
-                    Dim ttmp As String = Replace(tmp(10 + j), "技" & (j + 1) & vbTab, "") '"技1"みたいなのが付いてる場合、外す
-                    skillname(j) = Mid(ttmp, 1, InStr(ttmp, "LV") - 1)
-                    skilllv(j) = Val(Mid(ttmp, InStr(ttmp, "LV") + 2))
-                Next
+                    For i As Integer = 0 To slv.Length - 1
+                        Dim wazastr As String = "技" & i + 1
+                        skillname(i) = 正規表現マッチ(wazastr & ".*" & slv(i), stmp)(0) _
+                            .Replace(正規表現マッチ(wazastr & "\s+", stmp)(0), "").Replace(slv(i), "")
+                        skilllv(i) = Val(正規表現マッチ("[0-9]+", slv(i))(0))
+                        stmp = stmp.Replace(skillname(i) & slv(i), "")
+                    Next
+                Else
+                    'Yahooでの処理
+                    For i As Integer = 0 To slv.Length - 1
+                        Dim wazastr As String = "技" & i + 1
+                        skillname(i) = 正規表現マッチ(wazastr & ".*" & slv(i), stmp)(0).Replace(wazastr, "").Replace(slv(i), "")
+                        skilllv(i) = Val(正規表現マッチ("[0-9]+", slv(i))(0))
+                        stmp = stmp.Replace(skillname(i) & slv(i), "")
+                    Next
+                End If
+                '武将名と初期スキル名から、レアリティを割り出す
+                Dim repstr As String = "replace(replace(初期スキル名, " & """ "" , """"), " & """　"" , """") = "
+                'Dim repstr As String = "replace(初期スキル名, " & """ "" , """") = "
+                Dim s() As String = DB_DirectOUT("SELECT 武将名, 武将R, 初期スキル名 FROM BData WHERE 初期スキル名 = " _
+                                & ダブルクオート(skillname(0)) & " AND 武将名 LIKE """ & bname & "%""" & " AND " & repstr & ダブルクオート(TrimJ(skillname(0))), _
+                                {"武将名", "武将R"})
+                bname = s(0)
+                rare = s(1)
+                '武将名とレアリティがDBから正常に取得できていない場合、エラーにする
+                If (bname = "" Or rare = "") Then
+                    Throw New Exception
+                End If
             End If
             If sender Is GroupBox1 Then '合成される側
                 'If skillname.Length = 3 Then 'スロットに空きが無ければ

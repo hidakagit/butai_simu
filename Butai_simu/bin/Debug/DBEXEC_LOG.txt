@@ -64,3 +64,7 @@ UPDATE SData SET ã¸—¦ = "0.29", •t—^—¦ = "F" WHERE ƒXƒLƒ‹–¼ = "ŒÃ¡“`ö" AND ƒ
 ( 1 data affected )
 UPDATE BData SET •«–¼ = "‚¨‚Ü‚Â(“ó)" WHERE Bid = "2144"
 ( 1 data affected )
+UPDATE SName SET •ª—Ş = "•¡”" WHERE ƒXƒLƒ‹–¼ = "“Vƒm‰HX–î"
+( 1 data affected )
+INSERT INTO SData (ƒXƒLƒ‹–¼, ƒXƒLƒ‹LV, ”­“®—¦, ã¸—¦, Sunf) values ("‹ñ”ül‘", "1", "0.05", "0.06", "F")
+( 1 data affected )

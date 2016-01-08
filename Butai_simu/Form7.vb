@@ -5,7 +5,12 @@
     Public busho_heika As String '兵科
     Public butai_heiho As Decimal '部隊兵法補正
     Public syo_skill As Boolean = False '将スキルフラグ
+    Public heikasearch_flg As Boolean = False '兵科文字列検索フラグ
     Public hakai_onoff As Boolean = False '破壊期待値表示非表示フラグ
+
+    Private Sub 初期化()
+        syo_skill = False
+    End Sub
 
     Private Function 条件入力() As Boolean
         Dim flg As Boolean = True
@@ -19,41 +24,54 @@
                 kobo = "防"
             End If
         End If
-        If ToolStripComboBox2.Text = "" Or ToolStripComboBox2.Text = "-----" Then
-            MsgBox("兵科が未設定です")
-            flg = False
-        ElseIf ToolStripComboBox2.Text = "[将スキル]" Then '将スキルの場合
-            busho_heika = "将"
-            syo_skill = True
-        Else
-            busho_heika = ToolStripComboBox2.Text
-        End If
-        If ToolStripComboBox3.Text = "" Then
-            MsgBox("武将コストが未設定です")
-            flg = False
-        Else
-            busho_cost = Val(ToolStripComboBox3.Text)
-        End If
-        If ToolStripComboBox4.Text = "" Then
-            MsgBox("スキルLVが未設定です")
-            flg = False
-        Else
-            skill_lv = Val(ToolStripComboBox4.Text)
-        End If
-        If ToolStripTextBox1.Text = "" Then
-            MsgBox("部隊兵法値が未設定です")
-            flg = False
-        Else
-            butai_heiho = Val(ToolStripTextBox1.Text)
-            If butai_heiho < 0 Then
-                MsgBox("部隊兵法値の設定が不正です")
+        If heikasearch_flg Then
+            If ToolStripTextBox2.Text = "" Then
+                MsgBox("兵科文字列が空欄です")
                 flg = False
+            ElseIf InStr(ToolStripTextBox2.Text, "将") Then '将スキルの場合
+                busho_heika = "将"
+                syo_skill = True
+            Else
+                busho_heika = ToolStripTextBox2.Text
+            End If
+        Else
+            If ToolStripComboBox2.Text = "" Or ToolStripComboBox2.Text = "-----" Then
+                MsgBox("兵種が未設定です")
+                flg = False
+            ElseIf ToolStripComboBox2.Text = "[将スキル]" Then '将スキルの場合
+                busho_heika = "将"
+                syo_skill = True
+            Else
+                busho_heika = ToolStripComboBox2.Text
             End If
         End If
-        Return flg
+            If ToolStripComboBox3.Text = "" Then
+                MsgBox("武将コストが未設定です")
+                flg = False
+            Else
+                busho_cost = Val(ToolStripComboBox3.Text)
+            End If
+            If ToolStripComboBox4.Text = "" Then
+                MsgBox("スキルLVが未設定です")
+                flg = False
+            Else
+                skill_lv = Val(ToolStripComboBox4.Text)
+            End If
+            If ToolStripTextBox1.Text = "" Then
+                MsgBox("部隊兵法値が未設定です")
+                flg = False
+            Else
+                butai_heiho = Val(ToolStripTextBox1.Text)
+                If butai_heiho < 0 Then
+                    MsgBox("部隊兵法値の設定が不正です")
+                    flg = False
+                End If
+            End If
+            Return flg
     End Function
 
     Private Sub 表更新(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripButton1.Click
+        Call 初期化()
         Dim jf As Boolean = 条件入力()
         If jf = False Then '条件に不備があれば
             Exit Sub
@@ -78,35 +96,61 @@
 
         Dim h() As String
         If syo_skill = False Then '将スキルじゃない場合
-            h = DB_DirectOUT("SELECT 兵種名, 兵科 FROM HData WHERE 兵種名 = " & ダブルクオート(busho_heika) & "", {"兵科"})
-            For i As Integer = 0 To target_u.Length - 1 '上級器対応かどうか
-                If InStr(busho_heika, target_u(i)) Then
-                    jkf_u = True
-                End If
-            Next
-            For i As Integer = 0 To target_h.Length - 1 '上級砲対応かどうか
-                If InStr(busho_heika, target_h(i)) Then
-                    jkf_h = True
-                End If
-            Next
-            For i As Integer = 0 To target_hi.Length - 1 '秘境兵対応かどうか
-                If InStr(busho_heika, target_hi(i)) Then
-                    hik_f = True
-                End If
-            Next
+            '兵科文字列検索かどうか
+            If heikasearch_flg Then
+                '一文字ずつ切り出す
+                Dim tmp_h() As String
+                ReDim tmp_h(busho_heika.Length - 1)
+                For i As Integer = 0 To busho_heika.Length - 1
+                    tmp_h(i) = busho_heika.Substring(i, 1)
+                Next
+                '全文字列の組み合わせをLIKE条件でワイルドカード検索（文字数が多いと爆発するので将来的にコレはどうなのか・・・）
+                h = 複数文字を含む検索条件(tmp_h)
+            Else
+                h = DB_DirectOUT("SELECT 兵種名, 兵科 FROM HData_11 WHERE 兵種名 = " & ダブルクオート(busho_heika) & "", {"兵科"})
+                For i As Integer = 0 To target_u.Length - 1 '上級器対応かどうか
+                    If InStr(busho_heika, target_u(i)) Then
+                        jkf_u = True
+                    End If
+                Next
+                For i As Integer = 0 To target_h.Length - 1 '上級砲対応かどうか
+                    If InStr(busho_heika, target_h(i)) Then
+                        jkf_h = True
+                    End If
+                Next
+                For i As Integer = 0 To target_hi.Length - 1 '秘境兵対応かどうか
+                    If InStr(busho_heika, target_hi(i)) Then
+                        hik_f = True
+                    End If
+                Next
+            End If
         Else '将スキルの場合
             h = {"将"}
         End If
-        For i As Integer = 0 To slbl.Length - 1 '表示適応データを取得
-            ReDim Preserve sl(i)
-            '特殊スキルではなく、かつ指定LVで、かつ対象に兵科文字列もしくは全を含む、かつ攻防一致
-            Dim sqlstr As String
-            Dim kobos As String
-            If kobo = "攻" Then
-                kobos = "( 攻防 = " & ダブルクオート("攻") & " OR 攻防 = " & ダブルクオート("破壊") & " )"
+
+        '特殊スキルではなく、かつ指定LVで、かつ対象に兵科文字列もしくは全を含む、かつ攻防一致
+        Dim sqlstr As String
+        Dim kobos As String
+        If kobo = "攻" Then
+            kobos = "( 攻防 = " & ダブルクオート("攻") & " OR 攻防 = " & ダブルクオート("破壊") & " )"
+        Else
+            kobos = " 攻防 = " & ダブルクオート("防")
+        End If
+        '兵科文字列検索かどうか
+        If heikasearch_flg Then
+            If syo_skill Then '将スキルの場合は全スキルを除く
+                sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
+                    & " AND NOT 分類 = " & ダブルクオート("特殊") & " AND NOT 分類 = " & ダブルクオート("不可") & " AND スキルLV =" & skill_lv & " AND ( 対象 LIKE " & ダブルクオート("%" & h(0) & "%")
             Else
-                kobos = " 攻防 = " & ダブルクオート("防")
+                sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
+                    & " AND NOT 分類 = " & ダブルクオート("特殊") & " AND NOT 分類 = " & ダブルクオート("不可") _
+                    & " AND スキルLV =" & skill_lv & " AND ( "
+                For i As Integer = 0 To h.Length - 1
+                    sqlstr = sqlstr & " 対象 LIKE " & ダブルクオート(h(i)) & " OR "
+                Next
+                sqlstr = sqlstr & " 対象 = " & ダブルクオート("全")
             End If
+        Else
             If syo_skill Then '将スキルの場合は全スキルを除く
                 'sqlstr = "SELECT * FROM Skill WHERE 基本効果 LIKE """ & "%" & kobo & "%" & """ AND NOT 分類 =""" & "特殊""" & " AND LV =" & skill_lv & " AND ( 対象 LIKE """ & "%" & h(0) & "%" & """ )"
                 sqlstr = "SELECT * FROM SData INNER JOIN SName ON SData.スキル名 = SName.スキル名 WHERE " & kobos _
@@ -124,89 +168,90 @@
             If hik_f Then
                 sqlstr = sqlstr & " OR 対象 = " & ダブルクオート("秘境兵")
             End If
-            sqlstr = sqlstr & " )"
-            sl(i) = DB_DirectOUT2(sqlstr, slbl(i))
-        Next
-        Dim sc As Integer = sl(0).Length - 1 '合致したスキルの個数
+        End If
+        sqlstr = sqlstr & " )"
+        sl = DB_DirectOUT3(sqlstr, slbl)
+
+        Dim sc As Integer = sl.Length - 1 '合致したスキルの個数
         ReDim hp(sc), kp(sc), dp(sc), kitai(sc), dkitai(sc), tk(sc), erck(sc), costd(sc), sp(sc)
 
         For j As Integer = 0 To sc '取得してきたデータを加工
             Dim dflg As Boolean = False
             Dim sflg As Boolean = False
             costd(j) = False
-            If sl(8)(j) = "U" Then 'データなし
+            If sl(j)(8) = "U" Then 'データなし
                 erck(j) = "D無"
                 hp(j) = 0
                 kp(j) = 0
                 dp(j) = 0
                 Continue For
             End If
-            hp(j) = Val(sl(4)(j)) '発動率
+            hp(j) = Val(sl(j)(4)) '発動率
             '特殊スキル
-            If sl(1)(j) = "条件" Then
+            If sl(j)(1) = "条件" Then
                 Dim tmpskl As Busho.skl = Nothing
                 With tmpskl
-                    .name = sl(0)(j)
+                    .name = sl(j)(0)
                     .lv = skill_lv
-                    .kouka_f = Val(sl(5)(j))
+                    .kouka_f = Val(sl(j)(5))
                     .t_flg = フラグ付きスキル参照(tmpskl) '条件付きスキルの場合
                     If InStr(.heika, "槍弓馬砲器") Then
                         .heika = "全"
                     End If
                     If .t_flg Then
-                        sl(3)(j) = .heika
-                        sl(4)(j) = .kouka_p
-                        sl(5)(j) = .kouka_f
+                        sl(j)(3) = .heika
+                        sl(j)(4) = .kouka_p
+                        sl(j)(5) = .kouka_f
                     End If
                 End With
             End If
-            Select Case (sl(2)(j))
+            Select Case (sl(j)(2))
                 Case "速" '速度オンリー
                     sflg = True
-                    sp(j) = Val(sl(5)(j))
-                    sl(7)(j) = sl(5)(j) '速度のみのスキル。付加効果にコピー
-                    sl(5)(j) = 0
+                    sp(j) = Val(sl(j)(5))
+                    sl(j)(7) = sl(j)(5) '速度のみのスキル。付加効果にコピー
+                    sl(j)(5) = 0
                 Case "破壊" '破壊オンリー
                     dflg = True
-                    sl(7)(j) = sl(5)(j) '破壊のみのスキル。付加効果にコピー
-                    sl(5)(j) = 0
+                    sl(j)(7) = sl(j)(5) '破壊のみのスキル。付加効果にコピー
+                    sl(j)(5) = 0
                 Case Else '通常スキルの場合
-                    If sl(6)(j) = "速" Then '速度を含むスキル
+                    If sl(j)(6) = "速" Then '速度を含むスキル
                         sflg = True
-                        sp(j) = Val(sl(7)(j))
+                        sp(j) = Val(sl(j)(7))
                     End If
-                    If sl(6)(j) = "破壊" Then '破壊を含むスキル
+                    If sl(j)(6) = "破壊" Then '破壊を含むスキル
                         dflg = True
                     End If
-                    If InStr(sl(5)(j), "C") Then 'コスト依存スキル
-                        sl(5)(j) = Replace(sl(5)(j), "C", busho_cost)
+                    If InStr(sl(j)(5), "C") Then 'コスト依存スキル
+                        sl(j)(5) = Replace(sl(j)(5), "C", busho_cost)
                         costd(j) = True
-                        kp(j) = 文字列計算(sl(5)(j), False) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                        kp(j) = 文字列計算(sl(j)(5), False) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
                         If kp(j) = 0 And dflg = False Then '文字列計算をした結果、ゼロ
                             erck(j) = "D異常"
                         End If
                     Else
-                        kp(j) = Decimal.Parse(sl(5)(j))
+                        kp(j) = Decimal.Parse(sl(j)(5))
                     End If
             End Select
-            If Val(sl(4)(j)) + (butai_heiho / 100) < 1 Then '発動率
-                hp(j) = Val(sl(4)(j)) + butai_heiho / 100
+            If Val(sl(j)(4)) + (butai_heiho / 100) < 1 Then '発動率
+                hp(j) = Val(sl(j)(4)) + butai_heiho / 100
             Else
                 hp(j) = 1
             End If
             '期待値計算
             kitai(j) = hp(j) * kp(j)
             If dflg Then '付与効果に破壊を含むスキル
-                If InStr(sl(7)(j), "C") Then 'コスト依存スキル
-                    sl(7)(j) = Replace(sl(7)(j), "C", busho_cost)
+                If InStr(sl(j)(7), "C") Then 'コスト依存スキル
+                    sl(j)(7) = Replace(sl(j)(7), "C", busho_cost)
                     costd(j) = True
                     'costd(j) = True
-                    dp(j) = 文字列計算(sl(7)(j), False) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
+                    dp(j) = 文字列計算(sl(j)(7), False) 'ここでのエラーはwikiがおかしい場合が多い、うるさいから切る
                     If dp(j) = 0 Then '文字列計算をした結果、ゼロ
                         erck(j) = "D異常"
                     End If
                 Else
-                    dp(j) = 文字列計算(sl(7)(j), False)
+                    dp(j) = 文字列計算(sl(j)(7), False)
                 End If
                 dkitai(j) = hp(j) * dp(j) '破壊が絡むスキルは破壊期待値を計算
             End If
@@ -227,10 +272,10 @@
             Dim row As DataGridViewRow = New DataGridViewRow()
             Dim cp As Integer = CInt(slid(i))
             row.CreateCells(DataGridView1)
-            row.SetValues(New Object() {sl(0)(cp), sl(3)(cp), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
+            row.SetValues(New Object() {sl(cp)(0), sl(cp)(3), kitai(i), hp(cp), kp(cp), tk(cp), dp(cp), dkitai(cp), erck(cp)})
 
             Dim cell As DataGridViewCell = row.Cells(0) '条件付きスキルならば色づけ
-            If sl(1)(cp) = "条件" Then cell.Style.BackColor = Color.LightGoldenrodYellow
+            If sl(cp)(1) = "条件" Then cell.Style.BackColor = Color.LightGoldenrodYellow
             cell = row.Cells(4) 'コスト依存ならば色づけ
             If costd(cp) Then 'コスト依存
                 cell.Style.ForeColor = Color.DeepPink
@@ -265,11 +310,23 @@
         End If
     End Sub
 
-    Private Sub 破壊期待値表示切替(sender As Object, e As EventArgs) Handles ToolStripComboBox5.TextChanged
-        If InStr(ToolStripComboBox5.Text, "非表示") Then
+    Private Sub 破壊期待値表示切替(sender As Object, e As EventArgs) Handles ToolStripComboBox6.TextChanged
+        If InStr(ToolStripComboBox6.Text, "非表示") Then
             hakai_onoff = False
         Else
             hakai_onoff = True
+        End If
+    End Sub
+
+    Private Sub 兵種変更(sender As Object, e As EventArgs) Handles ToolStripComboBox2.SelectedIndexChanged
+        If Not (Val(ToolStripComboBox2.SelectedIndex)) = 0 Then
+            ToolStripTextBox2.Enabled = False
+            ToolStripLabel6.ForeColor = Color.Gray
+            heikasearch_flg = False
+        Else
+            ToolStripTextBox2.Enabled = True
+            ToolStripLabel6.ForeColor = Color.Red
+            heikasearch_flg = True
         End If
     End Sub
 End Class

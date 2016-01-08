@@ -16,6 +16,7 @@
             Public heika As String '兵科
             Public sum As Decimal '兵数
             Public bunrui As String '分類
+            Public sukumi As String '三すくみ分類
             Public heika_def As Decimal '兵科防御力
             Public keiken As Integer '兵科経験値
             Public def As Decimal '防御力
@@ -77,7 +78,7 @@
             With akiti.npc_hei(i)
                 Dim tmp As Decimal = 0
                 For j As Integer = 0 To busho_counter - 1
-                    tmp = tmp + bs_r(j) * (.def * 相性計算(.bunrui, bs(j).heisyu.bunrui))
+                    tmp = tmp + bs_r(j) * (.def * 相性計算(.sukumi, bs(j).heisyu.sukumi))
                 Next
                 changed_Defsum = changed_Defsum + tmp
             End With
@@ -134,10 +135,10 @@
         akiti.rank = Val(sender.Text)
         RemoveHandler ComboBox3.SelectedIndexChanged, AddressOf Me.空き地変更 'これが無いと空き地を選べなくなる
         Dim p As DataSet
-        p = DB_TableOUT("SELECT 土地ランク, パネル配置 FROM LName WHERE 土地ランク = " & ダブルクオート("☆" & akiti.rank) & "", "LName")
+        p = DB_TableOUT("SELECT 土地ランク, パネル配置 FROM LName_11 WHERE 土地ランク = " & ダブルクオート("☆" & akiti.rank) & "", "LName_11")
         With ComboBox3
             .BeginUpdate()
-            .DataSource = p.Tables("LName")
+            .DataSource = p.Tables("LName_11")
             .DisplayMember = "パネル配置"
             '.ValueMember = "Index"
             .SelectedIndex = -1
@@ -146,12 +147,12 @@
         AddHandler ComboBox3.SelectedIndexChanged, AddressOf Me.空き地変更
     End Sub
 
-    '現在は10章以降のみ対応
+    '現在は11章以降のみ対応
     Private Sub 章期変更(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
         If sender.Text = "" Then
             Exit Sub
         End If
-        syou = 10 '10章固定
+        syou = 11 '11章固定
         ki = Val(sender.text)
         '章期設定が変われば一旦クリア
         ComboBox2.Text = Nothing
@@ -168,18 +169,19 @@
         'NPC兵を取得・表示   兵種名, 土地ランク, パネル配置, NPC兵数
         RichTextBox1.Clear()
         Dim sqlstr As String, heika()() As String
-        sqlstr = "SELECT * FROM HData INNER JOIN (LData INNER JOIN LName ON LData.id = LName.id) ON HData.兵種名 = LData.兵種名 " & _
+        sqlstr = "SELECT * FROM HData_11 INNER JOIN (LData_11 INNER JOIN LName_11 ON LData_11.id = LName_11.id) ON HData_11.兵種名 = LData_11.兵種名 " & _
             "WHERE 期数 = " & ki & " AND 土地ランク = " & ダブルクオート("☆" & akiti.rank) & " AND パネル配置 = " & ダブルクオート(akiti.toti) & ""
-        heika = DB_DirectOUT3(sqlstr, {"兵科", "兵種名", "防御値", "経験値", "NPC兵数"})
+        heika = DB_DirectOUT3(sqlstr, {"兵科", "兵種名", "三すくみ", "防御値", "経験値", "NPC兵数"})
         For i As Integer = 0 To heika.Length - 1
             ReDim Preserve akiti.npc_hei(i)
             With akiti.npc_hei(i)
                 '.name = heika(i)
                 .bunrui = heika(i)(0)
                 .heika = heika(i)(1)
-                .heika_def = heika(i)(2)
-                .keiken = heika(i)(3)
-                .sum = heika(i)(4)
+                .sukumi = heika(i)(2)
+                .heika_def = heika(i)(3)
+                .keiken = heika(i)(4)
+                .sum = heika(i)(5)
                 .def = .heika_def * .sum
                 RichTextBox1.Text = RichTextBox1.Text & .bunrui & ":" & .heika & " " & .sum & vbCrLf
             End With
@@ -215,7 +217,6 @@
     Private Sub 経験値課金の有無(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
         If CheckBox2.Checked = True Then '有ならば
             g_kakin = 30
-
         Else
             g_kakin = 0
         End If

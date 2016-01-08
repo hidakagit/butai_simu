@@ -49,20 +49,23 @@ Partial Class Form7
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel2 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripComboBox2 = New System.Windows.Forms.ToolStripComboBox()
-        Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripSeparator6 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel6 = New System.Windows.Forms.ToolStripLabel()
-        Me.ToolStripComboBox5 = New System.Windows.Forms.ToolStripComboBox()
+        Me.ToolStripTextBox2 = New System.Windows.Forms.ToolStripTextBox()
+        Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStrip2 = New System.Windows.Forms.ToolStrip()
         Me.ToolStripLabel5 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripComboBox4 = New System.Windows.Forms.ToolStripComboBox()
-        Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripSeparator5 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripComboBox3 = New System.Windows.Forms.ToolStripComboBox()
         Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel4 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripTextBox1 = New System.Windows.Forms.ToolStripTextBox()
+        Me.ToolStripSeparator7 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripLabel7 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripComboBox6 = New System.Windows.Forms.ToolStripComboBox()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ToolStrip1.SuspendLayout()
         Me.ToolStrip2.SuspendLayout()
@@ -103,7 +106,7 @@ Partial Class Form7
         DataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.[True]
         Me.DataGridView1.RowHeadersDefaultCellStyle = DataGridViewCellStyle9
         Me.DataGridView1.RowTemplate.Height = 21
-        Me.DataGridView1.Size = New System.Drawing.Size(524, 305)
+        Me.DataGridView1.Size = New System.Drawing.Size(604, 305)
         Me.DataGridView1.TabIndex = 0
         '
         'Column1
@@ -177,10 +180,10 @@ Partial Class Form7
         'ToolStrip1
         '
         Me.ToolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripLabel1, Me.ToolStripComboBox1, Me.ToolStripSeparator1, Me.ToolStripSeparator2, Me.ToolStripLabel2, Me.ToolStripComboBox2, Me.ToolStripButton1, Me.ToolStripSeparator6, Me.ToolStripLabel6, Me.ToolStripComboBox5})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripLabel1, Me.ToolStripComboBox1, Me.ToolStripSeparator1, Me.ToolStripSeparator2, Me.ToolStripLabel2, Me.ToolStripComboBox2, Me.ToolStripSeparator6, Me.ToolStripLabel6, Me.ToolStripTextBox2, Me.ToolStripButton1})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Name = "ToolStrip1"
-        Me.ToolStrip1.Size = New System.Drawing.Size(524, 26)
+        Me.ToolStrip1.Size = New System.Drawing.Size(604, 26)
         Me.ToolStrip1.TabIndex = 1
         Me.ToolStrip1.Text = "ToolStrip1"
         '
@@ -211,21 +214,14 @@ Partial Class Form7
         '
         Me.ToolStripLabel2.Name = "ToolStripLabel2"
         Me.ToolStripLabel2.Size = New System.Drawing.Size(32, 23)
-        Me.ToolStripLabel2.Text = "兵科"
+        Me.ToolStripLabel2.Text = "兵種"
         '
         'ToolStripComboBox2
         '
-        Me.ToolStripComboBox2.Items.AddRange(New Object() {"足軽", "長槍足軽", "武士", "-----", "弓足軽", "長弓兵", "弓騎馬", "-----", "騎馬兵", "精鋭騎馬", "赤備え", "-----", "破城鎚", "攻城櫓", "大筒兵", "焙烙火矢", "鉄砲足軽", "騎馬鉄砲", "-----", "国人衆", "海賊衆", "母衣衆", "雑賀衆", "-----", "[将スキル]"})
+        Me.ToolStripComboBox2.Items.AddRange(New Object() {"[兵科検索]", "-----", "足軽", "長槍足軽", "武士", "-----", "弓足軽", "長弓兵", "弓騎馬", "-----", "騎馬兵", "精鋭騎馬", "赤備え", "-----", "破城鎚", "攻城櫓", "大筒兵", "焙烙火矢", "鉄砲足軽", "騎馬鉄砲", "-----", "国人衆", "海賊衆", "母衣衆", "雑賀衆", "-----", "[将スキル]"})
         Me.ToolStripComboBox2.Name = "ToolStripComboBox2"
         Me.ToolStripComboBox2.Size = New System.Drawing.Size(100, 26)
-        '
-        'ToolStripButton1
-        '
-        Me.ToolStripButton1.Image = CType(resources.GetObject("ToolStripButton1.Image"), System.Drawing.Image)
-        Me.ToolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.ToolStripButton1.Name = "ToolStripButton1"
-        Me.ToolStripButton1.Size = New System.Drawing.Size(64, 23)
-        Me.ToolStripButton1.Text = "表更新"
+        Me.ToolStripComboBox2.Text = "[兵科検索]"
         '
         'ToolStripSeparator6
         '
@@ -235,24 +231,30 @@ Partial Class Form7
         'ToolStripLabel6
         '
         Me.ToolStripLabel6.Name = "ToolStripLabel6"
-        Me.ToolStripLabel6.Size = New System.Drawing.Size(80, 23)
-        Me.ToolStripLabel6.Text = "◆破壊期待値"
+        Me.ToolStripLabel6.Size = New System.Drawing.Size(68, 23)
+        Me.ToolStripLabel6.Text = "兵科文字列"
         '
-        'ToolStripComboBox5
+        'ToolStripTextBox2
         '
-        Me.ToolStripComboBox5.Items.AddRange(New Object() {"表示", "非表示"})
-        Me.ToolStripComboBox5.Name = "ToolStripComboBox5"
-        Me.ToolStripComboBox5.Size = New System.Drawing.Size(75, 26)
-        Me.ToolStripComboBox5.Text = "非表示"
+        Me.ToolStripTextBox2.Name = "ToolStripTextBox2"
+        Me.ToolStripTextBox2.Size = New System.Drawing.Size(100, 26)
+        '
+        'ToolStripButton1
+        '
+        Me.ToolStripButton1.Image = CType(resources.GetObject("ToolStripButton1.Image"), System.Drawing.Image)
+        Me.ToolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton1.Name = "ToolStripButton1"
+        Me.ToolStripButton1.Size = New System.Drawing.Size(64, 23)
+        Me.ToolStripButton1.Text = "表更新"
         '
         'ToolStrip2
         '
         Me.ToolStrip2.Dock = System.Windows.Forms.DockStyle.Bottom
         Me.ToolStrip2.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip2.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripLabel5, Me.ToolStripComboBox4, Me.ToolStripSeparator4, Me.ToolStripSeparator5, Me.ToolStripLabel3, Me.ToolStripComboBox3, Me.ToolStripSeparator3, Me.ToolStripLabel4, Me.ToolStripTextBox1})
+        Me.ToolStrip2.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripLabel5, Me.ToolStripComboBox4, Me.ToolStripSeparator5, Me.ToolStripLabel3, Me.ToolStripComboBox3, Me.ToolStripSeparator3, Me.ToolStripSeparator4, Me.ToolStripLabel4, Me.ToolStripTextBox1, Me.ToolStripSeparator7, Me.ToolStripLabel7, Me.ToolStripComboBox6})
         Me.ToolStrip2.Location = New System.Drawing.Point(0, 336)
         Me.ToolStrip2.Name = "ToolStrip2"
-        Me.ToolStrip2.Size = New System.Drawing.Size(524, 26)
+        Me.ToolStrip2.Size = New System.Drawing.Size(604, 26)
         Me.ToolStrip2.TabIndex = 2
         Me.ToolStrip2.Text = "ToolStrip2"
         '
@@ -268,11 +270,6 @@ Partial Class Form7
         Me.ToolStripComboBox4.Name = "ToolStripComboBox4"
         Me.ToolStripComboBox4.Size = New System.Drawing.Size(75, 26)
         Me.ToolStripComboBox4.Text = "10"
-        '
-        'ToolStripSeparator4
-        '
-        Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
-        Me.ToolStripSeparator4.Size = New System.Drawing.Size(6, 26)
         '
         'ToolStripSeparator5
         '
@@ -297,6 +294,11 @@ Partial Class Form7
         Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
         Me.ToolStripSeparator3.Size = New System.Drawing.Size(6, 26)
         '
+        'ToolStripSeparator4
+        '
+        Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
+        Me.ToolStripSeparator4.Size = New System.Drawing.Size(6, 26)
+        '
         'ToolStripLabel4
         '
         Me.ToolStripLabel4.Name = "ToolStripLabel4"
@@ -306,14 +308,32 @@ Partial Class Form7
         'ToolStripTextBox1
         '
         Me.ToolStripTextBox1.Name = "ToolStripTextBox1"
-        Me.ToolStripTextBox1.Size = New System.Drawing.Size(80, 26)
+        Me.ToolStripTextBox1.Size = New System.Drawing.Size(40, 26)
         Me.ToolStripTextBox1.Text = "25"
+        '
+        'ToolStripSeparator7
+        '
+        Me.ToolStripSeparator7.Name = "ToolStripSeparator7"
+        Me.ToolStripSeparator7.Size = New System.Drawing.Size(6, 26)
+        '
+        'ToolStripLabel7
+        '
+        Me.ToolStripLabel7.Name = "ToolStripLabel7"
+        Me.ToolStripLabel7.Size = New System.Drawing.Size(80, 23)
+        Me.ToolStripLabel7.Text = "◆破壊期待値"
+        '
+        'ToolStripComboBox6
+        '
+        Me.ToolStripComboBox6.Items.AddRange(New Object() {"表示", "非表示"})
+        Me.ToolStripComboBox6.Name = "ToolStripComboBox6"
+        Me.ToolStripComboBox6.Size = New System.Drawing.Size(75, 26)
+        Me.ToolStripComboBox6.Text = "非表示"
         '
         'Form7
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(524, 362)
+        Me.ClientSize = New System.Drawing.Size(604, 362)
         Me.Controls.Add(Me.ToolStrip2)
         Me.Controls.Add(Me.ToolStrip1)
         Me.Controls.Add(Me.DataGridView1)
@@ -349,7 +369,6 @@ Partial Class Form7
     Friend WithEvents ToolStripSeparator5 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripSeparator6 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripLabel6 As System.Windows.Forms.ToolStripLabel
-    Friend WithEvents ToolStripComboBox5 As System.Windows.Forms.ToolStripComboBox
     Friend WithEvents Column1 As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Column3 As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Column5 As System.Windows.Forms.DataGridViewTextBoxColumn
@@ -359,4 +378,8 @@ Partial Class Form7
     Friend WithEvents Column9 As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Column7 As System.Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Column8 As System.Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents ToolStripSeparator7 As System.Windows.Forms.ToolStripSeparator
+    Friend WithEvents ToolStripLabel7 As System.Windows.Forms.ToolStripLabel
+    Friend WithEvents ToolStripComboBox6 As System.Windows.Forms.ToolStripComboBox
+    Friend WithEvents ToolStripTextBox2 As System.Windows.Forms.ToolStripTextBox
 End Class

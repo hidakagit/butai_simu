@@ -208,7 +208,7 @@
             End If
         Next
         Dim s() As String = _
-         DB_DirectOUT("SELECT 統率, 兵種名, 兵科, 攻撃値, 防御値 FROM HData WHERE 兵種名 = " & ダブルクオート(busho_heika) & "", {"兵科", "統率", "攻撃値", "防御値"})
+         DB_DirectOUT("SELECT 統率, 兵種名, 兵科, 攻撃値, 防御値 FROM HData_11 WHERE 兵種名 = " & ダブルクオート(busho_heika) & "", {"兵科", "統率", "攻撃値", "防御値"})
         Dim t As Integer = s(1).Length '統率に関係する兵科の種類数
         Dim heika As String = s(0) '兵種兵科
         Dim tousotu As String = s(1) '兵種の対応兵科

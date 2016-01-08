@@ -56,14 +56,15 @@ Partial Class Form9
         '
         'ComboBox1
         '
+        Me.ComboBox1.Enabled = False
         Me.ComboBox1.Font = New System.Drawing.Font("Consolas", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.ComboBox1.FormattingEnabled = True
-        Me.ComboBox1.Items.AddRange(New Object() {"2", "10"})
+        Me.ComboBox1.Items.AddRange(New Object() {"11"})
         Me.ComboBox1.Location = New System.Drawing.Point(130, 20)
         Me.ComboBox1.Name = "ComboBox1"
         Me.ComboBox1.Size = New System.Drawing.Size(40, 22)
         Me.ComboBox1.TabIndex = 0
-        Me.ComboBox1.Text = "10"
+        Me.ComboBox1.Text = "11"
         '
         'Label1
         '
@@ -143,7 +144,7 @@ Partial Class Form9
         Me.ComboBox5.Name = "ComboBox5"
         Me.ComboBox5.Size = New System.Drawing.Size(40, 22)
         Me.ComboBox5.TabIndex = 40
-        Me.ComboBox5.Text = "10"
+        Me.ComboBox5.Text = "11"
         '
         'Label9
         '

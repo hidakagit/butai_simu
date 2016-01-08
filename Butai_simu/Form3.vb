@@ -28,71 +28,79 @@
     Private Sub データ読取(sender As Object, ByVal e As System.Windows.Forms.DragEventArgs) Handles RichTextBox1.DragDrop
         'エラータグをクリア
         RichTextBox1.Tag = Nothing
+        Dim stmp As String = e.Data.GetData(GetType(String))
+        'ハンゲーム版であるかどうか
+        Dim hangameflg As Boolean = False
+        'ハンゲ版は、ステータス欄が「攻撃」「防御」「兵法」ではなく「攻」「防」「兵」となっている。
+        If 正規表現マッチ("\b攻撃\s*[0-9]+.[0-9]+", stmp) Is Nothing Then
+            hangameflg = True
+        End If
 
-        Dim stmp() = Split(e.Data.GetData(GetType(String)), vbCrLf)
-        Dim tmp() As String = Nothing
-        Dim k As Integer = 0
-        For i As Integer = 0 To stmp.Length - 1
-            If Not ((stmp(i) = vbNullString) Or (stmp(i) = "ステータス強化") Or (stmp(i) = "指揮力強化")) Then
-                ReDim Preserve tmp(k)
-                If InStr(stmp(i), "LV") = 0 Then 'スキル名の空白を消すとマズイ場合がある
-                    tmp(k) = Replace(stmp(i), " ", "")
-                Else
-                    tmp(k) = stmp(i)
-                End If
-                k = k + 1
-            End If
-        Next
         With bd
             Try
-                .rare = Mid(tmp(0), tmp(0).Length, 1)
-                If InStr(tmp(2), "限界突破") Then '限界突破時
+                If InStr(stmp, "限界突破") Then '限界突破時
                     .rank = 6
                     .level = 20
                 Else
-                    .rank = Val(Mid(tmp(2), InStr(tmp(2), "★") + 1, 1))
-                    .level = Val(Mid(tmp(2), InStr(tmp(2), "｜") + 1))
+                    .rank = Val(正規表現マッチ("[0-9]", 正規表現マッチ("★[0-9]", stmp)(0))(0))
+                    .level = Val(正規表現マッチ("[0-9]+", 正規表現マッチ("｜\b\S+\b", stmp)(0))(0))
                 End If
-                .hei_sum = Val(Mid(tmp(4), 5))
-                .heisyu_name = Mid(tmp(5), 4)
                 ReDim .st(2), .tou_a(3)
-                .st(0) = Val(Mid(tmp(6), 3))
-                .st(1) = Val(Mid(tmp(7), 3))
-                .st(2) = Val(Mid(tmp(6), InStr(tmp(6), "兵") + 2))
-                .tou_a(0) = Mid(tmp(8), 3, InStr(tmp(8), "馬") - 4)
-                .tou_a(1) = Mid(tmp(9), 3, InStr(tmp(9), "器") - 4)
-                .tou_a(2) = Mid(tmp(8), InStr(tmp(8), "馬") + 2)
-                .tou_a(3) = Mid(tmp(9), InStr(tmp(9), "器") + 2)
+                .st(0) = Val(正規表現マッチ("[0-9]+", 正規表現マッチ("\b(攻撃|攻)\s*[0-9]+.[0-9]+", stmp)(0))(0))
+                .st(1) = Val(正規表現マッチ("[0-9]+", 正規表現マッチ("\b(防御|防)\s*[0-9]+.[0-9]+", stmp)(0))(0))
+                .st(2) = Val(正規表現マッチ("[0-9]+", 正規表現マッチ("\b(兵法|兵)\s*[0-9]+.[0-9]+", stmp)(0))(0))
+                .tou_a(0) = 正規表現マッチ("[A-Z]+", 正規表現マッチ("\b槍\s*[A-Z]+", stmp)(0))(0)
+                .tou_a(1) = 正規表現マッチ("[A-Z]+", 正規表現マッチ("\b弓\s*[A-Z]+", stmp)(0))(0)
+                .tou_a(2) = 正規表現マッチ("[A-Z]+", 正規表現マッチ("\b馬\s*[A-Z]+", stmp)(0))(0)
+                .tou_a(3) = 正規表現マッチ("[A-Z]+", 正規表現マッチ("\b器\s*[A-Z]+", stmp)(0))(0)
                 For j As Integer = 0 To 3
                     If .tou_a(j) = "S" Then
                         .tou_a(j) = ".S"
                     End If
                 Next
-                .skill_no = tmp.Length - 10
-                ReDim .skill_name(.skill_no - 1), .skill_lv(.skill_no - 1)
-                Dim syokisk As String = Nothing '初期スキル名
-                For j As Integer = 0 To bd.skill_no - 1
-                    Dim ttmp As String = Replace(tmp(10 + j), "技" & (j + 1) & vbTab, "") '"技1"みたいなのが付いてる場合、外す
-                    If j = 0 Then
-                        syokisk = Mid(ttmp, 1, InStr(ttmp, "LV") - 1)
+                Dim slv() As String = 正規表現マッチ("LV[0-9]+", stmp)
+                .skill_no = slv.Length
+                ReDim Preserve .skill_name(.skill_no - 1), .skill_lv(.skill_no - 1)
+                .name = 正規表現マッチ("^\s*\S+", stmp)(0).Trim()
+                If hangameflg Then
+                    'ハンゲームの処理
+                    If InStr(.name, "レア") Then
+                        '武将名は、ハンゲームの場合そのまま取れないことがある。
+                        .name = .name.Replace(正規表現マッチ("レア.*", .name)(0), "")
                     End If
-                    .skill_name(j) = Mid(ttmp, 1, InStr(ttmp, "LV") - 1)
-                    .skill_lv(j) = Val(Mid(ttmp, InStr(ttmp, "LV") + 2))
-                Next
-                'Dim ntmp As String = GetINIValue(syokisk, Replace(Replace(tmp(0), "名", ""), "レア", "・"), bnpath)
-                .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
+                    For i As Integer = 0 To slv.Length - 1
+                        Dim wazastr As String = "技" & i + 1
+                        .skill_name(i) = 正規表現マッチ(wazastr & ".*" & slv(i), stmp)(0) _
+                            .Replace(正規表現マッチ(wazastr & "\s+", stmp)(0), "").Replace(slv(i), "")
+                        .skill_lv(i) = Val(正規表現マッチ("[0-9]+", slv(i))(0))
+                        stmp = stmp.Replace(.skill_name(i) & slv(i), "")
+                    Next
+                Else
+                    'Yahooでの処理
+                    For i As Integer = 0 To slv.Length - 1
+                        Dim wazastr As String = "技" & i + 1
+                        .skill_name(i) = 正規表現マッチ(wazastr & ".*" & slv(i), stmp)(0).Replace(wazastr, "").Replace(slv(i), "")
+                        .skill_lv(i) = Val(正規表現マッチ("[0-9]+", slv(i))(0))
+                        stmp = stmp.Replace(.skill_name(i) & slv(i), "")
+                    Next
+                End If
+                .heisyu_name = 正規表現マッチ("\S+", 正規表現マッチ("兵種\s+\S+", stmp)(0).Replace("兵種", ""))(0)
+                '兵種が空の場合、ハンゲームならば「攻」、Yahooなら「指揮」が返っている。
+                If .heisyu_name = "攻" Or .heisyu_name = "指揮" Then
+                    .heisyu_name = ""
+                End If
+                .hei_sum = Val(正規表現マッチ("[0-9]+", 正規表現マッチ("(指揮兵|指揮)\s+\S+", stmp)(0))(0))
                 Dim repstr As String = "replace(replace(初期スキル名, " & """ "" , """"), " & """　"" , """") = "
                 'Dim repstr As String = "replace(初期スキル名, " & """ "" , """") = "
-                Dim s() As String = DB_DirectOUT("SELECT 武将名, 初期スキル名 FROM BData WHERE 武将R = " _
-                                & ダブルクオート(.rare) & " AND 武将名 LIKE """ & .name & "%""" & " AND " & repstr & ダブルクオート(TrimJ(.skill_name(0))), _
-                                {"武将名", "初期スキル名"})
+                Dim s() As String = DB_DirectOUT("SELECT 武将名, 武将R, 初期スキル名 FROM BData WHERE " _
+                                & " 武将名 LIKE """ & .name & "%""" & " AND " & repstr & ダブルクオート(TrimJ(.skill_name(0))), _
+                                {"武将名", "武将R"})
                 .name = s(0)
-                .skill_name(0) = s(1)
-                'If Not ntmp = "－" Then
-                '    .name = ntmp
-                'Else
-                '    .name = Mid(tmp(0), 2, InStr(tmp(0), "レア") - 2)
-                'End If
+                .rare = s(1)
+                '武将名とレアリティがDBから正常に取得できていない場合、エラーにする
+                If (.name = "" Or .rare = "") Then
+                    Throw New Exception
+                End If
             Catch ex As Exception
                 'Me.Focus()
                 'MsgBox("データの読み込みが正常に行われなかった可能性があります")

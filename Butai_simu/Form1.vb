@@ -59,20 +59,32 @@ Public Class Form1
     End Sub
 
     Public Sub 武将数スイッチ(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ToolStripComboBox2.SelectedIndexChanged
+        If sender.text = "" Then '武将切り替え等で空白の場合もあり得る
+            Exit Sub
+        End If
         busho_counter = Val(sender.text)
         Select Case Val(sender.text)
             Case 1
                 OFF_GroupBox(GroupBox5)
                 OFF_GroupBox(GroupBox9)
                 OFF_GroupBox(GroupBox13)
+                For i As Integer = 1 To bs.Length - 1
+                    武将データ消去(i)
+                Next
             Case 2
                 OFF_GroupBox(GroupBox9)
                 OFF_GroupBox(GroupBox13)
                 GroupBox5.Visible = True
+                For i As Integer = 2 To bs.Length - 1
+                    武将データ消去(i)
+                Next
             Case 3
                 OFF_GroupBox(GroupBox13)
                 GroupBox5.Visible = True
                 GroupBox9.Visible = True
+                For i As Integer = 3 To bs.Length - 1
+                    武将データ消去(i)
+                Next
             Case 4
                 GroupBox5.Visible = True
                 GroupBox9.Visible = True
@@ -85,7 +97,7 @@ Public Class Form1
     Public Sub 武将データ消去(ByVal bc As Integer, Optional ByVal nextbs As Boolean = True) 'bcの武将データを消去
         'nextbsがTrueならば、次武将が入ってくるのが前提の消去（→R,武将名残す）
         bs(bc) = Nothing
-        If nextbs = True Then
+        If nextbs Then
             Dim cc As ComboBox
             Select Case bc
                 Case 0
@@ -124,7 +136,8 @@ Public Class Form1
         For i As Integer = 3 To 5 'ステUP率表示の初期化
             Label(Me, CStr(bc) & "0" & CStr(i)).Text = "(---)"
         Next
-        GroupBox(Me, "0" & CStr(bc) & "2").Text = "ステータス" '職表示の初期化
+        コスト表示(False, bc)
+        職表示(False, bc)
         With GroupBox(Me, 4 * (bc + 1)) '統率表示の初期化
             .Text = "統率"
             .ForeColor = Color.Black
@@ -212,9 +225,10 @@ Public Class Form1
             ReDim .sta_g(2)
             .sta_g = {s(11), s(12), s(13)}
             .skill(0).name = s(14)
+            .skill(0).bno = bc
             .job = s(15)
             Dim sklerror As String = Nothing
-            .スキル取得(0, .skill(0).name, .skill(0).lv, {0}, sklerror)
+            .スキル取得(0, bc, .skill(0).name, .skill(0).lv, {0}, sklerror)
             If Not sklerror Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & sklerror
             .情報入力(bc, False)
         End With
@@ -348,14 +362,14 @@ Public Class Form1
         Dim sklerror As String = Nothing
         Select Case CInt(Mid(CStr(sender.Name), 10, 2))
             Case 14 '初期スキルに関する変更
-                bs(bc).スキル取得(0, Label(Me, CStr(bc) & "002").Text, CInt(sender.text), ss(bc), sklerror)
+                bs(bc).スキル取得(0, bc, Label(Me, CStr(bc) & "002").Text, CInt(sender.text), ss(bc), sklerror)
             Case 15 'スロ2に関する変更
-                bs(bc).スキル取得(1, ComboBox(Me, CStr(bc) & "11").Text, CInt(sender.text), ss(bc), sklerror)
+                bs(bc).スキル取得(1, bc, ComboBox(Me, CStr(bc) & "11").Text, CInt(sender.text), ss(bc), sklerror)
                 If bs(bc).skill.Length - 1 >= 1 Then
                     bs(bc).skill(1).kanren = ComboBox(Me, CStr(bc) & "09").Text
                 End If
             Case 16 'スロ3に関する変更
-                bs(bc).スキル取得(2, ComboBox(Me, CStr(bc) & "12").Text, CInt(sender.text), ss(bc), sklerror)
+                bs(bc).スキル取得(2, bc, ComboBox(Me, CStr(bc) & "12").Text, CInt(sender.text), ss(bc), sklerror)
                 If bs(bc).skill.Length - 1 >= 2 Then
                     bs(bc).skill(2).kanren = ComboBox(Me, CStr(bc) & "10").Text
                 End If
@@ -642,25 +656,21 @@ Public Class Form1
             bs(i).スキル期待値計算()
         Next
         '海野六郎のようなスキル（他武将のスキル条件に影響を与えるスキル）がある。その部分を補正
-        '発動率補正(up_kouka_p)
         For i As Integer = 0 To busho_counter - 1
             For j As Integer = 0 To bs(i).skill_no - 1
                 With bs(i).skill(j)
+                    '発動率補正(up_kouka_p)
                     If (.kouka_p_b + .up_kouka_p) > 1 Then '合計100%を超えるならば
                         .kouka_p_b = 1
                     Else
                         .kouka_p_b = .kouka_p_b + .up_kouka_p
                     End If
                     .exp_kouka_b = .kouka_p_b * .kouka_f
-                End With
-            Next
-        Next
-        '上昇率補正(up_kouka_f)
-        For i As Integer = 0 To busho_counter - 1
-            For j As Integer = 0 To bs(i).skill_no - 1
-                With bs(i).skill(j)
+                    '上昇率補正(up_kouka_f)
                     .kouka_f_b = .kouka_f_b + .up_kouka_f
                     .exp_kouka_b = .kouka_p_b * .kouka_f_b
+                    '兵科追加補正(heika_add)
+                    .heika_b = .heika_b + .heika
                 End With
             Next
         Next
@@ -980,9 +990,9 @@ Public Class Form1
 
         With sk
             For i As Integer = 0 To refbsc - 1
-                If (InStr(.heika, refbs(i).heisyu.bunrui) Or InStr(.heika, "将")) And 条件付スキル適用チェック(refbs(i), sk) Then '兵科が合致するか＋条件付チェック
+                If (InStr(.heika_b, refbs(i).heisyu.bunrui) Or InStr(.heika_b, "将")) And 条件付スキル適用チェック(refbs(i), sk) Then '兵科が合致するか＋条件付チェック
                     '（攻防一致、特殊スキル排除、通常スキル確認は発動スキル候補決定の段階で除外
-                    If InStr(.heika, "将") Then '将スキルかどうか
+                    If InStr(.heika_b, "将") Then '将スキルかどうか
                         tmpatk(i, 0) = .kouka_f_b
                     Else
                         tmpatk(i, 1) = .kouka_f_b
@@ -1067,6 +1077,7 @@ Public Class Form1
         skill_yyk = Nothing
         'skill_syo = Nothing
         skill_ex = Nothing
+        skill_emax = Nothing
         skill_exk = 0
         skill_exx = 0
         skill_ax = 0
@@ -1258,6 +1269,7 @@ Public Class Form1
         'ソートのためにskill_yk更新
         ReDim skill_yk(UBound(skill_y))
         skill_yk = Array_to_Arrayk(skill_y)
+        skill_emax = getMaxAtk(skill_y, 2)
         atksum_max = skill_yk(skill_yk.Length - 1) 'MAX値
 
         '母集団の期待値、分散
@@ -1336,6 +1348,7 @@ Public Class Form1
         Try
             rank_sum = 部隊ランクボーナス計算(Ranksum)
             Call 部隊初期化()
+            Call 前提スキル読み込み()
             Call 部隊兵法値計算・スキルデータ確定()
             Call スキル状態計算()
 
@@ -1348,10 +1361,10 @@ Public Class Form1
             zenmetuHp = デッキアウトHP計算(hei, skill_ex)
 
             Form2.RichTextBox1.Text = データテキスト出力(0) '全体情報
-            'Call RTextBox_BOLD(Form2.RichTextBox1, boldtext(0))
+            Call RTextBox_BOLD(Form2.RichTextBox1, boldtext(0))
             For i As Integer = 0 To busho_counter - 1
                 RichTextBox(Form2, i + 2).Text = データテキスト出力(i + 1) '各武将情報
-                For j As Integer = 1 To boldtext.Length - 1
+                For j As Integer = 0 To boldtext.Length - 1
                     Call RTextBox_BOLD(RichTextBox(Form2, i + 2), boldtext(i + 1)) '太字処理
                 Next
             Next
@@ -1371,45 +1384,55 @@ Public Class Form1
         ReDim Preserve boldtext(bn)
         Dim bstr() As String = Nothing '太字にする行
         If bn = 0 Then '全体情報
+            bstr = Split("4,6,8", ",")
             If (Not bskill.activebsk Is Nothing) And bskill.flg = True Then
                 'bstr = Split("4,5,6,9", ",")
                 fg = True
-                ReDim tmp(13)
-                tmp(10) = "+++ 部隊スキルON (" & Int(bskill.activebsk.Length) & "個) +++"
+                ReDim tmp(15)
+                tmp(13) = "+++ 部隊スキルON (" & Int(bskill.activebsk.Length) & "個) +++" & vbCrLf & "    発動率/ 上昇率/ 対象"
                 For i As Integer = 0 To bskill.activebsk.Length - 1
                     If i = 0 Then
-                        tmp(11) = "[" & Int(i + 1) & "] " & _
-                        "発動率: " & bskill.activebsk(i).kouka_p & "/ " & "上昇率: " & bskill.activebsk(i).kouka_f & "/ 対象: " & bskill.activebsk(i).taisyo
+                        tmp(14) = "[" & Int(i + 1) & "]  " _
+                            & Format((bskill.activebsk(i).kouka_p), "0.0%") & " /   " & Format((bskill.activebsk(i).kouka_f), "0.0%") & "/ " & bskill.activebsk(i).taisyo
                     Else
-                        tmp(11) = tmp(11) & vbCrLf & "[" & Int(i + 1) & "] " & _
-                        "発動率: " & bskill.activebsk(i).kouka_p & "/ " & "上昇率: " & bskill.activebsk(i).kouka_f & "/ 対象: " & bskill.activebsk(i).taisyo
+                        tmp(14) = tmp(14) & vbCrLf & "[" & Int(i + 1) & "]  " _
+                            & Format((bskill.activebsk(i).kouka_p), "0.0%") & " /   " & Format((bskill.activebsk(i).kouka_f), "0.0%") & "/ " & bskill.activebsk(i).taisyo
                     End If
                 Next
-                tmp(12) = "※部隊スキルを全て無視した場合" & vbCrLf & _
+                tmp(15) = "※部隊スキルを全て無視した場合" & vbCrLf & _
                         "   |- ※期待値: " & Int(skill_exx) & vbCrLf & _
                         "   |- ※MAX値: " & Int(atksum_maxmax) & vbCrLf & "++++++++++++"
             Else
                 fg = False
-                'bstr = Split("4,5,6", ",")
-                ReDim tmp(9)
+                bstr = Split("4,6,8", ",")
+                ReDim tmp(12)
             End If
+            '素攻の比を出すために使うatk
+            Dim atk() As Decimal
+            ReDim atk(bs.Length - 1)
+            For i As Integer = 0 To atk.Length - 1
+                atk(i) = bs(i).attack
+            Next
             tmp(0) = "武将数: " & busho_counter
             tmp(1) = "総コスト: " & Costsum
             tmp(2) = "総兵数: " & Heisum
             tmp(3) = "総" & kb & "力: "
             tmp(4) = "  |- 素" & Mid(kb, 1, 1) & ": " & Int(Atksum)
-            tmp(5) = "  |- 期待値: " & Int(skill_exk) & " (+" & Format(((skill_exk / Atksum) - 1) * 100, "#0.00") & "%上昇)"
-            tmp(6) = "  |- MAX値: " & Int(atksum_max) & " (+" & Format(((atksum_max / Atksum) - 1) * 100, "#0.00") & "%上昇)"
-            tmp(7) = "部隊兵法補正値: +" & Math.Ceiling(heihou_sum * 100) / 100 & "%"
-            tmp(8) = "部隊ランクボーナス: +" & Format(rank_sum, "#0.00") & "% (★" & Format(Ranksum, "#0") & ")"
+            tmp(5) = "  |  " & すくみ割合(bs, atk)
+            tmp(6) = "  |- 期待値: " & Int(skill_exk) & " (+" & Format(((skill_exk / Atksum) - 1) * 100, "#0.00") & "%上昇)"
+            tmp(7) = "  |  " & すくみ割合(bs, skill_ex)
+            tmp(8) = "  |- MAX値: " & Int(atksum_max) & " (+" & Format(((atksum_max / Atksum) - 1) * 100, "#0.00") & "%上昇)"
+            tmp(9) = "     " & すくみ割合(bs, skill_emax)
+            tmp(10) = "部隊兵法補正値: +" & Math.Ceiling(heihou_sum * 100) / 100 & "%"
+            tmp(11) = "部隊ランクボーナス: +" & Format(rank_sum, "#0.00") & "% (★" & Format(Ranksum, "#0") & ")"
             If InStr(kb, "防") Then
                 tmp(4) = tmp(4) & vbCrLf & "      |- コス1あたり -> " & Int(Atksum / Costsum)
-                tmp(5) = tmp(5) & vbCrLf & "      |- コス1あたり -> " & Int(skill_exk / Costsum)
-                tmp(6) = tmp(6) & vbCrLf & "      |- コス1あたり -> " & Int(atksum_max / Costsum)
+                tmp(6) = tmp(6) & vbCrLf & "      |- コス1あたり -> " & Int(skill_exk / Costsum)
+                tmp(8) = tmp(8) & vbCrLf & "      |- コス1あたり -> " & Int(atksum_max / Costsum)
             End If
-            tmp(9) = "童効果: " + 童効果文字列出力(kb)
+            tmp(12) = "童効果: " + 童効果文字列出力(kb)
         Else
-            bstr = Split("0", ",")
+            bstr = Split("0,9", ",")
             With bs(bn - 1)
                 ReDim tmp(12)
                 tmp(0) = "武将名: " & .name
@@ -1438,7 +1461,8 @@ Public Class Form1
                             End If
                             tmp(11 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & _
                                 .name & "LV" & .lv & " /" & .koubou & " /" & tmps
-                            tmp(12 + 2 * i) = "発動率: " & .kouka_p & "/ " & "上昇率: " & .kouka_f & vbCrLf & _
+                            tmp(12 + 2 * i) = "発動率: " & .kouka_p & " (" & Format(Math.Round(.kouka_p_b, 3), "#0.000") & ") " & _
+                                "/ " & "上昇率: " & .kouka_f & vbCrLf & _
                                 "→ ◆期待値 " & Math.Ceiling(.exp_kouka_b * 10000) / 10000
                             If .up_kouka_p > 0 Then
                                 tmp(12 + 2 * i) = tmp(12 + 2 * i) & vbCrLf & " [発動率上昇中 +" & Format(.up_kouka_p * 100, "#0.00") & "%]"
@@ -1451,7 +1475,14 @@ Public Class Form1
                             End If
                         Else
                             tmp(11 + 2 * i) = "【スキル" & i + 1 & "】" & vbCrLf & .name & "LV" & .lv
-                            tmp(12 + 2 * i) = "***********"
+                            '発動率計算結果がゼロでなければ、発動率だけは表示する
+                            If Not .kouka_p_b = 0 Then
+                                tmp(12 + 2 * i) = "発動率: " & .kouka_p & " (" & Format(Math.Round(.kouka_p_b, 3), "#0.000") & ") "
+                                If .up_kouka_p > 0 Then
+                                    tmp(12 + 2 * i) = tmp(12 + 2 * i) & vbCrLf & " [発動率上昇中 +" & Format(.up_kouka_p * 100, "#0.00") & "%]"
+                                End If
+                            End If
+                            tmp(12 + 2 * i) = tmp(12 + 2 * i) & vbCrLf & "***********"
                         End If
                     End With
                 Next
@@ -1464,10 +1495,20 @@ Public Class Form1
             For i As Integer = 0 To bstr.Length - 1
                 ReDim Preserve boldtext(bn)(i)
                 Dim btemp As String = tmp(CInt(bstr(i)))
-                boldtext(bn)(i) = Mid(btemp, InStr(btemp, ": ") + 2, btemp.Length - InStr(btemp, ": ") - 1)
+                If InStr(btemp, "武将名") Then
+                    '武将名のみ太字
+                    boldtext(bn)(i) = Mid(btemp, InStr(btemp, ": ") + 2, btemp.Length - InStr(btemp, ": ") - 1)
+                ElseIf InStr(btemp, "素" & kb.Substring(0, 1)) Then
+                    boldtext(bn)(i) = "素" & kb.Substring(0, 1) & ": " & 正規表現マッチ("[0-9]+", btemp)(0)
+                ElseIf InStr(btemp, "期待値") Then
+                    boldtext(bn)(i) = "期待値: " & 正規表現マッチ("[0-9]+", btemp)(0)
+                ElseIf InStr(btemp, "MAX値") Then
+                    boldtext(bn)(i) = "MAX値: " & 正規表現マッチ("[0-9]+", btemp)(0)
+                Else
+                    boldtext(bn)(i) = btemp
+                End If
             Next
-            ReDim Preserve boldtext(bn)(boldtext(bn).Length)
-            boldtext(bn)(boldtext(bn).Length - 1) = tmp(9)
+            ReDim Preserve boldtext(bn)(boldtext(bn).Length - 1)
         End If
     End Function
 
@@ -1551,6 +1592,7 @@ Public Class Form1
                 For j As Integer = 0 To tmpskill_no - 1
                     ReDim Preserve .skill(tmpskill_no - 1) '途中、追加スキル追加の部分で空白部分を削られてしまうので逐一Redimする必要がある
                     .skill(j).name = tmpskill(j).name
+                    .skill(j).bno = i
                     .skill(j).lv = tmpskill(j).lv
                     If Not j = 0 Then '初期スキルはスルー
                         .skill(j).kanren = tmpskill(j).kanren
@@ -1784,6 +1826,7 @@ Public Class Form1
             With bs(i)
                 .兵科情報取得(bs(i).heisyu.name)
                 For j As Integer = 0 To .skill.Length - 1
+                    .skill(j).t_flg = フラグ付きスキル参照(.skill(j))
                     If Not .skill(j).speed = 0 Or .skill(j).tokusyu = 1 Then '加速スキルがあれば
                         ReDim Preserve speed_skl(c)
                         speed_skl(c) = .skill(j).Clone
@@ -1811,7 +1854,6 @@ Public Class Form1
             If Not c = 0 Then '加速スキルが見つかった場合
                 For j As Integer = 0 To speed_skl.Length - 1
                     If InStr(speed_skl(j).heika, bs(i).heisyu.bunrui) Or InStr(speed_skl(j).heika, "全") Or InStr(speed_skl(j).heika, "将") Then
-                        speed_skl(j).t_flg = フラグ付きスキル参照(speed_skl(j))
                         '特殊条件の速度スキルが増えてきたらアドホック対応では×・・・
                         If bsc = 1 And speed_skl(j).name = "焔槍雷戟" Then '天前田利家のスキルのみは特例
                             ksk(i) = ksk(i) + speed_skl(j).speed * speed_skl(j).lv
@@ -2002,6 +2044,33 @@ Public Class Form1
         If (e.Button = MouseButtons.Right) Then
             ToolStripLabel10.Text = "【スロ3 : 空】"
             ToolStripLabel10.Tag = ""
+        End If
+    End Sub
+
+    'メインシミュレータ上でのコストと職の表示
+    Public Sub コスト表示(ByVal visibleflg As Boolean, ByVal bindex As Integer, Optional ByVal cost As Decimal = 0)
+        Dim vstring As String = vbNullString
+        Select Case bindex
+            Case 0
+                vstring = "部隊長"
+            Case 1
+                vstring = "小隊長A"
+            Case 2
+                vstring = "小隊長B"
+            Case 3
+                vstring = "小隊長C"
+        End Select
+        If (Not visibleflg) Then   '初期化
+            GroupBox(Me, CStr(4 * bindex + 1)).Text = vstring
+        Else    '表示
+            GroupBox(Me, CStr(4 * bindex + 1)).Text = vstring & " [ Cost:" & cost & " ]"
+        End If
+    End Sub
+    Public Sub 職表示(ByVal visibleflg As Boolean, ByVal bindex As Integer, Optional ByVal job As String = vbNullString)
+        If (Not visibleflg) Then   '初期化
+            GroupBox(Me, "0" & CStr(bc) & "2").Text = "ステータス"
+        Else    '表示
+            GroupBox(Me, "0" & CStr(bc) & "2").Text = "ステータス [ " & job & " ]"
         End If
     End Sub
 
@@ -2204,7 +2273,7 @@ Public Class Form1
     Private Function 自動統率(ByVal heika As String, ByVal st() As Decimal, ByVal rc As Integer) As String()
         Dim stt() As Decimal = st.Clone
         Dim s() As String = _
-         DB_DirectOUT("SELECT 統率, 兵種名 FROM HData WHERE 兵種名= " & ダブルクオート(heika) & "", {"統率"})
+         DB_DirectOUT("SELECT 統率, 兵種名 FROM HData_11 WHERE 兵種名= " & ダブルクオート(heika) & "", {"統率"})
         Dim tt As New Hashtable
         Dim touk As String() = {"槍", "弓", "馬", "器"}
         Dim output As String() = {数値_統率変換(st(0)), 数値_統率変換(st(1)), 数値_統率変換(st(2)), 数値_統率変換(st(3))}
@@ -2284,5 +2353,65 @@ Public Class Form1
 
     Private Sub 条件設定オプション表示(sender As Object, e As EventArgs) Handles ToolStripButton9.Click
         Form14.Show()
+    End Sub
+
+    Private Sub 前提スキルONOFF(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
+        If (DirectCast(sender, CheckBox).Checked) Then
+            specialskl.t_flg = True
+        Else
+            specialskl.t_flg = False
+        End If
+    End Sub
+
+    Private Sub 前提スキル選択(sender As Object, e As EventArgs) Handles ComboBox2.SelectedIndexChanged
+        Dim cb As ComboBox = DirectCast(sender, ComboBox)
+        Dim sname As String = cb.Text
+        If Not (cb.SelectedIndex = -1) Then 'スキル名が選択されている
+            ComboBox1.Enabled = True
+            ComboBox1.Text = 1
+            スキル情報取り出し(sname, 1, specialskl)
+        Else
+            ComboBox1.Enabled = False
+        End If
+    End Sub
+
+    Private Sub 前提スキル初期化(sender As Object, e As EventArgs) Handles ComboBox2.TextChanged
+        Dim cb As ComboBox = DirectCast(sender, ComboBox)
+        Dim sname As String = cb.Text
+        If sname = "" Then 'スキル名が空欄
+            ComboBox1.Enabled = False
+        End If
+    End Sub
+
+    Private Sub 前提スキルLV変更(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
+        Dim lv As Integer = Val(sender.text)
+        スキル情報取り出し(ComboBox2.Text, lv, specialskl)
+    End Sub
+
+    '前提スキルのスキル情報を取り出すのに使う。エラーログは自分で出力
+    Public Sub スキル情報取り出し(ByVal sname As String, ByVal slv As Integer, ByRef skl As Busho.skl)
+        If sname Is Nothing Then Exit Sub
+        Dim s() As String = Skill_ref(sname, slv)
+        Dim errorlog As String = vbNullString
+        With skl
+            .name = sname
+            .bno = -1
+            .lv = slv
+            .kanren = s(1)
+            .heika = s(2)
+            If InStr(.heika, "全") Then
+                .heika = "槍弓馬砲器"
+            End If
+            .koubou = s(3)
+            If s(0) = Nothing Or s(7) = "U" Then 'データが存在しないか、不足している時
+                errorlog = "データベースに存在しないスキル。要更新。" & "【" & sname & "LV" & slv & "】"
+                .kouka_p = 0
+                .kouka_f = 0
+            Else
+                .kouka_p = Decimal.Parse(s(0))
+                .kouka_f = Decimal.Parse(Val(s(4)))
+            End If
+        End With
+        If Not errorlog Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & errorlog
     End Sub
 End Class
