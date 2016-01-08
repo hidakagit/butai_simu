@@ -632,7 +632,7 @@ Public Class Form1
         End With
     End Sub
 
-    Private Sub 部隊兵法値計算・スキルデータ確定() 'いわば前段階
+    Private Sub 部隊兵法値計算スキルデータ確定() 'いわば前段階
         '部隊兵法値計算
         Dim maxheihou As Decimal
         Dim heihou_kei As Decimal
@@ -1349,7 +1349,7 @@ Public Class Form1
             rank_sum = 部隊ランクボーナス計算(Ranksum)
             Call 部隊初期化()
             Call 前提スキル読み込み()
-            Call 部隊兵法値計算・スキルデータ確定()
+            Call 部隊兵法値計算スキルデータ確定()
             Call スキル状態計算()
 
             'デッキアウトするHPを計算する

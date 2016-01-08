@@ -65,10 +65,10 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>4EA89C934350B5BAEBED4E395D1FAB67AAA3D856</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>B728A401C7476C24F52C9B17FCB84A342B2C3177</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>部隊シミュレータ_一時キー.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Butai_simu_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -308,6 +308,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Butai_simu_TemporaryKey.pfx" />
     <None Include="My Project\app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>

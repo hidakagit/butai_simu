@@ -814,7 +814,7 @@ Public Class Form10
                 For j As Integer = 0 To .skill_no - 1 '攻防一致、特殊スキル排除
                     If InStr(kobo, .skill(j).koubou) Or .skill(j).koubou = "攻防" Then
                         If .skill(j).tokusyu = 9 Then
-                            .skill(j).t_flg = 条件依存スキル・フラグスキル判定(.skill(j), butaicostsum, butairanksum) '怪しいスキルを疑う
+                            .skill(j).t_flg = 条件依存スキルフラグスキル判定(.skill(j), butaicostsum, butairanksum) '怪しいスキルを疑う
                             .skill(j).t_flg = フラグ付きスキル参照(.skill(j))
                         End If
                         If .skill(j).tokusyu = 0 Or .skill(j).t_flg Then '通常スキル

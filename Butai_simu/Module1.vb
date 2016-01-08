@@ -501,7 +501,7 @@ Public Structure Busho : Implements System.ICloneable
                     .exp_kouka_b = .kouka_p_b * .kouka_f_b '期待値
                 Else
                     If .tokusyu = 9 Then '特殊スキルの場合は・・・
-                        .t_flg = 条件依存スキル・フラグスキル判定(skill(j), cost_sum_, rank_sum_) '怪しいスキルを疑う
+                        .t_flg = 条件依存スキルフラグスキル判定(skill(j), cost_sum_, rank_sum_) '怪しいスキルを疑う
                         .t_flg = フラグ付きスキル参照(skill(j))
                         If .kouka_p = 1 Then
                             .kouka_p_b = 1
@@ -1258,7 +1258,7 @@ Module Module1
 
     '部隊条件に依存したスキルの扱い（アドホック対応※）
     'データベースから静的に参照するだけではどうしようもないスキルはココでデータ確定
-    Public Function 条件依存スキル・フラグスキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal, ByVal sumrank As Decimal) As Boolean
+    Public Function 条件依存スキルフラグスキル判定(ByRef sk As Busho.skl, ByVal sumcost As Decimal, ByVal sumrank As Decimal) As Boolean
         'Dim sdata() As String
         With sk
             Select Case (.name)
@@ -1292,7 +1292,7 @@ Module Module1
                     '妙見の矜持
                     '部隊総コストが0.5増える毎に、威力-2% → コメントを頂いて修正。
                     '妙見の矜持の減分データ(0.5C-12.5C)
-                    Dim mh_d() As Decimal = {0, 2, 4, 6, 8, 10, 12, 15, 17, 19, 21, 23, 25, 27, 30, 32, 34, 36, 38, 40, _
+                    Dim mh_d() As Decimal = {0, 2, 4, 6, 8, 10, 12, 15, 17, 19, 21, 23, 25, 27, 30, 32, 34, 36, 38, 40,
                                              42, 45, 47, 49, 51}
                     Dim mh_f() As Decimal = {57, 58, 59, 60, 61, 62, 63, 64, 65, 67}
                     Dim minus_f As Decimal = mh_d((sumcost - 0.5) * 2) * 0.01
