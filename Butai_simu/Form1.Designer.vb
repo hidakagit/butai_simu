@@ -304,12 +304,12 @@ Partial Class Form1
         Me.ToolStripSeparator12 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripButton7 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripButton9 = New System.Windows.Forms.ToolStripButton()
-        Me.ToolStripSeparator13 = New System.Windows.Forms.ToolStripSeparator()
-        Me.ToolStripLabel3 = New System.Windows.Forms.ToolStripLabel()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
         Me.ComboBox1 = New System.Windows.Forms.ComboBox()
         Me.ComboBox2 = New System.Windows.Forms.ComboBox()
+        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.ToolStripButton10 = New System.Windows.Forms.ToolStripButton()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         Me.GroupBox002.SuspendLayout()
@@ -2983,7 +2983,7 @@ Partial Class Form1
         'ToolStrip3
         '
         Me.ToolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden
-        Me.ToolStrip3.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton6, Me.ToolStripLabel5, Me.ToolStripLabel6, Me.ToolStripSeparator11, Me.ToolStripSeparator12, Me.ToolStripButton7, Me.ToolStripButton9, Me.ToolStripSeparator13, Me.ToolStripLabel3})
+        Me.ToolStrip3.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripButton6, Me.ToolStripLabel5, Me.ToolStripLabel6, Me.ToolStripSeparator11, Me.ToolStripSeparator12, Me.ToolStripButton7, Me.ToolStripButton9, Me.ToolStripButton10})
         Me.ToolStrip3.Location = New System.Drawing.Point(0, 39)
         Me.ToolStrip3.Name = "ToolStrip3"
         Me.ToolStrip3.Size = New System.Drawing.Size(884, 25)
@@ -3039,18 +3039,6 @@ Partial Class Form1
         Me.ToolStripButton9.Size = New System.Drawing.Size(112, 22)
         Me.ToolStripButton9.Text = "スキル条件設定"
         '
-        'ToolStripSeparator13
-        '
-        Me.ToolStripSeparator13.Name = "ToolStripSeparator13"
-        Me.ToolStripSeparator13.Size = New System.Drawing.Size(6, 25)
-        '
-        'ToolStripLabel3
-        '
-        Me.ToolStripLabel3.ForeColor = System.Drawing.Color.Gray
-        Me.ToolStripLabel3.Name = "ToolStripLabel3"
-        Me.ToolStripLabel3.Size = New System.Drawing.Size(58, 22)
-        Me.ToolStripLabel3.Text = "----------"
-        '
         'GroupBox2
         '
         Me.GroupBox2.BackColor = System.Drawing.Color.SeaShell
@@ -3059,7 +3047,7 @@ Partial Class Form1
         Me.GroupBox2.Controls.Add(Me.ComboBox2)
         Me.GroupBox2.Location = New System.Drawing.Point(8, 498)
         Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(870, 38)
+        Me.GroupBox2.Size = New System.Drawing.Size(213, 38)
         Me.GroupBox2.TabIndex = 28
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "その他影響スキル"
@@ -3097,12 +3085,30 @@ Partial Class Form1
         Me.ComboBox2.Size = New System.Drawing.Size(85, 20)
         Me.ComboBox2.TabIndex = 26
         '
+        'RichTextBox1
+        '
+        Me.RichTextBox1.Enabled = False
+        Me.RichTextBox1.Location = New System.Drawing.Point(227, 503)
+        Me.RichTextBox1.Name = "RichTextBox1"
+        Me.RichTextBox1.Size = New System.Drawing.Size(651, 33)
+        Me.RichTextBox1.TabIndex = 29
+        Me.RichTextBox1.Text = "----------"
+        '
+        'ToolStripButton10
+        '
+        Me.ToolStripButton10.Image = CType(resources.GetObject("ToolStripButton10.Image"), System.Drawing.Image)
+        Me.ToolStripButton10.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton10.Name = "ToolStripButton10"
+        Me.ToolStripButton10.Size = New System.Drawing.Size(124, 22)
+        Me.ToolStripButton10.Text = "条件付スキル一覧"
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.AutoSize = True
         Me.ClientSize = New System.Drawing.Size(884, 567)
+        Me.Controls.Add(Me.RichTextBox1)
         Me.Controls.Add(Me.GroupBox2)
         Me.Controls.Add(Me.ToolStrip3)
         Me.Controls.Add(Me.ToolStrip2)
@@ -3435,13 +3441,13 @@ Partial Class Form1
     Friend WithEvents ToolStripButton6 As System.Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripSeparator12 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripButton7 As System.Windows.Forms.ToolStripButton
-    Friend WithEvents ToolStripSeparator13 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripSeparator14 As System.Windows.Forms.ToolStripSeparator
     Friend WithEvents ToolStripButton8 As System.Windows.Forms.ToolStripButton
-    Friend WithEvents ToolStripLabel3 As System.Windows.Forms.ToolStripLabel
     Friend WithEvents ToolStripButton9 As System.Windows.Forms.ToolStripButton
     Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
     Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
     Friend WithEvents ComboBox2 As System.Windows.Forms.ComboBox
     Friend WithEvents CheckBox1 As System.Windows.Forms.CheckBox
+    Friend WithEvents RichTextBox1 As RichTextBox
+    Friend WithEvents ToolStripButton10 As ToolStripButton
 End Class

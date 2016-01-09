@@ -329,16 +329,12 @@
         Next
     End Sub
 
-    Private Sub スキル逆引きモード()
-        If ComboBox111.Text = "" Then
-            MsgBox("設定が未完成です")
-            Exit Sub
-        End If
+    Public Function スキル逆引き(ByVal sname As String) As String
         Dim output As String = "******** 逆引き探索結果 ********" '出力文字列
         Dim r() As String = {"候補A", "候補B", "候補C", "候補S1", "候補S2"}
         Dim tmpsl As String()
         For i As Integer = 0 To 4
-            tmpsl = 逆引き検索(r(i), ComboBox111.Text)
+            tmpsl = 逆引き検索(r(i), sname)
             If tmpsl Is Nothing Then '候補が見当たらない
                 Continue For
             End If
@@ -354,6 +350,15 @@
         If output = "******** 逆引き探索結果 ********" Then
             output = output & vbCrLf & "固有スキル。追加合成不可"
         End If
+        Return output
+    End Function
+
+    Private Sub スキル逆引きモード()
+        If ComboBox111.Text = "" Then
+            MsgBox("設定が未完成です")
+            Exit Sub
+        End If
+        Dim output As String = スキル逆引き(ComboBox111.Text)
         RichTextBox1.Clear()
         RichTextBox1.Text = output
     End Sub

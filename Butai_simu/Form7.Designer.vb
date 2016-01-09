@@ -22,6 +22,7 @@ Partial Class Form7
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle8 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Dim DataGridViewCellStyle9 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
@@ -66,6 +67,7 @@ Partial Class Form7
         Me.ToolStripSeparator7 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripLabel7 = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripComboBox6 = New System.Windows.Forms.ToolStripComboBox()
+        Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ToolStrip1.SuspendLayout()
         Me.ToolStrip2.SuspendLayout()
@@ -329,6 +331,11 @@ Partial Class Form7
         Me.ToolStripComboBox6.Size = New System.Drawing.Size(75, 26)
         Me.ToolStripComboBox6.Text = "非表示"
         '
+        'ContextMenuStrip1
+        '
+        Me.ContextMenuStrip1.Name = "ContextMenuStrip1"
+        Me.ContextMenuStrip1.Size = New System.Drawing.Size(153, 26)
+        '
         'Form7
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
@@ -382,4 +389,5 @@ Partial Class Form7
     Friend WithEvents ToolStripLabel7 As System.Windows.Forms.ToolStripLabel
     Friend WithEvents ToolStripComboBox6 As System.Windows.Forms.ToolStripComboBox
     Friend WithEvents ToolStripTextBox2 As System.Windows.Forms.ToolStripTextBox
+    Friend WithEvents ContextMenuStrip1 As ContextMenuStrip
 End Class

@@ -329,4 +329,15 @@
             heikasearch_flg = True
         End If
     End Sub
+
+    Private Sub 右クリックで逆引き検索(sender As Object, e As DataGridViewCellMouseEventArgs) Handles DataGridView1.CellMouseUp
+        If e.Button = MouseButtons.Left Then '左クリック
+            Exit Sub
+        End If
+        Dim dgvc As DataGridViewCell = DirectCast(sender, DataGridView)(e.ColumnIndex, e.RowIndex)
+        ContextMenuStrip1.Items.Clear()
+        Dim viewtxt As String = "【" & dgvc.Value & "】" & vbCrLf & Form6.スキル逆引き(dgvc.Value)
+        ContextMenuStrip1.Items.Add(viewtxt)
+        ContextMenuStrip1.Show(Control.MousePosition())
+    End Sub
 End Class

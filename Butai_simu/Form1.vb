@@ -229,7 +229,7 @@ Public Class Form1
             .job = s(15)
             Dim sklerror As String = Nothing
             .スキル取得(0, bc, .skill(0).name, .skill(0).lv, {0}, sklerror)
-            If Not sklerror Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & sklerror
+            If Not sklerror Is Nothing Then RichTextBox1.Text = "[警告ログ]" & sklerror
             .情報入力(bc, False)
         End With
         ss(bc) = {0}
@@ -242,7 +242,7 @@ Public Class Form1
         Next
         ToolTip1.RemoveAll()
         ToolStripLabel6.Text = "---------"
-        ToolStripLabel3.Text = "----------"
+        RichTextBox1.Text = "----------"
     End Sub
 
     Public Sub ステ振り設定(ByVal sender As System.Object, ByVal e As System.EventArgs) _
@@ -374,7 +374,7 @@ Public Class Form1
                     bs(bc).skill(2).kanren = ComboBox(Me, CStr(bc) & "10").Text
                 End If
         End Select
-        If Not sklerror Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & sklerror
+        If Not sklerror Is Nothing Then RichTextBox1.Text = "[警告ログ]" & sklerror
     End Sub
 
     Public Sub スキルレベル一括変更(ByVal sender As Object, ByVal e As MouseEventArgs) _
@@ -2412,6 +2412,6 @@ Public Class Form1
                 .kouka_f = Decimal.Parse(Val(s(4)))
             End If
         End With
-        If Not errorlog Is Nothing Then ToolStripLabel3.Text = "[警告ログ]" & errorlog
+        If Not errorlog Is Nothing Then RichTextBox1.Text = "[警告ログ]" & errorlog
     End Sub
 End Class
